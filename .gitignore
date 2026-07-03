@@ -1,0 +1,32 @@
+# Xcode / build products
+*.xcodeproj
+*.xcworkspace
+DerivedData/
+build/
+Generated/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/PadelKit/.build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+fastlane/.env
+fastlane/.env.*
+
+# macOS
+.DS_Store
+
+# Secrets
+*.p8
+*.p12
+*.mobileprovision
+*.cer
+ExportOptions.plist
