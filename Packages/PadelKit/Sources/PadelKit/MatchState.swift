@@ -15,9 +15,9 @@ public struct MatchState: Codable, Hashable, Sendable, Identifiable {
 
     public init(
         id: UUID = UUID(),
-        settings: MatchSettings = .standard,
         teamA: Team,
         teamB: Team,
+        settings: MatchSettings = .standard,
         firstServer: TeamSide = .teamA,
         pointLog: [TeamSide] = [],
         createdAt: Date = Date(),

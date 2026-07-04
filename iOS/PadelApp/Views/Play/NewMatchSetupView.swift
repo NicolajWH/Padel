@@ -91,7 +91,7 @@ struct NewMatchSetupView: View {
             setsToWin: setsToWin,
             finalSetIsMatchTiebreak: finalSetMatchTiebreak
         )
-        let state = MatchState(settings: settings, teamA: teamA, teamB: teamB, firstServer: firstServer)
+        let state = MatchState(teamA: teamA, teamB: teamB, settings: settings, firstServer: firstServer)
         let record = MatchRecord.create(from: state)
         modelContext.insert(record)
         createdRecord = record

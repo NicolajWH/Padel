@@ -27,7 +27,7 @@ struct WatchNewMatchView: View {
         let teamA = Team(players: [Player(name: "Team A-1"), Player(name: "Team A-2")])
         let teamB = Team(players: [Player(name: "Team B-1"), Player(name: "Team B-2")])
         let settings = MatchSettings(goldenPoint: goldenPoint, setsToWin: singleSet ? 1 : 2)
-        let state = MatchState(settings: settings, teamA: teamA, teamB: teamB)
+        let state = MatchState(teamA: teamA, teamB: teamB, settings: settings)
         store.activeMatch = state
         connectivity.send(.match(state))
         navigate = true
