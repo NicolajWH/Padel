@@ -34,13 +34,21 @@ platform :ios do
       build_number: build_number
     )
 
+    # xcodebuild's own automatic-signing provisioning lookup (-allowProvisioningUpdates)
+    # needs its own App Store Connect API key auth - there's no interactive Apple ID
+    # signed into Xcode on a CI runner, so it can't be left to pick up app_store_connect_api_key
+    # implicitly the way upload_to_testflight does.
     build_app(
       scheme: "PadelApp",
       project: "Padel.xcodeproj",
       configuration: "Release",
       export_method: "app-store",
       clean: true,
-      xcargs: "-allowProvisioningUpdates DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}",
+      xcargs: "-allowProvisioningUpdates " \
+              "-authenticationKeyPath \"#{api_key[:key_filepath]}\" " \
+              "-authenticationKeyID \"#{api_key[:key_id]}\" " \
+              "-authenticationKeyIssuerID \"#{api_key[:issuer_id]}\" " \
+              "DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}",
       export_options: {
         method: "app-store",
         signingStyle: "automatic",
