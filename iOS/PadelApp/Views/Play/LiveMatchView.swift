@@ -258,11 +258,15 @@ private struct SetHistoryBar: View {
     }
 }
 
-/// Sheet with the join code and a ShareLink so friends can join the match.
+/// Sheet that publishes the match under a court number and the phone's
+/// location, so everyone nearby can join with one tap. The join code is
+/// shown afterwards as a fallback for when location isn't available.
 private struct ShareMatchSheet: View {
     @ObservedObject var share: SharedMatchController
     let state: MatchState
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var locationProvider = LocationProvider()
+    @State private var court = 1
 
     var body: some View {
         NavigationStack {
@@ -273,33 +277,57 @@ private struct ShareMatchSheet: View {
                     .padding(.top, 8)
 
                 if let code = share.shareCode {
-                    Text("Match Code")
-                        .font(.headline)
-                    Text(code)
-                        .font(.system(size: 44, weight: .heavy, design: .rounded))
-                        .kerning(6)
-                        .textSelection(.enabled)
-                    Text("Anyone with the code can follow and update the score from their own iPhone and Apple Watch.")
+                    Text("Sharing is on. Players nearby can now join this match from the Play tab.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
+
+                    VStack(spacing: 4) {
+                        Text("Match Code")
+                            .font(.headline)
+                        Text(code)
+                            .font(.system(size: 40, weight: .heavy, design: .rounded))
+                            .kerning(6)
+                            .textSelection(.enabled)
+                        Text("Only needed if automatic discovery can't find the match.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
 
                     ShareLink(item: shareText(code: code)) {
                         Label("Share Code", systemImage: "square.and.arrow.up")
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.bordered)
                     .padding(.horizontal)
                 } else {
-                    Text("Share this match so everyone on court can follow and update the score live.")
+                    Text("Share this match so everyone on court can follow and update the score live from their own iPhone and Apple Watch.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
 
+                    Picker("Court", selection: $court) {
+                        ForEach(1...8, id: \.self) { number in
+                            Text("Court \(number)").tag(number)
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    if locationProvider.isAuthorizationDenied {
+                        Text("Location access is off, so nearby players will need the code to join. You can enable location for Padel in Settings.")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+
                     Button {
-                        Task { await share.startSharing(state) }
+                        Task {
+                            let location = await locationProvider.currentLocation()
+                            await share.startSharing(state, court: court, location: location)
+                        }
                     } label: {
                         if share.isBusy {
                             ProgressView().frame(maxWidth: .infinity)

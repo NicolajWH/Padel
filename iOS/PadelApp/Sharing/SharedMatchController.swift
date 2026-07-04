@@ -1,6 +1,16 @@
 import Foundation
 import CloudKit
+import CoreLocation
 import PadelKit
+
+/// A shared match discovered near the user's location.
+struct NearbySharedMatch: Identifiable {
+    let code: String
+    let court: Int
+    let state: MatchState
+
+    var id: String { code }
+}
 
 /// Shares a live match through CloudKit's public database so several players
 /// can score the same match from their own iPhone + Apple Watch.
@@ -51,8 +61,9 @@ final class SharedMatchController: ObservableObject {
 
     // MARK: - Sharing
 
-    /// Publishes the match and returns the join code.
-    func startSharing(_ state: MatchState) async {
+    /// Publishes the match under a court number and (when available) the
+    /// court's location, so other players nearby can join with one tap.
+    func startSharing(_ state: MatchState, court: Int, location: CLLocation?) async {
         guard shareCode == nil else { return }
         isBusy = true
         defer { isBusy = false }
@@ -60,6 +71,11 @@ final class SharedMatchController: ObservableObject {
         let code = Self.generateCode()
         let record = CKRecord(recordType: Self.recordType, recordID: Self.recordID(for: code))
         Self.apply(state, revision: 1, to: record)
+        record["code"] = code
+        record["court"] = court
+        if let location {
+            record["location"] = location
+        }
         do {
             let (saveResults, _) = try await database.modifyRecords(saving: [record], deleting: [], savePolicy: .allKeys)
             for case .failure(let saveError) in saveResults.values {
@@ -103,6 +119,37 @@ final class SharedMatchController: ObservableObject {
         return state
     }
 
+    /// Finds active shared matches within `radius` meters of `location`,
+    /// sorted by court number — so players on court just tap their court
+    /// instead of typing a code.
+    static func fetchNearbyMatches(around location: CLLocation, radius: Double = 500) async throws -> [NearbySharedMatch] {
+        let database = CKContainer(identifier: containerID).publicCloudDatabase
+        let predicate = NSPredicate(
+            format: "distanceToLocation:fromLocation:(location, %@) < %f",
+            location, radius
+        )
+        let query = CKQuery(recordType: recordType, predicate: predicate)
+        let (results, _) = try await database.records(matching: query, resultsLimit: 25)
+
+        let cutoff = Date().addingTimeInterval(-12 * 60 * 60)
+        var matches: [NearbySharedMatch] = []
+        for (_, result) in results {
+            guard let record = try? result.get(),
+                  let code = record["code"] as? String,
+                  let data = record["state"] as? Data,
+                  let state = try? JSONDecoder().decode(MatchState.self, from: data) else { continue }
+            let finished = (record["finished"] as? Int ?? 0) == 1
+            let createdAt = record.creationDate ?? Date()
+            guard !finished, createdAt > cutoff else { continue }
+            let court = record["court"] as? Int ?? 1
+            matches.append(NearbySharedMatch(code: code, court: court, state: state))
+        }
+        for match in matches {
+            storeCode(match.code, for: match.state.id)
+        }
+        return matches.sorted { $0.court < $1.court }
+    }
+
     // MARK: - Polling
 
     private func startPolling() {
@@ -133,6 +180,7 @@ final class SharedMatchController: ObservableObject {
         record["state"] = (try? JSONEncoder().encode(state)) ?? Data()
         record["revision"] = revision
         record["matchID"] = state.id.uuidString
+        record["finished"] = state.isFinished ? 1 : 0
     }
 
     private static func recordID(for code: String) -> CKRecord.ID {

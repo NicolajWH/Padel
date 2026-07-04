@@ -1,0 +1,13 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSLocationWhenInUseUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Padel uses your location to find shared matches on nearby courts." } },
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Padel bruger din lokation til at finde delte kampe på baner i nærheden." } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

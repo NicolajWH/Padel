@@ -1,481 +1,1036 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "%@ leads" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "%@ fører" } }
-      }
-    },
-    "%@ vs %@" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ vs %2$@" } }
-      }
-    },
-    "%@ Wins!" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "%@ vinder!" } }
-      }
-    },
-    "%@ won" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "%@ vandt" } }
-      }
-    },
-    "%lld players · %lld rounds" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "%1$lld spillere · %2$lld runder" } }
-      }
-    },
-    "%lld rounds played" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "%lld runder spillet" } }
-      }
-    },
-    "%lld wins · %lld losses" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "%1$lld sejre · %2$lld nederlag" } }
-      }
-    },
-    "About" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Om" } }
-      }
-    },
-    "Add" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Tilføj" } }
-      }
-    },
-    "Add Player" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Tilføj spiller" } }
-      }
-    },
-    "Add players so you can quickly pick them when starting a match or Americano." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Tilføj spillere, så du hurtigt kan vælge dem, når du starter en kamp eller Americano." } }
-      }
-    },
-    "Americano" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Americano" } }
-      }
-    },
-    "Americano Sessions" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Americano-sessioner" } }
-      }
-    },
-    "Anyone with the code can follow and update the score from their own iPhone and Apple Watch." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Alle med koden kan følge og opdatere scoren fra deres egen iPhone og Apple Watch." } }
-      }
-    },
-    "Apple Watch" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Apple Watch" } }
-      }
-    },
-    "Best of 3 Sets" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Bedst af 3 sæt" } }
-      }
-    },
-    "Cancel" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Annuller" } }
-      }
-    },
-    "Connected" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Forbundet" } }
-      }
-    },
-    "Continue Match" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Fortsæt kamp" } }
-      }
-    },
-    "Court %lld" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Bane %lld" } }
-      }
-    },
-    "Default Americano Rules" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Standardregler for Americano" } }
-      }
-    },
-    "Default Match Rules" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Standardregler for kampe" } }
-      }
-    },
-    "Done" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Færdig" } }
-      }
-    },
-    "Enter the match code from the player who shared the match." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Indtast kampkoden fra den spiller, der har delt kampen." } }
-      }
-    },
-    "Finished" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Afsluttet" } }
-      }
-    },
-    "First Serve" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Første serv" } }
-      }
-    },
-    "Games: %lld" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Partier: %lld" } }
-      }
-    },
-    "Generate Schedule & Start" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Generér program og start" } }
-      }
-    },
-    "Golden Point" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Golden point" } }
-      }
-    },
-    "Golden Point (sudden death at 40-40)" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Golden point (afgørende bold ved 40-40)" } }
-      }
-    },
-    "History" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Historik" } }
-      }
-    },
-    "iCloud is required to share matches. Sign in to iCloud on this iPhone and try again." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "iCloud kræves for at dele kampe. Log ind på iCloud på denne iPhone, og prøv igen." } }
-      }
-    },
-    "In progress" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "I gang" } }
-      }
-    },
-    "Join Match" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Deltag i kamp" } }
-      }
-    },
-    "Join my padel match in the Padel app with code %@" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Deltag i min padelkamp i Padel-appen med koden %@" } }
-      }
-    },
-    "Language" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Sprog" } }
-      }
-    },
-    "Live Match" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Live kamp" } }
-      }
-    },
-    "Match Code" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Kampkode" } }
-      }
-    },
-    "Match Format" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Kampformat" } }
-      }
-    },
-    "Match not found. Check the code and try again." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Kampen blev ikke fundet. Tjek koden, og prøv igen." } }
-      }
-    },
-    "Match Result" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Kampresultat" } }
-      }
-    },
-    "Match Tiebreak" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Match-tiebreak" } }
-      }
-    },
-    "Match Tiebreak for Deciding Set" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Match-tiebreak i afgørende sæt" } }
-      }
-    },
-    "Matches" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Kampe" } }
-      }
-    },
-    "Name" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Navn" } }
-      }
-    },
-    "New Americano" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ny Americano" } }
-      }
-    },
-    "New Match" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ny kamp" } }
-      }
-    },
-    "No Americano sessions yet" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ingen Americano-sessioner endnu" } }
-      }
-    },
-    "No internet connection. Try again when you're back online." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ingen internetforbindelse. Prøv igen, når du er online." } }
-      }
-    },
-    "No matches yet" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ingen kampe endnu" } }
-      }
-    },
-    "No Players Yet" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ingen spillere endnu" } }
-      }
-    },
-    "Not Installed" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ikke installeret" } }
-      }
-    },
-    "Not Reachable" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ikke tilgængeligt" } }
-      }
-    },
-    "Number of rounds: %lld" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Antal runder: %lld" } }
-      }
-    },
-    "OK" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "OK" } }
-      }
-    },
-    "Padel follows your iPhone's language. To use a different language just for this app, change it in Settings. Your Apple Watch follows automatically." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Padel følger din iPhones sprog. Vil du bruge et andet sprog kun til denne app, kan du ændre det i Indstillinger. Dit Apple Watch følger automatisk med." } }
-      }
-    },
-    "Padel — score matches with real padel rules, run Americano tournaments, and play it all from your Apple Watch." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Padel — før score med rigtige padelregler, afvikl Americano-turneringer, og styr det hele fra dit Apple Watch." } }
-      }
-    },
-    "Play" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spil" } }
-      }
-    },
-    "Player %lld" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spiller %lld" } }
-      }
-    },
-    "Player 1" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spiller 1" } }
-      }
-    },
-    "Player 2" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spiller 2" } }
-      }
-    },
-    "Players" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spillere" } }
-      }
-    },
-    "Players (min. 4, multiples of 4 work best)" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spillere (min. 4, multipla af 4 fungerer bedst)" } }
-      }
-    },
-    "Players: %lld · Courts per round: %lld" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spillere: %1$lld · Baner pr. runde: %2$lld" } }
-      }
-    },
-    "Points per round: %lld" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Point pr. runde: %lld" } }
-      }
-    },
-    "Quick Add From Saved Players" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Hurtig tilføjelse fra gemte spillere" } }
-      }
-    },
-    "Recent" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Seneste" } }
-      }
-    },
-    "Round" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Runde" } }
-      }
-    },
-    "Round %lld" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Runde %lld" } }
-      }
-    },
-    "Round Settings" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Rundeindstillinger" } }
-      }
-    },
-    "Score a padel match with real scoring rules — deuce or golden point, sets and tiebreaks. Share it live with everyone on court and on Apple Watch." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Før score i en padelkamp med rigtige pointregler — fordel eller golden point, sæt og tiebreaks. Del den live med alle på banen og på Apple Watch." } }
-      }
-    },
-    "Scoring" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Pointregler" } }
-      }
-    },
-    "Session" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Session" } }
-      }
-    },
-    "Session complete." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Sessionen er afsluttet." } }
-      }
-    },
-    "Set %lld" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Sæt %lld" } }
-      }
-    },
-    "Set up a group, rotate partners automatically, and add up everyone's individual points — just like Americano padel, right on your Apple Watch." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Opret en gruppe, rotér makkere automatisk, og læg alles individuelle point sammen — præcis som Americano-padel, direkte på dit Apple Watch." } }
-      }
-    },
-    "Sets %lld-%lld" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Sæt %1$lld-%2$lld" } }
-      }
-    },
-    "Settings" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Indstillinger" } }
-      }
-    },
-    "Share Code" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Del kode" } }
-      }
-    },
-    "Share Match" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Del kamp" } }
-      }
-    },
-    "Share this match so everyone on court can follow and update the score live." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Del kampen, så alle på banen kan følge og opdatere scoren live." } }
-      }
-    },
-    "Shared Match" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Delt kamp" } }
-      }
-    },
-    "Sharing Failed" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Deling mislykkedes" } }
-      }
-    },
-    "Single Set" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ét sæt" } }
-      }
-    },
-    "Something went wrong. Please try again." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Noget gik galt. Prøv igen." } }
-      }
-    },
-    "Standings" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Stilling" } }
-      }
-    },
-    "Start Match" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Start kamp" } }
-      }
-    },
-    "Status" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Status" } }
-      }
-    },
-    "Team A" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Hold A" } }
-      }
-    },
-    "Team B" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Hold B" } }
-      }
-    },
-    "Tiebreak" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Tiebreak" } }
-      }
-    },
-    "Undo" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Fortryd" } }
-      }
-    },
-    "Updates live as rounds are played." : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Opdateres live, mens runderne spilles." } }
-      }
-    },
-    "Version" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Version" } }
-      }
+  "sourceLanguage": "en",
+  "strings": {
+    "%@ leads": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ fører"
+          }
+        }
+      }
+    },
+    "%@ vs %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ vs %2$@"
+          }
+        }
+      }
+    },
+    "%@ Wins!": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ vinder!"
+          }
+        }
+      }
+    },
+    "%@ won": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ vandt"
+          }
+        }
+      }
+    },
+    "%lld players · %lld rounds": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld spillere · %2$lld runder"
+          }
+        }
+      }
+    },
+    "%lld rounds played": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld runder spillet"
+          }
+        }
+      }
+    },
+    "%lld wins · %lld losses": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld sejre · %2$lld nederlag"
+          }
+        }
+      }
+    },
+    "About": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Om"
+          }
+        }
+      }
+    },
+    "Add": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj"
+          }
+        }
+      }
+    },
+    "Add Player": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj spiller"
+          }
+        }
+      }
     },
-    "View Standings" : {
-      "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Se stilling" } }
+    "Add players so you can quickly pick them when starting a match or Americano.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj spillere, så du hurtigt kan vælge dem, når du starter en kamp eller Americano."
+          }
+        }
+      }
+    },
+    "Americano": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Americano"
+          }
+        }
+      }
+    },
+    "Americano Sessions": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Americano-sessioner"
+          }
+        }
+      }
+    },
+    "Apple Watch": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Watch"
+          }
+        }
+      }
+    },
+    "Best of 3 Sets": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bedst af 3 sæt"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuller"
+          }
+        }
+      }
+    },
+    "Connected": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Forbundet"
+          }
+        }
+      }
+    },
+    "Continue Match": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortsæt kamp"
+          }
+        }
+      }
+    },
+    "Couldn't search for matches nearby. Check your internet connection and try again.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kunne ikke søge efter kampe i nærheden. Tjek din internetforbindelse, og prøv igen."
+          }
+        }
+      }
+    },
+    "Court": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bane"
+          }
+        }
+      }
+    },
+    "Court %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bane %lld"
+          }
+        }
+      }
+    },
+    "Default Americano Rules": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standardregler for Americano"
+          }
+        }
+      }
+    },
+    "Default Match Rules": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Standardregler for kampe"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Færdig"
+          }
+        }
+      }
+    },
+    "Enter code manually": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indtast kode manuelt"
+          }
+        }
+      }
+    },
+    "Finished": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afsluttet"
+          }
+        }
+      }
+    },
+    "First Serve": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Første serv"
+          }
+        }
+      }
+    },
+    "Games: %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partier: %lld"
+          }
+        }
+      }
+    },
+    "Generate Schedule & Start": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Generér program og start"
+          }
+        }
+      }
+    },
+    "Golden Point": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Golden point"
+          }
+        }
+      }
+    },
+    "Golden Point (sudden death at 40-40)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Golden point (afgørende bold ved 40-40)"
+          }
+        }
+      }
+    },
+    "History": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Historik"
+          }
+        }
+      }
+    },
+    "iCloud is required to share matches. Sign in to iCloud on this iPhone and try again.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iCloud kræves for at dele kampe. Log ind på iCloud på denne iPhone, og prøv igen."
+          }
+        }
+      }
+    },
+    "In progress": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "I gang"
+          }
+        }
+      }
+    },
+    "Join Match": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deltag i kamp"
+          }
+        }
+      }
+    },
+    "Join my padel match in the Padel app with code %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deltag i min padelkamp i Padel-appen med koden %@"
+          }
+        }
+      }
+    },
+    "Language": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprog"
+          }
+        }
+      }
+    },
+    "Live Match": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live kamp"
+          }
+        }
+      }
+    },
+    "Location access is needed to find matches near you. Enable it for Padel in Settings, or join with a code below.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der kræves adgang til lokation for at finde kampe i nærheden. Slå det til for Padel i Indstillinger, eller deltag med en kode nedenfor."
+          }
+        }
+      }
+    },
+    "Location access is off, so nearby players will need the code to join. You can enable location for Padel in Settings.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lokation er slået fra, så spillere i nærheden skal bruge koden for at deltage. Du kan slå lokation til for Padel i Indstillinger."
+          }
+        }
+      }
+    },
+    "Match Code": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kampkode"
+          }
+        }
+      }
+    },
+    "Match Format": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kampformat"
+          }
+        }
+      }
+    },
+    "Match not found. Check the code and try again.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kampen blev ikke fundet. Tjek koden, og prøv igen."
+          }
+        }
+      }
+    },
+    "Match Result": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kampresultat"
+          }
+        }
+      }
+    },
+    "Match Tiebreak": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Match-tiebreak"
+          }
+        }
+      }
+    },
+    "Match Tiebreak for Deciding Set": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Match-tiebreak i afgørende sæt"
+          }
+        }
+      }
+    },
+    "Matches": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kampe"
+          }
+        }
+      }
+    },
+    "Name": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navn"
+          }
+        }
+      }
+    },
+    "Nearby Matches": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kampe i nærheden"
+          }
+        }
+      }
+    },
+    "New Americano": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ny Americano"
+          }
+        }
+      }
+    },
+    "New Match": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ny kamp"
+          }
+        }
+      }
+    },
+    "No Americano sessions yet": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen Americano-sessioner endnu"
+          }
+        }
+      }
+    },
+    "No internet connection. Try again when you're back online.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen internetforbindelse. Prøv igen, når du er online."
+          }
+        }
+      }
+    },
+    "No matches found nearby. Ask the player keeping score to turn on sharing in the live match.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen kampe fundet i nærheden. Bed den spiller, der fører score, om at slå deling til i live-kampen."
+          }
+        }
+      }
+    },
+    "No matches yet": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen kampe endnu"
+          }
+        }
+      }
+    },
+    "No Players Yet": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen spillere endnu"
+          }
+        }
+      }
+    },
+    "Not Installed": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke installeret"
+          }
+        }
+      }
+    },
+    "Not Reachable": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ikke tilgængeligt"
+          }
+        }
+      }
+    },
+    "Number of rounds: %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Antal runder: %lld"
+          }
+        }
+      }
+    },
+    "OK": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        }
+      }
+    },
+    "Only needed if automatic discovery can't find the match.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kun nødvendig, hvis automatisk søgning ikke kan finde kampen."
+          }
+        }
+      }
+    },
+    "Padel follows your iPhone's language. To use a different language just for this app, change it in Settings. Your Apple Watch follows automatically.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Padel følger din iPhones sprog. Vil du bruge et andet sprog kun til denne app, kan du ændre det i Indstillinger. Dit Apple Watch følger automatisk med."
+          }
+        }
+      }
+    },
+    "Padel — score matches with real padel rules, run Americano tournaments, and play it all from your Apple Watch.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Padel — før score med rigtige padelregler, afvikl Americano-turneringer, og styr det hele fra dit Apple Watch."
+          }
+        }
+      }
+    },
+    "Play": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spil"
+          }
+        }
+      }
+    },
+    "Player %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spiller %lld"
+          }
+        }
+      }
+    },
+    "Player 1": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spiller 1"
+          }
+        }
+      }
+    },
+    "Player 2": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spiller 2"
+          }
+        }
+      }
+    },
+    "Players": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spillere"
+          }
+        }
+      }
+    },
+    "Players (min. 4, multiples of 4 work best)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spillere (min. 4, multipla af 4 fungerer bedst)"
+          }
+        }
+      }
+    },
+    "Players: %lld · Courts per round: %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spillere: %1$lld · Baner pr. runde: %2$lld"
+          }
+        }
+      }
+    },
+    "Points per round: %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Point pr. runde: %lld"
+          }
+        }
+      }
+    },
+    "Quick Add From Saved Players": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hurtig tilføjelse fra gemte spillere"
+          }
+        }
+      }
+    },
+    "Recent": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seneste"
+          }
+        }
+      }
+    },
+    "Round": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runde"
+          }
+        }
+      }
+    },
+    "Round %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runde %lld"
+          }
+        }
+      }
+    },
+    "Round Settings": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rundeindstillinger"
+          }
+        }
+      }
+    },
+    "Score a padel match with real scoring rules — deuce or golden point, sets and tiebreaks. Share it live with everyone on court and on Apple Watch.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Før score i en padelkamp med rigtige pointregler — fordel eller golden point, sæt og tiebreaks. Del den live med alle på banen og på Apple Watch."
+          }
+        }
+      }
+    },
+    "Scoring": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pointregler"
+          }
+        }
+      }
+    },
+    "Searching for matches nearby…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Søger efter kampe i nærheden …"
+          }
+        }
+      }
+    },
+    "Session": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Session"
+          }
+        }
+      }
+    },
+    "Session complete.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sessionen er afsluttet."
+          }
+        }
+      }
+    },
+    "Set %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sæt %lld"
+          }
+        }
+      }
+    },
+    "Set up a group, rotate partners automatically, and add up everyone's individual points — just like Americano padel, right on your Apple Watch.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opret en gruppe, rotér makkere automatisk, og læg alles individuelle point sammen — præcis som Americano-padel, direkte på dit Apple Watch."
+          }
+        }
+      }
+    },
+    "Sets %lld-%lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sæt %1$lld-%2$lld"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indstillinger"
+          }
+        }
+      }
+    },
+    "Share Code": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Del kode"
+          }
+        }
+      }
+    },
+    "Share Match": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Del kamp"
+          }
+        }
+      }
+    },
+    "Share this match so everyone on court can follow and update the score live from their own iPhone and Apple Watch.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Del kampen, så alle på banen kan følge og opdatere scoren live fra deres egen iPhone og Apple Watch."
+          }
+        }
+      }
+    },
+    "Shared Match": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delt kamp"
+          }
+        }
+      }
+    },
+    "Sharing Failed": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deling mislykkedes"
+          }
+        }
+      }
+    },
+    "Sharing is on. Players nearby can now join this match from the Play tab.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deling er slået til. Spillere i nærheden kan nu deltage i kampen fra Spil-fanen."
+          }
+        }
+      }
+    },
+    "Single Set": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ét sæt"
+          }
+        }
+      }
+    },
+    "Something went wrong. Please try again.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Noget gik galt. Prøv igen."
+          }
+        }
+      }
+    },
+    "Standings": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stilling"
+          }
+        }
+      }
+    },
+    "Start Match": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start kamp"
+          }
+        }
+      }
+    },
+    "Status": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
+          }
+        }
+      }
+    },
+    "Team A": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold A"
+          }
+        }
+      }
+    },
+    "Team B": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold B"
+          }
+        }
+      }
+    },
+    "Tiebreak": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tiebreak"
+          }
+        }
+      }
+    },
+    "Undo": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fortryd"
+          }
+        }
+      }
+    },
+    "Updates live as rounds are played.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opdateres live, mens runderne spilles."
+          }
+        }
+      }
+    },
+    "Version": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        }
+      }
+    },
+    "View Standings": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se stilling"
+          }
+        }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

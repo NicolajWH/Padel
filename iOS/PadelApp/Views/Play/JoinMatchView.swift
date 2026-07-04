@@ -1,66 +1,91 @@
 import SwiftUI
 import UIKit
 import SwiftData
+import CoreLocation
 import PadelKit
 
-/// Lets the user enter a share code and pull a friend's live match down from
-/// CloudKit. The joined match is stored locally and shows up as the ongoing
-/// match on the Play tab, scoring straight into the shared record.
+/// Finds shared matches on courts near the user's location so they can join
+/// with one tap — "Court 1" or "Court 2" — no code typing. Entering a code
+/// manually remains available as a fallback for when location is off or the
+/// GPS fix is poor indoors.
 struct JoinMatchView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var locationProvider = LocationProvider()
+
+    @State private var nearbyMatches: [NearbySharedMatch] = []
+    @State private var isSearching = true
+    @State private var searchFailed = false
+    @State private var showingCodeEntry = false
     @State private var code = ""
     @State private var isJoining = false
     @State private var errorMessage: String?
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                Image(systemName: "person.2.wave.2.fill")
-                    .font(.system(size: 40))
-                    .foregroundStyle(Color.accentColor)
-                    .padding(.top, 24)
-
-                Text("Enter the match code from the player who shared the match.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-
-                TextField("Match Code", text: $code)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .kerning(4)
-                    .multilineTextAlignment(.center)
-                    .textInputAutocapitalization(.characters)
-                    .autocorrectionDisabled()
-                    .padding()
-                    .background(Color(uiColor: .secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .padding(.horizontal)
-
-                if let errorMessage {
-                    Text(errorMessage)
+            List {
+                Section {
+                    if isSearching {
+                        HStack(spacing: 10) {
+                            ProgressView()
+                            Text("Searching for matches nearby…")
+                                .foregroundStyle(.secondary)
+                        }
+                    } else if nearbyMatches.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            if locationProvider.isAuthorizationDenied {
+                                Text("Location access is needed to find matches near you. Enable it for Padel in Settings, or join with a code below.")
+                            } else if searchFailed {
+                                Text("Couldn't search for matches nearby. Check your internet connection and try again.")
+                            } else {
+                                Text("No matches found nearby. Ask the player keeping score to turn on sharing in the live match.")
+                            }
+                        }
                         .font(.footnote)
-                        .foregroundStyle(.red)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-
-                Button {
-                    join()
-                } label: {
-                    if isJoining {
-                        ProgressView().frame(maxWidth: .infinity)
+                        .foregroundStyle(.secondary)
                     } else {
-                        Label("Join Match", systemImage: "arrow.down.circle.fill")
-                            .frame(maxWidth: .infinity)
+                        ForEach(nearbyMatches) { match in
+                            Button {
+                                join(state: match.state)
+                            } label: {
+                                NearbyMatchRow(match: match)
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(isJoining)
+                        }
+                    }
+                } header: {
+                    Text("Nearby Matches")
+                } footer: {
+                    if let errorMessage {
+                        Text(errorMessage).foregroundStyle(.red)
                     }
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(isJoining || SharedMatchController.normalize(code).count < 4)
-                .padding(.horizontal)
 
-                Spacer()
+                Section {
+                    if showingCodeEntry {
+                        TextField("Match Code", text: $code)
+                            .font(.system(.title3, design: .rounded).bold())
+                            .kerning(2)
+                            .textInputAutocapitalization(.characters)
+                            .autocorrectionDisabled()
+                        Button {
+                            joinWithCode()
+                        } label: {
+                            if isJoining {
+                                ProgressView()
+                            } else {
+                                Text("Join Match")
+                            }
+                        }
+                        .disabled(isJoining || SharedMatchController.normalize(code).count < 4)
+                    } else {
+                        Button("Enter code manually") {
+                            showingCodeEntry = true
+                        }
+                        .font(.footnote)
+                    }
+                }
             }
             .navigationTitle("Join Match")
             .navigationBarTitleDisplayMode(.inline)
@@ -68,11 +93,40 @@ struct JoinMatchView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        Task { await search() }
+                    } label: {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .disabled(isSearching)
+                }
+            }
+            .task {
+                await search()
             }
         }
     }
 
-    private func join() {
+    private func search() async {
+        isSearching = true
+        searchFailed = false
+        errorMessage = nil
+        defer { isSearching = false }
+
+        guard let location = await locationProvider.currentLocation() else {
+            nearbyMatches = []
+            return
+        }
+        do {
+            nearbyMatches = try await SharedMatchController.fetchNearbyMatches(around: location)
+        } catch {
+            nearbyMatches = []
+            searchFailed = true
+        }
+    }
+
+    private func joinWithCode() {
         let normalized = SharedMatchController.normalize(code)
         isJoining = true
         errorMessage = nil
@@ -88,6 +142,12 @@ struct JoinMatchView: View {
         }
     }
 
+    private func join(state: MatchState) {
+        isJoining = true
+        upsert(state)
+        dismiss()
+    }
+
     private func upsert(_ state: MatchState) {
         let matchID = state.id
         let descriptor = FetchDescriptor<MatchRecord>(predicate: #Predicate { $0.id == matchID })
@@ -95,6 +155,41 @@ struct JoinMatchView: View {
             existing.update(with: state)
         } else {
             modelContext.insert(MatchRecord.create(from: state))
+        }
+    }
+}
+
+private struct NearbyMatchRow: View {
+    let match: NearbySharedMatch
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "sportscourt.fill")
+                .font(.title3)
+                .foregroundStyle(Color.accentColor)
+                .frame(width: 36, height: 36)
+                .background(Color.accentColor.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Court \(match.court)")
+                    .font(.headline)
+                Text("\(match.state.teamA.displayName) vs \(match.state.teamB.displayName)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            let snap = match.state.snapshot
+            Text("Sets \(snap.setsWonA)-\(snap.setsWonB)")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.tertiary)
         }
     }
 }
