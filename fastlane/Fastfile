@@ -99,8 +99,10 @@ platform :ios do
       configuration: "Release",
       export_method: "app-store",
       clean: true,
+      # gym appends xcargs to the -exportArchive call as well, so auth flags must
+      # not also be in export_xcargs or xcodebuild rejects the duplicated
+      # -authenticationKeyPath ("may only be provided once").
       xcargs: "#{auth_args} DEVELOPMENT_TEAM=#{team_id.shellescape}",
-      export_xcargs: auth_args,
       export_options: {
         method: "app-store",
         signingStyle: "automatic",
