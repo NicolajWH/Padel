@@ -48,18 +48,62 @@ pure function (`MatchEngine.simulate`). That makes "undo" trivial and
 correct (drop the last log entry) and makes syncing between devices safe —
 whichever device has the longer log wins, no merge logic needed.
 
-The project has **no physical `.xcodeproj` committed** — it's generated from
-`project.yml` by [XcodeGen](https://github.com/yonaskolb/XcodeGen). Run
-`xcodegen generate` (or let CI do it) whenever you want an up-to-date
-`Padel.xcodeproj`.
+The project has **no physical `.xcodeproj` committed** — CI generates it from
+`project.yml` with [XcodeGen](https://github.com/yonaskolb/XcodeGen) on every
+build.
 
-## Requirements
+## Deploying to TestFlight
 
-- Xcode 16+
-- [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`)
-- iOS 17+ / watchOS 10+ (uses SwiftData + modern SwiftUI APIs)
+**This project is deployed straight from GitHub Actions — no local Xcode or
+Mac is needed.** `.github/workflows/testflight.yml` runs the PadelKit unit
+tests, generates the Xcode project, builds both apps with **Xcode 26**
+(App Store Connect requires the iOS 26 SDK), signs them via cloud signing,
+and uploads to TestFlight:
 
-## Running locally
+- automatically on every **push to `main`**
+- or on demand via **Actions → Deploy to TestFlight → Run workflow**
+
+Every build gets a unique build number from the GitHub Actions run number,
+so uploads never collide. After a green run, Apple processes the build for
+5–15 minutes before it appears under the app's TestFlight tab in App Store
+Connect.
+
+### Configuration (already set up — reference for changes)
+
+**GitHub Actions secrets** (Settings → Secrets and variables → Actions).
+Exactly these four; no Apple ID email or password is needed anywhere — the
+API key fully replaces interactive Apple ID login for building, signing,
+and uploading:
+
+| Secret | Value |
+|---|---|
+| `APPLE_TEAM_ID` | The 10-character Apple Developer Team ID (Developer Portal → Membership) |
+| `APP_STORE_CONNECT_KEY_ID` | The API key's ID — the `XXXXXXXXXX` in `AuthKey_XXXXXXXXXX.p8` |
+| `APP_STORE_CONNECT_ISSUER_ID` | The Issuer ID shown on the Integrations page (shared by all keys) |
+| `APP_STORE_CONNECT_KEY_CONTENT` | The `.p8` key — raw PEM, base64 of the file, or just its inner base64 body all work |
+
+**The API key must be a Team Key with the Admin role** (App Store Connect →
+Users and Access → Integrations → **Team Keys**). Lesser roles can create
+development certificates but fail cloud signing for distribution with
+"Cloud signing permission error", and Individual Keys fail authentication
+outright because they don't use the team Issuer ID.
+
+**Apple-side registrations** (already done for this app):
+- App record in App Store Connect with bundle ID `com.worsa.padel`
+- The Watch app's `com.worsa.padel.watchapp` identifier is registered
+  automatically by cloud signing — no manual step
+
+The Fastlane lane validates the key against the App Store Connect API before
+building, so a misconfigured secret fails in under a minute with a precise
+message instead of a cryptic signing error later. Signing itself uses
+`xcodebuild -allowProvisioningUpdates` with the API key: certificates and
+App Store provisioning profiles are created/refreshed automatically in CI —
+no manual certificates, no `match` repo to maintain.
+
+## Local development (optional)
+
+The app can also be run locally in Xcode 26+ on a Mac — this is never
+required for deploying:
 
 ```bash
 brew install xcodegen
@@ -70,64 +114,24 @@ open Padel.xcodeproj
 Pick the **PadelApp** scheme to run on an iPhone (or Simulator with a paired
 Watch Simulator), or the **PadelWatch** scheme to run the Watch app on its own.
 
-To run just the scoring-engine unit tests without opening Xcode:
+The scoring-engine unit tests run anywhere Swift does, no Xcode project
+needed:
 
 ```bash
 cd Packages/PadelKit
 swift test
 ```
 
-## Deploying to TestFlight
+## Changing bundle identifiers / team
 
-`.github/workflows/testflight.yml` builds both targets and uploads to
-TestFlight automatically on every push to `main`, or on demand via
-**Actions → Deploy to TestFlight → Run workflow**.
-
-### One-time setup (required before the Action can succeed)
-
-1. **Register the app in App Store Connect / the Developer Portal** with the
-   bundle identifiers from `project.yml`:
-   - iOS app: `com.worsa.padel`
-   - Watch app: `com.worsa.padel.watchapp`
-
-   (Change these in `project.yml` first if you want a different identifier —
-   they must be registered under your own Apple Developer team.)
-
-2. **Create an App Store Connect API key**: App Store Connect →
-   Users and Access → Integrations → App Store Connect API → generate a key
-   with the *App Manager* role. Note the **Key ID**, **Issuer ID**, and
-   download the `.p8` file.
-
-3. **Add these GitHub Actions secrets** (Settings → Secrets and variables →
-   Actions):
-
-   | Secret | Value |
-   |---|---|
-   | `APPLE_TEAM_ID` | Your 10-character Apple Developer Team ID (Developer Portal → Membership) |
-   | `APP_STORE_CONNECT_KEY_ID` | The API key ID from step 2 (the `XXXXXXXXXX` in `AuthKey_XXXXXXXXXX.p8`) |
-   | `APP_STORE_CONNECT_ISSUER_ID` | The API key's issuer ID from step 2 |
-   | `APP_STORE_CONNECT_KEY_CONTENT` | The `.p8` file contents — raw or base64-encoded, both work |
-
-   No Apple ID email or password is needed anywhere: the API key fully replaces
-   interactive Apple ID authentication for building, signing, and uploading.
-
-The workflow uses `xcodebuild -allowProvisioningUpdates` with that API key,
-so Xcode automatically creates/refreshes the signing certificate and App
-Store provisioning profiles during CI — no manual certificates, no `match`
-repo to maintain.
-
-Every build gets a unique build number derived from the GitHub Actions run
-number, so repeated uploads to TestFlight never collide.
-
-## Configuring your own bundle identifiers / team
-
-Everything Apple-specific lives in `project.yml` and `fastlane/Appfile`:
+Everything Apple-specific lives in three places:
 
 - `PRODUCT_BUNDLE_IDENTIFIER` for each target in `project.yml`
 - `app_identifier` in `fastlane/Appfile`
+- the bundle ID probed by the key-validation step in `fastlane/Fastfile`
 
-Update those, re-register the new identifiers in the Developer Portal, and
-the same workflow will work unchanged.
+Update those, create a matching app record in App Store Connect, and the
+same workflow works unchanged.
 
 ## Notes on the Americano scheduler
 
