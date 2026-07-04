@@ -31,29 +31,27 @@ platform :ios do
     issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"].strip
     raw_key_secret = ENV["APP_STORE_CONNECT_KEY_CONTENT"].strip
 
-    # Accept the .p8 either base64-encoded (as documented) or pasted as raw PEM,
-    # and fail with a precise message if it parses as neither.
-    key_pem =
-      if raw_key_secret.include?("BEGIN PRIVATE KEY")
-        raw_key_secret
-      else
-        Base64.decode64(raw_key_secret)
+    # Accept the key in any form people actually paste: the raw PEM text of the
+    # .p8 file, base64 of the whole file, or just the file's inner base64 body
+    # (which decodes to raw DER - Ruby's OpenSSL happily reads DER, which is why
+    # fastlane's own JWT minting worked while Xcode's PEM-only parser rejected
+    # the same bytes with keyPathInvalid). Re-emit as canonical PKCS#8 PEM so the
+    # file on disk is always exactly what Xcode expects.
+    key_obj =
+      begin
+        OpenSSL::PKey.read(raw_key_secret)
+      rescue OpenSSL::PKey::PKeyError
+        begin
+          OpenSSL::PKey.read(Base64.decode64(raw_key_secret))
+        rescue OpenSSL::PKey::PKeyError => e
+          UI.user_error!(
+            "APP_STORE_CONNECT_KEY_CONTENT does not decode to a valid .p8 private key " \
+            "(#{e.message}). Set the secret to the raw contents of the AuthKey_*.p8 " \
+            "file or its base64 encoding (base64 -i AuthKey_XXXX.p8)."
+          )
+        end
       end
-    # Ruby's OpenSSL tolerates CRLF line endings in PEM but Xcode's own JWT key
-    # parser does not - a .p8 that passed through a Windows/text editor before
-    # being base64-encoded fails xcodebuild with JWT.Error.keyPathInvalid while
-    # working fine for fastlane itself.
-    key_pem = key_pem.gsub(/\r\n?/, "\n")
-    key_pem += "\n" unless key_pem.end_with?("\n")
-    begin
-      OpenSSL::PKey.read(key_pem)
-    rescue OpenSSL::PKey::PKeyError => e
-      UI.user_error!(
-        "APP_STORE_CONNECT_KEY_CONTENT does not decode to a valid .p8 private key " \
-        "(#{e.message}). Set the secret to either the raw contents of the AuthKey_*.p8 " \
-        "file or its base64 encoding (base64 -i AuthKey_XXXX.p8)."
-      )
-    end
+    key_pem = key_obj.respond_to?(:private_to_pem) ? key_obj.private_to_pem : key_obj.to_pem
 
     api_key = app_store_connect_api_key(
       key_id: key_id,
