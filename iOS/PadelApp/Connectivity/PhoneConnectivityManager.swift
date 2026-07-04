@@ -39,7 +39,7 @@ final class PhoneConnectivityManager: NSObject, ObservableObject {
         try? session.updateApplicationContext(dict)
     }
 
-    private func handleIncoming(_ dict: [String: Any]) {
+    nonisolated private func handleIncoming(_ dict: [String: Any]) {
         guard let data = dict["payload"] as? Data, let payload = SyncPayload.decode(data) else { return }
         Task { @MainActor in
             switch payload {
