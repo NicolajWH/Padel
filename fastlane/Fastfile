@@ -3,6 +3,10 @@ default_platform(:ios)
 platform :ios do
   desc "Build the Padel app and upload it to TestFlight"
   lane :beta do
+    require "base64"
+    require "openssl"
+    require "shellwords"
+
     required_env = %w[
       APPLE_TEAM_ID
       APP_STORE_CONNECT_KEY_ID
@@ -19,11 +23,38 @@ platform :ios do
       )
     end
 
+    # Secrets pasted into GitHub often pick up stray whitespace/newlines; a newline
+    # inside the key ID or issuer ID silently corrupts the xcodebuild arguments and
+    # surfaces as an unrelated-looking "Invalid authentication key credential" error.
+    team_id = ENV["APPLE_TEAM_ID"].strip
+    key_id = ENV["APP_STORE_CONNECT_KEY_ID"].strip
+    issuer_id = ENV["APP_STORE_CONNECT_ISSUER_ID"].strip
+    raw_key_secret = ENV["APP_STORE_CONNECT_KEY_CONTENT"].strip
+
+    # Accept the .p8 either base64-encoded (as documented) or pasted as raw PEM,
+    # and fail with a precise message if it parses as neither.
+    key_pem =
+      if raw_key_secret.include?("BEGIN PRIVATE KEY")
+        raw_key_secret
+      else
+        Base64.decode64(raw_key_secret)
+      end
+    key_pem += "\n" unless key_pem.end_with?("\n")
+    begin
+      OpenSSL::PKey.read(key_pem)
+    rescue OpenSSL::PKey::PKeyError => e
+      UI.user_error!(
+        "APP_STORE_CONNECT_KEY_CONTENT does not decode to a valid .p8 private key " \
+        "(#{e.message}). Set the secret to either the raw contents of the AuthKey_*.p8 " \
+        "file or its base64 encoding (base64 -i AuthKey_XXXX.p8)."
+      )
+    end
+
     api_key = app_store_connect_api_key(
-      key_id: ENV["APP_STORE_CONNECT_KEY_ID"],
-      issuer_id: ENV["APP_STORE_CONNECT_ISSUER_ID"],
-      key_content: ENV["APP_STORE_CONNECT_KEY_CONTENT"],
-      is_key_content_base64: true,
+      key_id: key_id,
+      issuer_id: issuer_id,
+      key_content: key_pem,
+      is_key_content_base64: false,
       in_house: false
     )
 
@@ -38,15 +69,15 @@ platform :ios do
     # needs its own App Store Connect API key auth - there's no interactive Apple ID
     # signed into Xcode on a CI runner. app_store_connect_api_key holds the key purely
     # in memory when given key_content, so write the .p8 to disk ourselves and hand
-    # xcodebuild the file path (for both the archive and the export step).
-    require "base64"
-    auth_key_path = File.expand_path("AuthKey_#{ENV['APP_STORE_CONNECT_KEY_ID']}.p8", __dir__)
-    File.write(auth_key_path, Base64.decode64(ENV["APP_STORE_CONNECT_KEY_CONTENT"]))
+    # xcodebuild the file path (for both the archive and the export step). The file
+    # name deliberately contains no secret-derived characters.
+    auth_key_path = File.expand_path("authkey.p8", __dir__)
+    File.write(auth_key_path, key_pem)
 
     auth_args = "-allowProvisioningUpdates " \
-                "-authenticationKeyPath \"#{auth_key_path}\" " \
-                "-authenticationKeyID \"#{ENV['APP_STORE_CONNECT_KEY_ID']}\" " \
-                "-authenticationKeyIssuerID \"#{ENV['APP_STORE_CONNECT_ISSUER_ID']}\""
+                "-authenticationKeyPath #{auth_key_path.shellescape} " \
+                "-authenticationKeyID #{key_id.shellescape} " \
+                "-authenticationKeyIssuerID #{issuer_id.shellescape}"
 
     build_app(
       scheme: "PadelApp",
@@ -54,12 +85,12 @@ platform :ios do
       configuration: "Release",
       export_method: "app-store",
       clean: true,
-      xcargs: "#{auth_args} DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}",
+      xcargs: "#{auth_args} DEVELOPMENT_TEAM=#{team_id.shellescape}",
       export_xcargs: auth_args,
       export_options: {
         method: "app-store",
         signingStyle: "automatic",
-        teamID: ENV["APPLE_TEAM_ID"]
+        teamID: team_id
       }
     )
 
