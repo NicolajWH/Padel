@@ -36,19 +36,26 @@ platform :ios do
 
     # xcodebuild's own automatic-signing provisioning lookup (-allowProvisioningUpdates)
     # needs its own App Store Connect API key auth - there's no interactive Apple ID
-    # signed into Xcode on a CI runner, so it can't be left to pick up app_store_connect_api_key
-    # implicitly the way upload_to_testflight does.
+    # signed into Xcode on a CI runner. app_store_connect_api_key holds the key purely
+    # in memory when given key_content, so write the .p8 to disk ourselves and hand
+    # xcodebuild the file path (for both the archive and the export step).
+    require "base64"
+    auth_key_path = File.expand_path("AuthKey_#{ENV['APP_STORE_CONNECT_KEY_ID']}.p8", __dir__)
+    File.write(auth_key_path, Base64.decode64(ENV["APP_STORE_CONNECT_KEY_CONTENT"]))
+
+    auth_args = "-allowProvisioningUpdates " \
+                "-authenticationKeyPath \"#{auth_key_path}\" " \
+                "-authenticationKeyID \"#{ENV['APP_STORE_CONNECT_KEY_ID']}\" " \
+                "-authenticationKeyIssuerID \"#{ENV['APP_STORE_CONNECT_ISSUER_ID']}\""
+
     build_app(
       scheme: "PadelApp",
       project: "Padel.xcodeproj",
       configuration: "Release",
       export_method: "app-store",
       clean: true,
-      xcargs: "-allowProvisioningUpdates " \
-              "-authenticationKeyPath \"#{api_key[:key_filepath]}\" " \
-              "-authenticationKeyID \"#{api_key[:key_id]}\" " \
-              "-authenticationKeyIssuerID \"#{api_key[:issuer_id]}\" " \
-              "DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}",
+      xcargs: "#{auth_args} DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}",
+      export_xcargs: auth_args,
       export_options: {
         method: "app-store",
         signingStyle: "automatic",
