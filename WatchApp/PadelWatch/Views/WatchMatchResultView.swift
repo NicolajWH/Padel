@@ -8,7 +8,10 @@ struct WatchMatchResultView: View {
     var body: some View {
         let snap = state.snapshot
         VStack(spacing: 8) {
-            Image(systemName: "trophy.fill").foregroundStyle(.yellow).font(.title2)
+            Image(systemName: "trophy.fill")
+                .foregroundStyle(PadelTheme.lime)
+                .font(.title2)
+                .shadow(color: PadelTheme.lime.opacity(0.6), radius: 8)
             if let winner = snap.winner {
                 Text("\(state.team(winner).displayName) Wins")
                     .font(.headline)

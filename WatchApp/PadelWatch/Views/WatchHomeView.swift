@@ -12,13 +12,20 @@ struct WatchHomeView: View {
                     NavigationLink {
                         WatchLiveMatchView()
                     } label: {
-                        VStack(alignment: .leading) {
-                            Text("Continue Match").font(.headline)
-                            Text("\(match.teamA.displayName) vs \(match.teamB.displayName)")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
+                        HStack(spacing: 8) {
+                            Image(systemName: "play.circle.fill")
+                                .foregroundStyle(PadelTheme.lime)
+                                .font(.title3)
+                            VStack(alignment: .leading) {
+                                Text("Continue Match").font(.headline)
+                                Text("\(match.teamA.displayName) vs \(match.teamB.displayName)")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                            }
                         }
                     }
+                    .listItemTint(PadelTheme.courtDeep)
                 }
             }
 
@@ -27,27 +34,51 @@ struct WatchHomeView: View {
                     NavigationLink {
                         WatchAmericanoRoundView()
                     } label: {
-                        VStack(alignment: .leading) {
-                            Text("Continue Americano").font(.headline)
-                            Text(session.name).font(.caption2).foregroundStyle(.secondary)
+                        HStack(spacing: 8) {
+                            Image(systemName: "person.3.fill")
+                                .foregroundStyle(PadelTheme.lime)
+                                .font(.caption)
+                            VStack(alignment: .leading) {
+                                Text("Continue Americano").font(.headline)
+                                Text(session.name).font(.caption2).foregroundStyle(.secondary)
+                            }
                         }
                     }
+                    .listItemTint(PadelTheme.courtDeep)
                 }
             }
 
             Section {
-                NavigationLink("New Match") {
+                NavigationLink {
                     WatchNewMatchView()
+                } label: {
+                    Label {
+                        Text("New Match")
+                    } icon: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundStyle(PadelTheme.teamA)
+                    }
                 }
-                NavigationLink("New Americano") {
+                NavigationLink {
                     WatchNewAmericanoView()
+                } label: {
+                    Label {
+                        Text("New Americano")
+                    } icon: {
+                        Image(systemName: "person.3.fill")
+                            .foregroundStyle(PadelTheme.teamB)
+                    }
                 }
             }
 
             Section {
                 HStack {
                     Image(systemName: connectivity.isPhoneReachable ? "iphone.gen3" : "iphone.slash")
-                    Text(connectivity.isPhoneReachable ? "iPhone Connected" : "iPhone Offline")
+                    if connectivity.isPhoneReachable {
+                        Text("iPhone Connected")
+                    } else {
+                        Text("iPhone Offline")
+                    }
                 }
                 .font(.caption2)
                 .foregroundStyle(.secondary)

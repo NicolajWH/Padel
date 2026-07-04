@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import PadelKit
 
 struct AmericanoRoundScoringView: View {
@@ -49,6 +50,8 @@ struct AmericanoRoundScoringView: View {
             }
             .padding(.vertical)
         }
+        .background(Color(uiColor: .systemGroupedBackground))
+        .sensoryFeedback(.impact(weight: .medium), trigger: session)
         .navigationTitle(session.name)
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: session) { _, newValue in
@@ -95,10 +98,10 @@ private struct MatchupCard: View {
                 .font(.caption).foregroundStyle(.secondary)
 
             HStack(spacing: 12) {
-                TeamButton(team: matchup.teamA, points: score.a, disabled: score.isComplete, color: .blue) {
+                TeamButton(team: matchup.teamA, points: score.a, disabled: score.isComplete, color: PadelTheme.teamA) {
                     onScore(.teamA)
                 }
-                TeamButton(team: matchup.teamB, points: score.b, disabled: score.isComplete, color: .red) {
+                TeamButton(team: matchup.teamB, points: score.b, disabled: score.isComplete, color: PadelTheme.teamB) {
                     onScore(.teamB)
                 }
             }
@@ -138,6 +141,7 @@ private struct TeamButton: View {
                 Text("\(points)")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(color)
+                    .contentTransition(.numericText())
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)

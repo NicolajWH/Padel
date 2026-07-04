@@ -8,47 +8,68 @@ struct MatchSummaryView: View {
     var body: some View {
         let snap = state.snapshot
         NavigationStack {
-            VStack(spacing: 24) {
-                if let winner = snap.winner {
-                    VStack(spacing: 4) {
-                        Image(systemName: "trophy.fill")
-                            .font(.system(size: 44))
-                            .foregroundStyle(.yellow)
-                        Text("\(state.team(winner).displayName) Wins!")
-                            .font(.title2).bold()
-                    }
-                    .padding(.top, 32)
-                }
+            ZStack {
+                PadelTheme.scoreboardGradient
+                    .ignoresSafeArea()
 
-                VStack(spacing: 8) {
-                    HStack {
-                        Text(state.teamA.displayName).bold()
-                        Spacer()
-                        Text(state.teamB.displayName).bold()
+                VStack(spacing: 24) {
+                    if let winner = snap.winner {
+                        VStack(spacing: 8) {
+                            Image(systemName: "trophy.fill")
+                                .font(.system(size: 48))
+                                .foregroundStyle(PadelTheme.lime)
+                                .shadow(color: PadelTheme.lime.opacity(0.6), radius: 16)
+                            Text("\(state.team(winner).displayName) Wins!")
+                                .font(.title2).bold()
+                                .foregroundStyle(.white)
+                                .multilineTextAlignment(.center)
+                        }
+                        .padding(.top, 32)
                     }
-                    Divider()
-                    ForEach(Array(snap.completedSets.enumerated()), id: \.offset) { index, set in
+
+                    VStack(spacing: 8) {
                         HStack {
-                            Text("Set \(index + 1)").foregroundStyle(.secondary)
+                            Text(state.teamA.displayName).bold()
+                                .foregroundStyle(PadelTheme.teamA)
                             Spacer()
-                            Text("\(set.teamAGames) - \(set.teamBGames)")
-                                .fontWeight(.semibold)
+                            Text(state.teamB.displayName).bold()
+                                .foregroundStyle(PadelTheme.teamB)
+                        }
+                        Divider().overlay(.white.opacity(0.3))
+                        ForEach(Array(snap.completedSets.enumerated()), id: \.offset) { index, set in
+                            HStack {
+                                Text("Set \(index + 1)").foregroundStyle(.white.opacity(0.6))
+                                Spacer()
+                                Text("\(set.teamAGames) - \(set.teamBGames)")
+                                    .fontWeight(.semibold)
+                                    .foregroundStyle(.white)
+                            }
                         }
                     }
-                }
-                .padding()
-                .background(.thinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                .padding(.horizontal)
+                    .padding()
+                    .background(.white.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .padding(.horizontal)
 
-                Spacer()
+                    Spacer()
 
-                Button("Done") { dismiss() }
+                    Button {
+                        dismiss()
+                    } label: {
+                        Text("Done")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                    }
                     .buttonStyle(.borderedProminent)
+                    .tint(PadelTheme.lime)
+                    .foregroundStyle(PadelTheme.night)
+                    .padding(.horizontal)
                     .padding(.bottom, 32)
+                }
             }
             .navigationTitle("Match Result")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
         }
     }
 }
