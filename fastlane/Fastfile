@@ -83,9 +83,11 @@ platform :ios do
 
     # Safe diagnostics: file size plus the first 32 bytes, which is only the
     # "-----BEGIN PRIVATE KEY-----" armor line - never key material. od -c makes
-    # any stray \r or BOM visible in the build log.
+    # any stray \r or BOM visible in the build log. head must come first in the
+    # pipe: `od file | head` kills od with SIGPIPE (exit 141), which sh() treats
+    # as a failure.
     UI.message("Wrote #{auth_key_path} (#{File.size(auth_key_path)} bytes)")
-    sh("od -c #{auth_key_path.shellescape} | head -2")
+    sh("head -c 32 #{auth_key_path.shellescape} | od -c")
     sh("openssl pkey -in #{auth_key_path.shellescape} -noout && echo 'openssl parses the .p8 key OK'")
 
     auth_args = "-allowProvisioningUpdates " \
