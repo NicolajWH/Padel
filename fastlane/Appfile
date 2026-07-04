@@ -1,4 +1,2 @@
 app_identifier("com.worsa.padel")
-apple_id(ENV["APPLE_ID"])
 team_id(ENV["APPLE_TEAM_ID"])
-itc_team_id(ENV["APP_STORE_CONNECT_TEAM_ID"])

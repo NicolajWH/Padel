@@ -103,12 +103,13 @@ TestFlight automatically on every push to `main`, or on demand via
 
    | Secret | Value |
    |---|---|
-   | `APPLE_ID` | Your Apple ID email (used by fastlane's Appfile) |
-   | `APPLE_TEAM_ID` | Your 10-character Apple Developer Team ID |
-   | `APP_STORE_CONNECT_TEAM_ID` | Your App Store Connect team ID (Developer Portal → Membership) |
-   | `APP_STORE_CONNECT_KEY_ID` | The API key ID from step 2 |
+   | `APPLE_TEAM_ID` | Your 10-character Apple Developer Team ID (Developer Portal → Membership) |
+   | `APP_STORE_CONNECT_KEY_ID` | The API key ID from step 2 (the `XXXXXXXXXX` in `AuthKey_XXXXXXXXXX.p8`) |
    | `APP_STORE_CONNECT_ISSUER_ID` | The API key's issuer ID from step 2 |
-   | `APP_STORE_CONNECT_KEY_CONTENT` | The `.p8` file contents, **base64-encoded**: `base64 -i AuthKey_XXXX.p8 \| pbcopy` |
+   | `APP_STORE_CONNECT_KEY_CONTENT` | The `.p8` file contents — raw or base64-encoded, both work |
+
+   No Apple ID email or password is needed anywhere: the API key fully replaces
+   interactive Apple ID authentication for building, signing, and uploading.
 
 The workflow uses `xcodebuild -allowProvisioningUpdates` with that API key,
 so Xcode automatically creates/refreshes the signing certificate and App
