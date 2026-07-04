@@ -36,8 +36,12 @@ final class AmericanoTests: XCTestCase {
         let teamA = Team(players: [p1, p2])
         let teamB = Team(players: [p3, p4])
         var matchup = AmericanoMatchup(court: 1, teamA: teamA, teamB: teamB)
-        for _ in 0..<21 { matchup.addPoint(to: .teamA, target: 21) }
+        // Once a side reaches the target the round is decided and further points are ignored,
+        // so interleave realistically: get team A to 20, team B to its final 15, then let team
+        // A score the 21st and deciding point last.
+        for _ in 0..<20 { matchup.addPoint(to: .teamA, target: 21) }
         for _ in 0..<15 { matchup.addPoint(to: .teamB, target: 21) }
+        matchup.addPoint(to: .teamA, target: 21)
 
         let round = AmericanoRound(index: 0, matchups: [matchup])
         let session = AmericanoSession(players: [p1, p2, p3, p4], settings: AmericanoSettings(pointsPerRound: 21, numberOfCourts: 1, numberOfRounds: 1), rounds: [round])
