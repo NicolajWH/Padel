@@ -61,6 +61,29 @@ platform :ios do
       in_house: false
     )
 
+    # Prove the key works against the App Store Connect REST API before spending
+    # minutes building. This cleanly separates "the key/ID pair is wrong" from the
+    # stricter requirements of Xcode's cloud-signing service (which additionally
+    # needs a *team* key, not an individual key).
+    require "spaceship"
+    begin
+      Spaceship::ConnectAPI.token = Spaceship::ConnectAPI::Token.from(hash: api_key)
+      app = Spaceship::ConnectAPI::App.find("com.worsa.padel")
+      if app
+        UI.success("App Store Connect API auth OK - found app '#{app.name}' (#{app.bundle_id})")
+      else
+        UI.important("App Store Connect API auth OK, but no app record found for com.worsa.padel")
+      end
+    rescue => e
+      UI.user_error!(
+        "The App Store Connect API rejected the key: #{e.message}. Check that " \
+        "APP_STORE_CONNECT_KEY_ID is the ID of the new key (the XXXXXXXXXX in " \
+        "AuthKey_XXXXXXXXXX.p8), that the key is a Team Key with the Admin role " \
+        "(App Store Connect -> Users and Access -> Integrations -> Team Keys), " \
+        "and allow a newly created key a few minutes to propagate."
+      )
+    end
+
     build_number = ENV["GITHUB_RUN_NUMBER"] || Time.now.strftime("%Y%m%d%H%M")
 
     increment_build_number(
