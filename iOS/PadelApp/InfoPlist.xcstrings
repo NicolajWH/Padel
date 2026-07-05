@@ -1,6 +1,13 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "NSContactsUsageDescription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Padel uses your contact card to prefill your player name in Settings." } },
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Padel bruger dit kontaktkort til at udfylde dit spillernavn i Indstillinger." } }
+      }
+    },
     "NSLocationWhenInUseUsageDescription" : {
       "extractionState" : "manual",
       "localizations" : {
