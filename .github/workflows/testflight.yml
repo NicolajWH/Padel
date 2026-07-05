@@ -30,6 +30,10 @@ jobs:
     needs: test-padel-kit
     runs-on: macos-15
     timeout-minutes: 60
+    # match stores the signing certificate + profiles on this repo's
+    # "certificates" branch, so the job needs write access to push there.
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -56,4 +60,6 @@ jobs:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           APP_STORE_CONNECT_KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: bundle exec fastlane beta

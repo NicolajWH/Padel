@@ -12,6 +12,8 @@ platform :ios do
       APP_STORE_CONNECT_KEY_ID
       APP_STORE_CONNECT_ISSUER_ID
       APP_STORE_CONNECT_KEY_CONTENT
+      MATCH_PASSWORD
+      GITHUB_TOKEN
     ]
     missing = required_env.select { |key| ENV[key].to_s.strip.empty? }
     unless missing.empty?
@@ -91,30 +93,50 @@ platform :ios do
       build_number: build_number
     )
 
-    # xcodebuild's own automatic-signing provisioning lookup (-allowProvisioningUpdates)
-    # needs its own App Store Connect API key auth - there's no interactive Apple ID
-    # signed into Xcode on a CI runner. app_store_connect_api_key holds the key purely
-    # in memory when given key_content, so write the .p8 to disk ourselves, in the
-    # directory and AuthKey_<ID>.p8 name Xcode conventionally looks keys up under.
-    require "fileutils"
-    private_keys_dir = File.expand_path("~/.appstoreconnect/private_keys")
-    FileUtils.mkdir_p(private_keys_dir)
-    auth_key_path = File.join(private_keys_dir, "AuthKey_#{key_id}.p8")
-    File.write(auth_key_path, key_pem)
+    # Ephemeral CI runners never have last run's private key, so Xcode's
+    # cloud signing minted a brand-new "Created via API" development
+    # certificate on every run until the account hit its certificate cap.
+    # match instead keeps ONE Apple Distribution certificate + the App Store
+    # profiles for both bundle ids, encrypted with MATCH_PASSWORD on this
+    # repo's "certificates" branch, and reuses them on every run.
+    setup_ci
 
-    # Safe diagnostics: file size plus the first 32 bytes, which is only the
-    # "-----BEGIN PRIVATE KEY-----" armor line - never key material. od -c makes
-    # any stray \r or BOM visible in the build log. head must come first in the
-    # pipe: `od file | head` kills od with SIGPIPE (exit 141), which sh() treats
-    # as a failure.
-    UI.message("Wrote #{auth_key_path} (#{File.size(auth_key_path)} bytes)")
-    sh("head -c 32 #{auth_key_path.shellescape} | od -c")
-    sh("openssl pkey -in #{auth_key_path.shellescape} -noout && echo 'openssl parses the .p8 key OK'")
+    git_basic_authorization = Base64.strict_encode64("x-access-token:#{ENV['GITHUB_TOKEN']}")
 
-    auth_args = "-allowProvisioningUpdates " \
-                "-authenticationKeyPath #{auth_key_path.shellescape} " \
-                "-authenticationKeyID #{key_id.shellescape} " \
-                "-authenticationKeyIssuerID #{issuer_id.shellescape}"
+    match(
+      type: "appstore",
+      app_identifier: ["com.worsa.padel", "com.worsa.padel.watchapp"],
+      api_key: api_key,
+      storage_mode: "git",
+      git_url: "https://github.com/NicolajWH/Padel.git",
+      git_branch: "certificates",
+      git_basic_authorization: git_basic_authorization,
+      readonly: false,
+      platform: "ios"
+    )
+
+    ios_profile = ENV["sigh_com.worsa.padel_appstore_profile-name"]
+    watch_profile = ENV["sigh_com.worsa.padel.watchapp_appstore_profile-name"]
+
+    # xcodegen writes CODE_SIGN_STYLE=Automatic; flip both app targets to
+    # manual signing with the match distribution identity + profiles so the
+    # archive never needs to create certificates.
+    update_code_signing_settings(
+      path: "Padel.xcodeproj",
+      use_automatic_signing: false,
+      team_id: team_id,
+      code_sign_identity: "Apple Distribution",
+      targets: ["PadelApp"],
+      profile_name: ios_profile
+    )
+    update_code_signing_settings(
+      path: "Padel.xcodeproj",
+      use_automatic_signing: false,
+      team_id: team_id,
+      code_sign_identity: "Apple Distribution",
+      targets: ["PadelWatch"],
+      profile_name: watch_profile
+    )
 
     build_app(
       scheme: "PadelApp",
@@ -122,14 +144,15 @@ platform :ios do
       configuration: "Release",
       export_method: "app-store",
       clean: true,
-      # gym appends xcargs to the -exportArchive call as well, so auth flags must
-      # not also be in export_xcargs or xcodebuild rejects the duplicated
-      # -authenticationKeyPath ("may only be provided once").
-      xcargs: "#{auth_args} DEVELOPMENT_TEAM=#{team_id.shellescape}",
+      xcargs: "DEVELOPMENT_TEAM=#{team_id.shellescape}",
       export_options: {
         method: "app-store",
-        signingStyle: "automatic",
-        teamID: team_id
+        signingStyle: "manual",
+        teamID: team_id,
+        provisioningProfiles: {
+          "com.worsa.padel" => ios_profile,
+          "com.worsa.padel.watchapp" => watch_profile
+        }
       }
     )
 

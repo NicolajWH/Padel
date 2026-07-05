@@ -71,7 +71,7 @@ Connect.
 ### Configuration (already set up — reference for changes)
 
 **GitHub Actions secrets** (Settings → Secrets and variables → Actions).
-Exactly these four; no Apple ID email or password is needed anywhere — the
+Exactly these five; no Apple ID email or password is needed anywhere — the
 API key fully replaces interactive Apple ID login for building, signing,
 and uploading:
 
@@ -81,6 +81,7 @@ and uploading:
 | `APP_STORE_CONNECT_KEY_ID` | The API key's ID — the `XXXXXXXXXX` in `AuthKey_XXXXXXXXXX.p8` |
 | `APP_STORE_CONNECT_ISSUER_ID` | The Issuer ID shown on the Integrations page (shared by all keys) |
 | `APP_STORE_CONNECT_KEY_CONTENT` | The `.p8` key — raw PEM, base64 of the file, or just its inner base64 body all work |
+| `MATCH_PASSWORD` | Any passphrase you choose — encrypts the signing certificate stored on the `certificates` branch |
 
 **The API key must be a Team Key with the Admin role** (App Store Connect →
 Users and Access → Integrations → **Team Keys**). Lesser roles can create
@@ -95,10 +96,13 @@ outright because they don't use the team Issuer ID.
 
 The Fastlane lane validates the key against the App Store Connect API before
 building, so a misconfigured secret fails in under a minute with a precise
-message instead of a cryptic signing error later. Signing itself uses
-`xcodebuild -allowProvisioningUpdates` with the API key: certificates and
-App Store provisioning profiles are created/refreshed automatically in CI —
-no manual certificates, no `match` repo to maintain.
+message instead of a cryptic signing error later. Signing uses `fastlane
+match`: one Apple Distribution certificate and the App Store profiles for
+both bundle ids are created once, encrypted with `MATCH_PASSWORD`, and stored
+on this repository's `certificates` branch. Every CI run reuses that same
+certificate — ephemeral runners previously minted a fresh "Created via API"
+development certificate per run until the account hit Apple's certificate
+cap.
 
 ## Local development (optional)
 
