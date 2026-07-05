@@ -8,6 +8,9 @@ struct LiveMatchView: View {
     let record: MatchRecord
     @State private var state: MatchState
     @State private var showingFinishedSheet = false
+    @State private var showingShareSheet = false
+    @StateObject private var share = SharedMatchController()
+    @State private var suppressCloudPush = false
 
     init(record: MatchRecord, initialState: MatchState) {
         self.record = record
@@ -17,71 +20,92 @@ struct LiveMatchView: View {
     var body: some View {
         let snap = state.snapshot
 
-        VStack(spacing: 0) {
-            SetHistoryBar(sets: snap.completedSets)
-                .padding(.top, 8)
+        ZStack {
+            PadelTheme.scoreboardGradient
+                .ignoresSafeArea()
 
-            HStack(spacing: 16) {
-                TeamScoreColumn(
-                    team: state.teamA,
-                    label: snap.gamePointLabelA,
-                    games: snap.currentSetGamesA,
-                    isServing: snap.servingSide == .teamA,
-                    servingPlayerIndex: snap.servingPlayerIndex,
-                    isTiebreak: snap.isTiebreak,
-                    tiebreakPoints: snap.tiebreakPointsA,
-                    color: .blue
-                ) {
-                    score(.teamA)
-                }
+            VStack(spacing: 0) {
+                SetHistoryBar(sets: snap.completedSets)
+                    .padding(.top, 12)
 
-                TeamScoreColumn(
-                    team: state.teamB,
-                    label: snap.gamePointLabelB,
-                    games: snap.currentSetGamesB,
-                    isServing: snap.servingSide == .teamB,
-                    servingPlayerIndex: snap.servingPlayerIndex,
-                    isTiebreak: snap.isTiebreak,
-                    tiebreakPoints: snap.tiebreakPointsB,
-                    color: .red
-                ) {
-                    score(.teamB)
+                HStack(spacing: 14) {
+                    TeamScoreColumn(
+                        team: state.teamA,
+                        label: snap.gamePointLabelA,
+                        games: snap.currentSetGamesA,
+                        isServing: snap.servingSide == .teamA,
+                        servingPlayerIndex: snap.servingPlayerIndex,
+                        isTiebreak: snap.isTiebreak,
+                        tiebreakPoints: snap.tiebreakPointsA,
+                        color: PadelTheme.teamA
+                    ) {
+                        score(.teamA)
+                    }
+
+                    TeamScoreColumn(
+                        team: state.teamB,
+                        label: snap.gamePointLabelB,
+                        games: snap.currentSetGamesB,
+                        isServing: snap.servingSide == .teamB,
+                        servingPlayerIndex: snap.servingPlayerIndex,
+                        isTiebreak: snap.isTiebreak,
+                        tiebreakPoints: snap.tiebreakPointsB,
+                        color: PadelTheme.teamB
+                    ) {
+                        score(.teamB)
+                    }
                 }
+                .padding()
+
+                Spacer(minLength: 0)
+
+                bottomBar
             }
-            .padding()
-
-            HStack {
-                Button {
-                    undo()
-                } label: {
-                    Label("Undo", systemImage: "arrow.uturn.backward")
-                }
-                .disabled(state.pointLog.isEmpty)
-
-                Spacer()
-
-                if connectivity.isWatchAppInstalled {
-                    Label(connectivity.isWatchReachable ? "Watch Connected" : "Watch Not Reachable", systemImage: "applewatch")
-                        .font(.caption)
-                        .foregroundStyle(connectivity.isWatchReachable ? .green : .secondary)
-                }
-            }
-            .padding(.horizontal)
-            .padding(.bottom)
         }
-        .navigationTitle(snap.isMatchTiebreak ? "Match Tiebreak" : (snap.isTiebreak ? "Tiebreak" : "Live Match"))
+        .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbarBackground(PadelTheme.courtDeep, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingShareSheet = true
+                } label: {
+                    Image(systemName: share.isSharing ? "person.2.wave.2.fill" : "square.and.arrow.up")
+                }
+                .tint(PadelTheme.lime)
+            }
+        }
+        .sensoryFeedback(.impact(weight: .medium), trigger: state.pointLog)
+        .sensoryFeedback(.success, trigger: showingFinishedSheet)
         .onChange(of: state.pointLog) { _, _ in
-            persist()
+            record.update(with: state)
+            connectivity.send(.match(state))
+            if share.isSharing {
+                if suppressCloudPush {
+                    suppressCloudPush = false
+                } else {
+                    let current = state
+                    Task { await share.push(current) }
+                }
+            }
         }
         .onAppear {
+            share.attach(to: state)
             connectivity.send(.match(state))
         }
+        .onDisappear {
+            share.detach()
+        }
         .onChange(of: connectivity.lastReceivedMatch) { _, incoming in
-            guard let incoming, incoming.id == state.id else { return }
-            if incoming.pointLog.count > state.pointLog.count {
-                state = incoming
-            }
+            guard let incoming, incoming.id == state.id, incoming != state else { return }
+            withAnimation(.snappy) { state = incoming }
+        }
+        .onChange(of: share.remoteState) { _, incoming in
+            guard let incoming, incoming.id == state.id, incoming.pointLog != state.pointLog else { return }
+            suppressCloudPush = true
+            withAnimation(.snappy) { state = incoming }
         }
         .onChange(of: snap.isMatchOver) { _, isOver in
             if isOver {
@@ -92,21 +116,67 @@ struct LiveMatchView: View {
         .sheet(isPresented: $showingFinishedSheet) {
             MatchSummaryView(state: state)
         }
+        .sheet(isPresented: $showingShareSheet) {
+            ShareMatchSheet(share: share, state: state)
+                .presentationDetents([.medium])
+        }
+        .alert(
+            Text("Sharing Failed"),
+            isPresented: Binding(
+                get: { share.errorMessage != nil },
+                set: { if !$0 { share.errorMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(share.errorMessage ?? "")
+        }
+    }
+
+    private var title: String {
+        let snap = state.snapshot
+        if snap.isMatchTiebreak { return String(localized: "Match Tiebreak") }
+        if snap.isTiebreak { return String(localized: "Tiebreak") }
+        return String(localized: "Live Match")
+    }
+
+    private var bottomBar: some View {
+        HStack {
+            Button {
+                undo()
+            } label: {
+                Label("Undo", systemImage: "arrow.uturn.backward")
+                    .font(.subheadline.weight(.semibold))
+            }
+            .tint(PadelTheme.lime)
+            .disabled(state.pointLog.isEmpty)
+
+            Spacer()
+
+            if let code = share.shareCode {
+                Label(code, systemImage: "person.2.wave.2.fill")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(PadelTheme.lime)
+            }
+
+            if connectivity.isWatchAppInstalled {
+                Image(systemName: "applewatch")
+                    .font(.caption)
+                    .foregroundStyle(connectivity.isWatchReachable ? PadelTheme.lime : .white.opacity(0.35))
+                    .padding(.leading, 8)
+            }
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 12)
     }
 
     private func score(_ side: TeamSide) {
         guard !state.snapshot.isMatchOver else { return }
-        state.addPoint(for: side)
-        connectivity.send(.match(state))
+        withAnimation(.snappy) { state.addPoint(for: side) }
     }
 
     private func undo() {
-        state.undoLastPoint()
-        connectivity.send(.match(state))
-    }
-
-    private func persist() {
-        record.update(with: state)
+        withAnimation(.snappy) { state.undoLastPoint() }
     }
 }
 
@@ -123,15 +193,18 @@ private struct TeamScoreColumn: View {
 
     var body: some View {
         Button(action: onScore) {
-            VStack(spacing: 12) {
-                VStack(spacing: 2) {
+            VStack(spacing: 14) {
+                VStack(spacing: 3) {
                     ForEach(Array(team.players.enumerated()), id: \.element.id) { index, player in
                         HStack(spacing: 6) {
                             if isServing && index == servingPlayerIndex {
-                                Image(systemName: "circle.fill").font(.system(size: 6)).foregroundStyle(color)
+                                Image(systemName: "tennisball.fill")
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(PadelTheme.lime)
                             }
                             Text(player.name)
-                                .font(.subheadline)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(.white)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.7)
                         }
@@ -139,18 +212,27 @@ private struct TeamScoreColumn: View {
                 }
 
                 Text(isTiebreak ? "\(tiebreakPoints)" : label)
-                    .font(.system(size: 56, weight: .bold, design: .rounded))
+                    .font(.system(size: 64, weight: .heavy, design: .rounded))
                     .foregroundStyle(color)
+                    .contentTransition(.numericText())
                     .minimumScaleFactor(0.5)
+                    .shadow(color: color.opacity(0.55), radius: 14)
 
                 Text("Games: \(games)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.65))
+                    .contentTransition(.numericText())
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 24)
-            .background(color.opacity(0.08))
-            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .padding(.vertical, 28)
+            .background(
+                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                    .fill(color.opacity(0.14))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .strokeBorder(color.opacity(isServing ? 0.65 : 0.25), lineWidth: isServing ? 2 : 1)
+                    )
+            )
         }
         .buttonStyle(.plain)
     }
@@ -161,17 +243,119 @@ private struct SetHistoryBar: View {
 
     var body: some View {
         if !sets.isEmpty {
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 ForEach(Array(sets.enumerated()), id: \.offset) { _, set in
                     Text("\(set.teamAGames)-\(set.teamBGames)")
-                        .font(.caption)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 4)
-                        .background(.thinMaterial)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 5)
+                        .background(.white.opacity(0.12))
                         .clipShape(Capsule())
                 }
             }
         }
+    }
+}
+
+/// Sheet that publishes the match under a court number and the phone's
+/// location, so everyone nearby can join with one tap. The join code is
+/// shown afterwards as a fallback for when location isn't available.
+private struct ShareMatchSheet: View {
+    @ObservedObject var share: SharedMatchController
+    let state: MatchState
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var locationProvider = LocationProvider()
+    @State private var court = 1
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Image(systemName: "person.2.wave.2.fill")
+                    .font(.system(size: 40))
+                    .foregroundStyle(Color.accentColor)
+                    .padding(.top, 8)
+
+                if let code = share.shareCode {
+                    Text("Sharing is on. Players nearby can now join this match from the Play tab.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+
+                    VStack(spacing: 4) {
+                        Text("Match Code")
+                            .font(.headline)
+                        Text(code)
+                            .font(.system(size: 40, weight: .heavy, design: .rounded))
+                            .kerning(6)
+                            .textSelection(.enabled)
+                        Text("Only needed if automatic discovery can't find the match.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    ShareLink(item: shareText(code: code)) {
+                        Label("Share Code", systemImage: "square.and.arrow.up")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .padding(.horizontal)
+                } else {
+                    Text("Share this match so everyone on court can follow and update the score live from their own iPhone and Apple Watch.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+
+                    Picker("Court", selection: $court) {
+                        ForEach(1...8, id: \.self) { number in
+                            Text("Court \(number)").tag(number)
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    if locationProvider.isAuthorizationDenied {
+                        Text("Location access is off, so nearby players will need the code to join. You can enable location for Padel in Settings.")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+
+                    Button {
+                        Task {
+                            let location = await locationProvider.currentLocation()
+                            await share.startSharing(state, court: court, location: location)
+                        }
+                    } label: {
+                        if share.isBusy {
+                            ProgressView().frame(maxWidth: .infinity)
+                        } else {
+                            Label("Share Match", systemImage: "person.2.wave.2")
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(share.isBusy)
+                    .padding(.horizontal)
+                }
+
+                Spacer()
+            }
+            .padding(.top)
+            .navigationTitle("Shared Match")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func shareText(code: String) -> String {
+        String(localized: "Join my padel match in the Padel app with code \(code)")
     }
 }
 

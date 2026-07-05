@@ -60,8 +60,10 @@ struct WatchAmericanoRoundView: View {
                 }
             }
             .onChange(of: connectivity.lastReceivedAmericano) { _, incoming in
-                guard let incoming, incoming.id == session.id else { return }
+                guard let incoming, incoming.id == session.id, incoming != session else { return }
                 store.activeAmericano = incoming
+                // Someone else (phone or another player) updated the score.
+                WKInterfaceDevice.current().play(.notification)
             }
         } else {
             ContentUnavailableView("No Active Americano", systemImage: "person.3")
@@ -91,7 +93,7 @@ private struct MatchupScoringView: View {
             Button {
                 addPoint(.teamA)
             } label: {
-                scoreRow(name: matchup.teamA.displayName, points: score.a, color: .blue)
+                scoreRow(name: matchup.teamA.displayName, points: score.a, color: PadelTheme.teamA)
             }
             .buttonStyle(.plain)
             .disabled(score.isComplete)
@@ -99,7 +101,7 @@ private struct MatchupScoringView: View {
             Button {
                 addPoint(.teamB)
             } label: {
-                scoreRow(name: matchup.teamB.displayName, points: score.b, color: .red)
+                scoreRow(name: matchup.teamB.displayName, points: score.b, color: PadelTheme.teamB)
             }
             .buttonStyle(.plain)
             .disabled(score.isComplete)
@@ -125,11 +127,22 @@ private struct MatchupScoringView: View {
         HStack {
             Text(name).font(.system(size: 12)).lineLimit(1).minimumScaleFactor(0.6)
             Spacer()
-            Text("\(points)").font(.system(size: 26, weight: .bold, design: .rounded)).foregroundStyle(color)
+            Text("\(points)")
+                .font(.system(size: 26, weight: .bold, design: .rounded))
+                .foregroundStyle(color)
+                .contentTransition(.numericText())
         }
         .padding(8)
-        .background(color.opacity(0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .background(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [color.opacity(0.3), color.opacity(0.12)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        )
     }
 
     private func addPoint(_ side: TeamSide) {

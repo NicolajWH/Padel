@@ -7,15 +7,35 @@ struct WatchAmericanoStandingsView: View {
     var body: some View {
         List {
             ForEach(Array(session.standings.enumerated()), id: \.element.id) { index, entry in
-                HStack {
-                    Text("\(index + 1)").font(.caption).foregroundStyle(index == 0 ? .yellow : .secondary)
-                    Text(entry.player.name).font(.system(size: 13)).lineLimit(1).minimumScaleFactor(0.6)
+                HStack(spacing: 6) {
+                    Text("\(index + 1)")
+                        .font(.system(.caption, design: .rounded).bold())
+                        .foregroundStyle(rankColor(index + 1))
+                        .frame(width: 16)
+                    Circle()
+                        .fill(Color(hex: entry.player.colorHex))
+                        .frame(width: 8, height: 8)
+                    Text(entry.player.name)
+                        .font(.system(size: 13))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
                     Spacer()
-                    Text("\(entry.totalPoints)").font(.headline)
+                    Text("\(entry.totalPoints)")
+                        .font(.system(.headline, design: .rounded))
+                        .foregroundStyle(index == 0 ? PadelTheme.lime : .primary)
                 }
             }
         }
         .navigationTitle("Standings")
+    }
+
+    private func rankColor(_ rank: Int) -> Color {
+        switch rank {
+        case 1: return Color(hex: "E5B80B")
+        case 2: return Color(hex: "9EA7AD")
+        case 3: return Color(hex: "B87333")
+        default: return .secondary
+        }
     }
 }
 

@@ -59,12 +59,12 @@ struct AmericanoRowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(session.name).font(.subheadline).bold()
-            HStack {
+            HStack(spacing: 6) {
                 Text("\(session.players.count) players · \(session.rounds.count) rounds")
                 if session.isComplete, let leader = session.standings.first {
-                    Text("· \(leader.player.name) leads").foregroundStyle(.green)
+                    Text("\(leader.player.name) won").foregroundStyle(.green)
                 } else if !session.rounds.isEmpty {
-                    Text("· In progress").foregroundStyle(.orange)
+                    StatusPill(text: "In progress", color: .orange)
                 }
             }
             .font(.caption)

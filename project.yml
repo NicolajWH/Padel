@@ -30,12 +30,20 @@ targets:
       - package: PadelKit
       - target: PadelWatch
         embed: true
+    entitlements:
+      path: Generated/PadelApp.entitlements
+      properties:
+        com.apple.developer.icloud-services: [CloudKit]
+        com.apple.developer.icloud-container-identifiers:
+          - iCloud.com.worsa.padel
     info:
       path: Generated/iOS-Info.plist
       properties:
         CFBundleDisplayName: Padel
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleLocalizations: [en, da]
+        NSLocationWhenInUseUsageDescription: "Padel uses your location to find shared matches on nearby courts."
         ITSAppUsesNonExemptEncryption: false
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
@@ -64,6 +72,7 @@ targets:
         CFBundleDisplayName: Padel
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleLocalizations: [en, da]
         WKApplication: true
         WKCompanionAppBundleIdentifier: com.worsa.padel
         WKRunsIndependentlyOfCompanionApp: true

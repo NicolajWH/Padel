@@ -24,7 +24,7 @@ struct PlayersView: View {
                             Text(record.name).font(.headline)
                             let stats = MatchStatistics.stats(for: record.asPlayer, in: allFinishedMatches())
                             if stats.played > 0 {
-                                Text("\(stats.wins)W – \(stats.losses)L · \(Int(stats.winRate * 100))% win rate")
+                                Text("\(stats.wins) wins · \(stats.losses) losses")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             } else {

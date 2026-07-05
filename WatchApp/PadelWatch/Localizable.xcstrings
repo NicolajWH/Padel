@@ -1,0 +1,141 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ vs %@" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "%1$@ vs %2$@" } }
+      }
+    },
+    "%@ Wins" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "%@ vinder" } }
+      }
+    },
+    "Americano" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Americano" } }
+      }
+    },
+    "Continue Americano" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Fortsæt Americano" } }
+      }
+    },
+    "Continue Match" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Fortsæt kamp" } }
+      }
+    },
+    "Court %lld" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Bane %lld" } }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Færdig" } }
+      }
+    },
+    "Games %lld" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Partier %lld" } }
+      }
+    },
+    "Generate & Start" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Generér og start" } }
+      }
+    },
+    "Golden Point" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Golden point" } }
+      }
+    },
+    "iPhone Connected" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "iPhone forbundet" } }
+      }
+    },
+    "iPhone Offline" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "iPhone offline" } }
+      }
+    },
+    "Live" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Live" } }
+      }
+    },
+    "Match TB" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Match-TB" } }
+      }
+    },
+    "New Americano" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ny Americano" } }
+      }
+    },
+    "New Match" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ny kamp" } }
+      }
+    },
+    "No Active Americano" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ingen aktiv Americano" } }
+      }
+    },
+    "No Active Match" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ingen aktiv kamp" } }
+      }
+    },
+    "Padel" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Padel" } }
+      }
+    },
+    "Players: %lld" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spillere: %lld" } }
+      }
+    },
+    "Points/round: %lld" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Point/runde: %lld" } }
+      }
+    },
+    "Round %lld / %lld" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Runde %1$lld / %2$lld" } }
+      }
+    },
+    "Rounds: %lld" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Runder: %lld" } }
+      }
+    },
+    "Single Set" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ét sæt" } }
+      }
+    },
+    "Standings" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Stilling" } }
+      }
+    },
+    "Start" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Start" } }
+      }
+    },
+    "Tiebreak" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Tiebreak" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -56,7 +56,7 @@ struct AmericanoSetupView: View {
                     .disabled(!isValid)
             } footer: {
                 if courtCount > 0 {
-                    Text("\(validNames.count) players on \(courtCount) court\(courtCount == 1 ? "" : "s") per round.")
+                    Text("Players: \(validNames.count) · Courts per round: \(courtCount)")
                 }
             }
         }

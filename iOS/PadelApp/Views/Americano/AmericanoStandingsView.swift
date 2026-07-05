@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import PadelKit
 
 struct AmericanoStandingsView: View {
@@ -9,21 +10,20 @@ struct AmericanoStandingsView: View {
         List {
             Section {
                 ForEach(Array(session.standings.enumerated()), id: \.element.id) { index, entry in
-                    HStack {
-                        Text("\(index + 1)")
-                            .font(.headline)
-                            .foregroundStyle(index == 0 ? .yellow : .secondary)
-                            .frame(width: 24)
+                    HStack(spacing: 12) {
+                        RankBadge(rank: index + 1)
                         PlayerAvatar(player: entry.player, size: 32)
                         VStack(alignment: .leading) {
                             Text(entry.player.name)
+                                .font(.subheadline.weight(index == 0 ? .bold : .regular))
                             Text("\(entry.roundsPlayed) rounds played")
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
                         Spacer()
                         Text("\(entry.totalPoints)")
-                            .font(.title3).bold()
+                            .font(.system(.title3, design: .rounded)).bold()
+                            .foregroundStyle(index == 0 ? Color.accentColor : .primary)
                     }
                 }
             } header: {
@@ -37,6 +37,30 @@ struct AmericanoStandingsView: View {
             }
         }
         .navigationTitle(session.name)
+    }
+}
+
+/// Rank number with medal colors for the top three.
+struct RankBadge: View {
+    let rank: Int
+
+    var body: some View {
+        Text("\(rank)")
+            .font(.system(.subheadline, design: .rounded).bold())
+            .foregroundStyle(rank <= 3 ? .white : Color.secondary)
+            .frame(width: 26, height: 26)
+            .background(
+                Circle().fill(badgeColor)
+            )
+    }
+
+    private var badgeColor: Color {
+        switch rank {
+        case 1: return Color(hex: "E5B80B")
+        case 2: return Color(hex: "9EA7AD")
+        case 3: return Color(hex: "B87333")
+        default: return Color(uiColor: .tertiarySystemFill)
+        }
     }
 }
 
