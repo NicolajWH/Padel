@@ -20,6 +20,9 @@ struct AmericanoStandingsView: View {
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }
+                        if entry.player.id == AmericanoIdentity.playerID(for: session.id) {
+                            StatusPill(text: "You", color: .accentColor)
+                        }
                         Spacer()
                         Text("\(entry.totalPoints)")
                             .font(.system(.title3, design: .rounded)).bold()

@@ -5,7 +5,10 @@ import PadelKit
 
 struct PlayHomeView: View {
     @Query(sort: \MatchRecord.createdAt, order: .reverse) private var matches: [MatchRecord]
+    @Query private var americanos: [AmericanoRecord]
     @State private var showingJoin = false
+    @StateObject private var locationProvider = LocationProvider()
+    @State private var nearbyGameCount = 0
 
     private var ongoingMatch: MatchRecord? {
         matches.first { !$0.isFinished }
@@ -14,6 +17,15 @@ struct PlayHomeView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
+                if nearbyGameCount > 0 {
+                    Button {
+                        showingJoin = true
+                    } label: {
+                        NearbyGamesBanner(count: nearbyGameCount)
+                    }
+                    .buttonStyle(.plain)
+                }
+
                 if let ongoingMatch, let state = ongoingMatch.state {
                     NavigationLink {
                         LiveMatchView(record: ongoingMatch, initialState: state)
@@ -79,6 +91,61 @@ struct PlayHomeView: View {
         .sheet(isPresented: $showingJoin) {
             JoinMatchView()
         }
+        .task {
+            await checkForNearbyGames()
+        }
+        .refreshable {
+            await checkForNearbyGames()
+        }
+    }
+
+    /// Quietly looks for shared games at the user's location when the tab
+    /// appears — never prompts for permission, and hides games we already
+    /// joined. This is the "you're at the court, want in?" nudge.
+    private func checkForNearbyGames() async {
+        guard let location = await locationProvider.currentLocationIfAuthorized(),
+              let games = try? await SharedMatchController.fetchNearby(around: location) else {
+            return
+        }
+        var knownIDs = Set(matches.map(\.id))
+        knownIDs.formUnion(americanos.map(\.id))
+        nearbyGameCount = games.filter { game in
+            switch game.content {
+            case .match(let state): return !knownIDs.contains(state.id)
+            case .americano(let session): return !knownIDs.contains(session.id)
+            }
+        }.count
+    }
+}
+
+/// Lime nudge shown when there are shared games at the user's location
+/// that they haven't joined yet.
+private struct NearbyGamesBanner: View {
+    let count: Int
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "person.2.wave.2.fill")
+                .font(.title3)
+                .foregroundStyle(PadelTheme.night)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Live games nearby!")
+                    .font(.headline)
+                    .foregroundStyle(PadelTheme.night)
+                Text("Tap to see who's playing and join in.")
+                    .font(.caption)
+                    .foregroundStyle(PadelTheme.night.opacity(0.75))
+            }
+            Spacer()
+            Text("\(count)")
+                .font(.system(.title3, design: .rounded).bold())
+                .foregroundStyle(PadelTheme.night)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(PadelTheme.lime)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(color: PadelTheme.lime.opacity(0.4), radius: 8, y: 4)
     }
 }
 

@@ -3,40 +3,56 @@ import CloudKit
 import CoreLocation
 import PadelKit
 
-/// A shared match discovered near the user's location.
-struct NearbySharedMatch: Identifiable {
+/// What kind of game a shared CloudKit record carries.
+enum SharedGameKind: Int {
+    case match = 0
+    case americano = 1
+}
+
+/// A shared game discovered near the user's location.
+struct NearbyShared: Identifiable {
+    enum Content {
+        case match(MatchState)
+        case americano(AmericanoSession)
+    }
+
     let code: String
     let court: Int
-    let state: MatchState
+    let content: Content
 
     var id: String { code }
 }
 
-/// Shares a live match through CloudKit's public database so several players
-/// can score the same match from their own iPhone + Apple Watch.
+/// Shares a live match or Americano session through CloudKit's public
+/// database so several players can score the same game from their own
+/// iPhone + Apple Watch.
 ///
-/// A match is published under a short join code (e.g. "K7WQ2M"). Everyone who
-/// joins polls the record every few seconds and pushes their own updates. A
-/// monotonically increasing `revision` decides which state is newest, so undo
-/// (a shorter point log) still propagates correctly.
+/// The record schema is deliberately tiny (state, revision, court, kind,
+/// location) so it is quick to set up in CloudKit Console. The join code is
+/// derived from the record name; whether a game is finished is derived from
+/// the decoded state.
+///
+/// A monotonically increasing `revision` decides which state is newest, so
+/// undo (a shorter point log) still propagates correctly.
 @MainActor
 final class SharedMatchController: ObservableObject {
     @Published private(set) var shareCode: String?
-    @Published private(set) var remoteState: MatchState?
+    @Published private(set) var remoteMatch: MatchState?
+    @Published private(set) var remoteAmericano: AmericanoSession?
     @Published private(set) var isBusy = false
     @Published var errorMessage: String?
 
     private static let containerID = "iCloud.com.worsa.padel"
     private static let recordType = "SharedMatch"
+    private static let recordNamePrefix = "sharedmatch-"
     private static let codesDefaultsKey = "sharedMatchCodes"
     // No 0/O or 1/I so codes are easy to read out loud on court.
     private static let codeAlphabet = Array("ABCDEFGHJKLMNPQRSTUVWXYZ23456789")
 
-    private var database: CKDatabase {
-        CKContainer(identifier: Self.containerID).publicCloudDatabase
+    private static var database: CKDatabase {
+        CKContainer(identifier: containerID).publicCloudDatabase
     }
 
-    private var matchID: UUID?
     private var revision: Int = 0
     private var pollTask: Task<Void, Never>?
 
@@ -44,11 +60,10 @@ final class SharedMatchController: ObservableObject {
 
     // MARK: - Lifecycle
 
-    /// Call when the live view appears. Resumes sharing if this match was
+    /// Call when a live view appears. Resumes sharing if this game was
     /// already shared or joined earlier.
-    func attach(to state: MatchState) {
-        matchID = state.id
-        if let code = Self.storedCode(for: state.id) {
+    func attach(id: UUID) {
+        if let code = Self.storedCode(for: id) {
             shareCode = code
             startPolling()
         }
@@ -61,69 +76,86 @@ final class SharedMatchController: ObservableObject {
 
     // MARK: - Sharing
 
-    /// Publishes the match under a court number and (when available) the
+    /// Publishes a match under a court number and (when available) the
     /// court's location, so other players nearby can join with one tap.
-    func startSharing(_ state: MatchState, court: Int, location: CLLocation?) async {
+    func startSharingMatch(_ state: MatchState, court: Int, location: CLLocation?) async {
+        await startSharing(
+            id: state.id,
+            data: (try? JSONEncoder().encode(state)) ?? Data(),
+            kind: .match,
+            court: court,
+            location: location
+        )
+    }
+
+    /// Publishes an Americano session so players nearby can join, pick who
+    /// they are, and score their own courts.
+    func startSharingAmericano(_ session: AmericanoSession, location: CLLocation?) async {
+        await startSharing(
+            id: session.id,
+            data: (try? JSONEncoder().encode(session)) ?? Data(),
+            kind: .americano,
+            court: 0,
+            location: location
+        )
+    }
+
+    private func startSharing(id: UUID, data: Data, kind: SharedGameKind, court: Int, location: CLLocation?) async {
         guard shareCode == nil else { return }
         isBusy = true
         defer { isBusy = false }
 
         let code = Self.generateCode()
         let record = CKRecord(recordType: Self.recordType, recordID: Self.recordID(for: code))
-        Self.apply(state, revision: 1, to: record)
-        record["code"] = code
+        record["state"] = data
+        record["revision"] = 1
+        record["kind"] = kind.rawValue
         record["court"] = court
         if let location {
             record["location"] = location
         }
         do {
-            let (saveResults, _) = try await database.modifyRecords(saving: [record], deleting: [], savePolicy: .allKeys)
+            let (saveResults, _) = try await Self.database.modifyRecords(saving: [record], deleting: [], savePolicy: .allKeys)
             for case .failure(let saveError) in saveResults.values {
                 throw saveError
             }
             revision = 1
             shareCode = code
-            Self.storeCode(code, for: state.id)
+            Self.storeCode(code, for: id)
             startPolling()
         } catch {
             errorMessage = Self.friendlyMessage(for: error)
         }
     }
 
-    /// Pushes a locally produced state change to the shared record.
-    func push(_ state: MatchState) async {
+    // MARK: - Pushing local changes
+
+    func pushMatch(_ state: MatchState) async {
+        await push(data: (try? JSONEncoder().encode(state)) ?? Data())
+    }
+
+    func pushAmericano(_ session: AmericanoSession) async {
+        await push(data: (try? JSONEncoder().encode(session)) ?? Data())
+    }
+
+    private func push(data: Data) async {
         guard let code = shareCode else { return }
         revision += 1
-        let record = (try? await database.record(for: Self.recordID(for: code)))
-            ?? CKRecord(recordType: Self.recordType, recordID: Self.recordID(for: code))
-        Self.apply(state, revision: revision, to: record)
+        guard let record = try? await Self.database.record(for: Self.recordID(for: code)) else { return }
+        record["state"] = data
+        record["revision"] = revision
         do {
-            _ = try await database.modifyRecords(saving: [record], deleting: [], savePolicy: .allKeys)
+            _ = try await Self.database.modifyRecords(saving: [record], deleting: [], savePolicy: .allKeys)
         } catch {
             // Transient push failures are fine; the next poll reconciles.
         }
     }
 
-    // MARK: - Joining
+    // MARK: - Discovery & joining
 
-    /// Fetches the match published under `code`. Throws if it doesn't exist
-    /// or iCloud is unavailable.
-    static func fetchSharedMatch(code: String) async throws -> MatchState {
-        let database = CKContainer(identifier: containerID).publicCloudDatabase
-        let record = try await database.record(for: recordID(for: code))
-        guard let data = record["state"] as? Data,
-              let state = try? JSONDecoder().decode(MatchState.self, from: data) else {
-            throw CKError(.unknownItem)
-        }
-        storeCode(normalize(code), for: state.id)
-        return state
-    }
-
-    /// Finds active shared matches within `radius` meters of `location`,
-    /// sorted by court number — so players on court just tap their court
-    /// instead of typing a code.
-    static func fetchNearbyMatches(around location: CLLocation, radius: Double = 500) async throws -> [NearbySharedMatch] {
-        let database = CKContainer(identifier: containerID).publicCloudDatabase
+    /// Finds active shared games within `radius` meters of `location`,
+    /// matches sorted by court number first, then Americano sessions.
+    static func fetchNearby(around location: CLLocation, radius: Double = 500) async throws -> [NearbyShared] {
         let predicate = NSPredicate(
             format: "distanceToLocation:fromLocation:(location, %@) < %f",
             location, radius
@@ -132,22 +164,36 @@ final class SharedMatchController: ObservableObject {
         let (results, _) = try await database.records(matching: query, resultsLimit: 25)
 
         let cutoff = Date().addingTimeInterval(-12 * 60 * 60)
-        var matches: [NearbySharedMatch] = []
-        for (_, result) in results {
+        var games: [NearbyShared] = []
+        for (recordID, result) in results {
             guard let record = try? result.get(),
-                  let code = record["code"] as? String,
-                  let data = record["state"] as? Data,
-                  let state = try? JSONDecoder().decode(MatchState.self, from: data) else { continue }
-            let finished = (record["finished"] as? Int ?? 0) == 1
-            let createdAt = record.creationDate ?? Date()
-            guard !finished, createdAt > cutoff else { continue }
-            let court = record["court"] as? Int ?? 1
-            matches.append(NearbySharedMatch(code: code, court: court, state: state))
+                  (record.creationDate ?? Date()) > cutoff,
+                  let game = decode(record: record, recordID: recordID),
+                  !isFinished(game) else { continue }
+            games.append(game)
         }
-        for match in matches {
-            storeCode(match.code, for: match.state.id)
+        for game in games {
+            storeCode(game.code, for: gameID(of: game))
         }
-        return matches.sorted { $0.court < $1.court }
+        return games.sorted { a, b in
+            switch (a.content, b.content) {
+            case (.match, .americano): return true
+            case (.americano, .match): return false
+            default: return a.court < b.court
+            }
+        }
+    }
+
+    /// Fetches the game published under `code`. Throws if it doesn't exist
+    /// or iCloud is unavailable.
+    static func fetchShared(code: String) async throws -> NearbyShared {
+        let recordID = recordID(for: code)
+        let record = try await database.record(for: recordID)
+        guard let game = decode(record: record, recordID: recordID) else {
+            throw CKError(.unknownItem)
+        }
+        storeCode(game.code, for: gameID(of: game))
+        return game
     }
 
     // MARK: - Polling
@@ -164,27 +210,51 @@ final class SharedMatchController: ObservableObject {
 
     private func fetchLatest() async {
         guard let code = shareCode else { return }
-        guard let record = try? await database.record(for: Self.recordID(for: code)),
-              let data = record["state"] as? Data,
+        let recordID = Self.recordID(for: code)
+        guard let record = try? await Self.database.record(for: recordID),
               let incomingRevision = record["revision"] as? Int,
-              let state = try? JSONDecoder().decode(MatchState.self, from: data) else { return }
-        if incomingRevision > revision {
-            revision = incomingRevision
-            remoteState = state
+              incomingRevision > revision,
+              let game = Self.decode(record: record, recordID: recordID) else { return }
+        revision = incomingRevision
+        switch game.content {
+        case .match(let state): remoteMatch = state
+        case .americano(let session): remoteAmericano = session
         }
     }
 
     // MARK: - Helpers
 
-    private static func apply(_ state: MatchState, revision: Int, to record: CKRecord) {
-        record["state"] = (try? JSONEncoder().encode(state)) ?? Data()
-        record["revision"] = revision
-        record["matchID"] = state.id.uuidString
-        record["finished"] = state.isFinished ? 1 : 0
+    private static func decode(record: CKRecord, recordID: CKRecord.ID) -> NearbyShared? {
+        guard let data = record["state"] as? Data else { return nil }
+        let code = String(recordID.recordName.dropFirst(recordNamePrefix.count))
+        let court = record["court"] as? Int ?? 1
+        let kind = SharedGameKind(rawValue: record["kind"] as? Int ?? 0) ?? .match
+        switch kind {
+        case .match:
+            guard let state = try? JSONDecoder().decode(MatchState.self, from: data) else { return nil }
+            return NearbyShared(code: code, court: court, content: .match(state))
+        case .americano:
+            guard let session = try? JSONDecoder().decode(AmericanoSession.self, from: data) else { return nil }
+            return NearbyShared(code: code, court: court, content: .americano(session))
+        }
+    }
+
+    private static func isFinished(_ game: NearbyShared) -> Bool {
+        switch game.content {
+        case .match(let state): return state.isFinished
+        case .americano(let session): return session.isComplete
+        }
+    }
+
+    private static func gameID(of game: NearbyShared) -> UUID {
+        switch game.content {
+        case .match(let state): return state.id
+        case .americano(let session): return session.id
+        }
     }
 
     private static func recordID(for code: String) -> CKRecord.ID {
-        CKRecord.ID(recordName: "sharedmatch-\(normalize(code))")
+        CKRecord.ID(recordName: recordNamePrefix + normalize(code))
     }
 
     static func normalize(_ code: String) -> String {
@@ -195,14 +265,14 @@ final class SharedMatchController: ObservableObject {
         String((0..<6).compactMap { _ in codeAlphabet.randomElement() })
     }
 
-    static func storedCode(for matchID: UUID) -> String? {
+    static func storedCode(for gameID: UUID) -> String? {
         let dict = UserDefaults.standard.dictionary(forKey: codesDefaultsKey) as? [String: String]
-        return dict?[matchID.uuidString]
+        return dict?[gameID.uuidString]
     }
 
-    private static func storeCode(_ code: String, for matchID: UUID) {
+    private static func storeCode(_ code: String, for gameID: UUID) {
         var dict = (UserDefaults.standard.dictionary(forKey: codesDefaultsKey) as? [String: String]) ?? [:]
-        dict[matchID.uuidString] = code
+        dict[gameID.uuidString] = code
         UserDefaults.standard.set(dict, forKey: codesDefaultsKey)
     }
 
@@ -220,5 +290,23 @@ final class SharedMatchController: ObservableObject {
             }
         }
         return String(localized: "Something went wrong. Please try again.")
+    }
+}
+
+/// Remembers which player the local user is in a joined Americano session,
+/// so their row can be highlighted in standings.
+enum AmericanoIdentity {
+    private static let key = "americanoIdentities"
+
+    static func playerID(for sessionID: UUID) -> UUID? {
+        let dict = UserDefaults.standard.dictionary(forKey: key) as? [String: String]
+        guard let raw = dict?[sessionID.uuidString] else { return nil }
+        return UUID(uuidString: raw)
+    }
+
+    static func setPlayerID(_ playerID: UUID, for sessionID: UUID) {
+        var dict = (UserDefaults.standard.dictionary(forKey: key) as? [String: String]) ?? [:]
+        dict[sessionID.uuidString] = playerID.uuidString
+        UserDefaults.standard.set(dict, forKey: key)
     }
 }

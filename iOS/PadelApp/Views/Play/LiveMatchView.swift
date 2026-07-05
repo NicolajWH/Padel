@@ -87,12 +87,12 @@ struct LiveMatchView: View {
                     suppressCloudPush = false
                 } else {
                     let current = state
-                    Task { await share.push(current) }
+                    Task { await share.pushMatch(current) }
                 }
             }
         }
         .onAppear {
-            share.attach(to: state)
+            share.attach(id: state.id)
             connectivity.send(.match(state))
         }
         .onDisappear {
@@ -102,7 +102,7 @@ struct LiveMatchView: View {
             guard let incoming, incoming.id == state.id, incoming != state else { return }
             withAnimation(.snappy) { state = incoming }
         }
-        .onChange(of: share.remoteState) { _, incoming in
+        .onChange(of: share.remoteMatch) { _, incoming in
             guard let incoming, incoming.id == state.id, incoming.pointLog != state.pointLog else { return }
             suppressCloudPush = true
             withAnimation(.snappy) { state = incoming }
@@ -326,7 +326,7 @@ private struct ShareMatchSheet: View {
                     Button {
                         Task {
                             let location = await locationProvider.currentLocation()
-                            await share.startSharing(state, court: court, location: location)
+                            await share.startSharingMatch(state, court: court, location: location)
                         }
                     } label: {
                         if share.isBusy {

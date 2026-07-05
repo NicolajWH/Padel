@@ -131,6 +131,16 @@
         }
       }
     },
+    "Americano · %lld players": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Americano · %lld spillere"
+          }
+        }
+      }
+    },
     "Apple Watch": {
       "localizations": {
         "da": {
@@ -367,6 +377,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sprog"
+          }
+        }
+      }
+    },
+    "Live games nearby!": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aktive kampe i nærheden!"
           }
         }
       }
@@ -631,6 +651,16 @@
         }
       }
     },
+    "Pick your name so your standings row is highlighted on your phone.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vælg dit navn, så din række i stillingen fremhæves på din telefon."
+          }
+        }
+      }
+    },
     "Play": {
       "localizations": {
         "da": {
@@ -851,6 +881,16 @@
         }
       }
     },
+    "Share Americano": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Del Americano"
+          }
+        }
+      }
+    },
     "Share Code": {
       "localizations": {
         "da": {
@@ -871,12 +911,32 @@
         }
       }
     },
+    "Share this Americano so everyone at the venue can follow the standings and score their own court live.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Del denne Americano, så alle i centret kan følge stillingen og føre score på deres egen bane live."
+          }
+        }
+      }
+    },
     "Share this match so everyone on court can follow and update the score live from their own iPhone and Apple Watch.": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Del kampen, så alle på banen kan følge og opdatere scoren live fra deres egen iPhone og Apple Watch."
+          }
+        }
+      }
+    },
+    "Shared Americano": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delt Americano"
           }
         }
       }
@@ -897,6 +957,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deling mislykkedes"
+          }
+        }
+      }
+    },
+    "Sharing is on. Players nearby can now join this Americano, pick who they are, and score their own court.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deling er slået til. Spillere i nærheden kan nu deltage i denne Americano, vælge hvem de er og føre score på deres egen bane."
           }
         }
       }
@@ -961,6 +1031,16 @@
         }
       }
     },
+    "Tap to see who's playing and join in.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tryk for at se, hvem der spiller, og vær med."
+          }
+        }
+      }
+    },
     "Team A": {
       "localizations": {
         "da": {
@@ -1011,6 +1091,16 @@
         }
       }
     },
+    "Used to suggest who you are when you join a shared Americano.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bruges til at foreslå, hvem du er, når du deltager i en delt Americano."
+          }
+        }
+      }
+    },
     "Version": {
       "localizations": {
         "da": {
@@ -1027,6 +1117,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "Se stilling"
+          }
+        }
+      }
+    },
+    "Who are you?": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hvem er du?"
+          }
+        }
+      }
+    },
+    "You": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dig"
+          }
+        }
+      }
+    },
+    "Your Name": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit navn"
           }
         }
       }
