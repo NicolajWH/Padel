@@ -7,6 +7,9 @@ struct AmericanoRoundScoringView: View {
     let record: AmericanoRecord
     @State private var session: AmericanoSession
     @State private var roundIndex: Int
+    @StateObject private var share = SharedMatchController()
+    @State private var showingShareSheet = false
+    @State private var suppressCloudPush = false
 
     init(record: AmericanoRecord, session: AmericanoSession) {
         self.record = record
@@ -54,19 +57,59 @@ struct AmericanoRoundScoringView: View {
         .sensoryFeedback(.impact(weight: .medium), trigger: session)
         .navigationTitle(session.name)
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingShareSheet = true
+                } label: {
+                    Image(systemName: share.isSharing ? "person.2.wave.2.fill" : "square.and.arrow.up")
+                }
+            }
+        }
         .onChange(of: session) { _, newValue in
             record.update(with: newValue)
             connectivity.send(.americano(newValue))
             if newValue.isComplete {
                 connectivity.send(.americanoFinished(newValue))
             }
+            if share.isSharing {
+                if suppressCloudPush {
+                    suppressCloudPush = false
+                } else {
+                    Task { await share.pushAmericano(newValue) }
+                }
+            }
         }
         .onAppear {
+            share.attach(id: session.id)
             connectivity.send(.americano(session))
         }
+        .onDisappear {
+            share.detach()
+        }
         .onChange(of: connectivity.lastReceivedAmericano) { _, incoming in
-            guard let incoming, incoming.id == session.id else { return }
+            guard let incoming, incoming.id == session.id, incoming != session else { return }
             session = incoming
+        }
+        .onChange(of: share.remoteAmericano) { _, incoming in
+            guard let incoming, incoming.id == session.id, incoming != session else { return }
+            suppressCloudPush = true
+            session = incoming
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            ShareAmericanoSheet(share: share, session: session)
+                .presentationDetents([.medium])
+        }
+        .alert(
+            Text("Sharing Failed"),
+            isPresented: Binding(
+                get: { share.errorMessage != nil },
+                set: { if !$0 { share.errorMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(share.errorMessage ?? "")
         }
     }
 
@@ -150,6 +193,87 @@ private struct TeamButton: View {
         }
         .buttonStyle(.plain)
         .disabled(disabled)
+    }
+}
+
+/// Sheet that publishes the Americano session with the phone's location so
+/// everyone at the venue can join with one tap and pick who they are.
+struct ShareAmericanoSheet: View {
+    @ObservedObject var share: SharedMatchController
+    let session: AmericanoSession
+    @Environment(\.dismiss) private var dismiss
+    @StateObject private var locationProvider = LocationProvider()
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Image(systemName: "person.3.fill")
+                    .font(.system(size: 40))
+                    .foregroundStyle(Color.accentColor)
+                    .padding(.top, 8)
+
+                if let code = share.shareCode {
+                    Text("Sharing is on. Players nearby can now join this Americano, pick who they are, and score their own court.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+
+                    VStack(spacing: 4) {
+                        Text("Match Code")
+                            .font(.headline)
+                        Text(code)
+                            .font(.system(size: 40, weight: .heavy, design: .rounded))
+                            .kerning(6)
+                            .textSelection(.enabled)
+                        Text("Only needed if automatic discovery can't find the match.")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                } else {
+                    Text("Share this Americano so everyone at the venue can follow the standings and score their own court live.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+
+                    if locationProvider.isAuthorizationDenied {
+                        Text("Location access is off, so nearby players will need the code to join. You can enable location for Padel in Settings.")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+
+                    Button {
+                        Task {
+                            let location = await locationProvider.currentLocation()
+                            await share.startSharingAmericano(session, location: location)
+                        }
+                    } label: {
+                        if share.isBusy {
+                            ProgressView().frame(maxWidth: .infinity)
+                        } else {
+                            Label("Share Americano", systemImage: "person.2.wave.2")
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(share.isBusy)
+                    .padding(.horizontal)
+                }
+
+                Spacer()
+            }
+            .padding(.top)
+            .navigationTitle("Shared Americano")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
     }
 }
 

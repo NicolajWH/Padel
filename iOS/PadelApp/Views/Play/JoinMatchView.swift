@@ -4,22 +4,24 @@ import SwiftData
 import CoreLocation
 import PadelKit
 
-/// Finds shared matches on courts near the user's location so they can join
-/// with one tap — "Court 1" or "Court 2" — no code typing. Entering a code
-/// manually remains available as a fallback for when location is off or the
-/// GPS fix is poor indoors.
+/// Finds shared games on courts near the user's location so they can join
+/// with one tap — "Court 1", "Court 2", or an Americano session — no code
+/// typing. Joining an Americano asks who you are so your row is highlighted.
+/// Entering a code manually remains available as a fallback for when
+/// location is off or the GPS fix is poor indoors.
 struct JoinMatchView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @StateObject private var locationProvider = LocationProvider()
 
-    @State private var nearbyMatches: [NearbySharedMatch] = []
+    @State private var nearbyGames: [NearbyShared] = []
     @State private var isSearching = true
     @State private var searchFailed = false
     @State private var showingCodeEntry = false
     @State private var code = ""
     @State private var isJoining = false
     @State private var errorMessage: String?
+    @State private var pendingAmericano: AmericanoSession?
 
     var body: some View {
         NavigationStack {
@@ -31,8 +33,8 @@ struct JoinMatchView: View {
                             Text("Searching for matches nearby…")
                                 .foregroundStyle(.secondary)
                         }
-                    } else if nearbyMatches.isEmpty {
-                        VStack(alignment: .leading, spacing: 6) {
+                    } else if nearbyGames.isEmpty {
+                        Group {
                             if locationProvider.isAuthorizationDenied {
                                 Text("Location access is needed to find matches near you. Enable it for Padel in Settings, or join with a code below.")
                             } else if searchFailed {
@@ -44,11 +46,11 @@ struct JoinMatchView: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                     } else {
-                        ForEach(nearbyMatches) { match in
+                        ForEach(nearbyGames) { game in
                             Button {
-                                join(state: match.state)
+                                join(game)
                             } label: {
-                                NearbyMatchRow(match: match)
+                                NearbyGameRow(game: game)
                             }
                             .buttonStyle(.plain)
                             .disabled(isJoining)
@@ -105,6 +107,14 @@ struct JoinMatchView: View {
             .task {
                 await search()
             }
+            .sheet(item: $pendingAmericano) { session in
+                WhoAreYouSheet(session: session) { player in
+                    AmericanoIdentity.setPlayerID(player.id, for: session.id)
+                    upsertAmericano(session)
+                    pendingAmericano = nil
+                    dismiss()
+                }
+            }
         }
     }
 
@@ -115,13 +125,13 @@ struct JoinMatchView: View {
         defer { isSearching = false }
 
         guard let location = await locationProvider.currentLocation() else {
-            nearbyMatches = []
+            nearbyGames = []
             return
         }
         do {
-            nearbyMatches = try await SharedMatchController.fetchNearbyMatches(around: location)
+            nearbyGames = try await SharedMatchController.fetchNearby(around: location)
         } catch {
-            nearbyMatches = []
+            nearbyGames = []
             searchFailed = true
         }
     }
@@ -132,23 +142,28 @@ struct JoinMatchView: View {
         errorMessage = nil
         Task {
             do {
-                let state = try await SharedMatchController.fetchSharedMatch(code: normalized)
-                upsert(state)
-                dismiss()
+                let game = try await SharedMatchController.fetchShared(code: normalized)
+                isJoining = false
+                join(game)
             } catch {
                 errorMessage = SharedMatchController.friendlyMessage(for: error)
+                isJoining = false
             }
-            isJoining = false
         }
     }
 
-    private func join(state: MatchState) {
-        isJoining = true
-        upsert(state)
-        dismiss()
+    private func join(_ game: NearbyShared) {
+        switch game.content {
+        case .match(let state):
+            isJoining = true
+            upsertMatch(state)
+            dismiss()
+        case .americano(let session):
+            pendingAmericano = session
+        }
     }
 
-    private func upsert(_ state: MatchState) {
+    private func upsertMatch(_ state: MatchState) {
         let matchID = state.id
         let descriptor = FetchDescriptor<MatchRecord>(predicate: #Predicate { $0.id == matchID })
         if let existing = try? modelContext.fetch(descriptor).first {
@@ -157,14 +172,24 @@ struct JoinMatchView: View {
             modelContext.insert(MatchRecord.create(from: state))
         }
     }
+
+    private func upsertAmericano(_ session: AmericanoSession) {
+        let sessionID = session.id
+        let descriptor = FetchDescriptor<AmericanoRecord>(predicate: #Predicate { $0.id == sessionID })
+        if let existing = try? modelContext.fetch(descriptor).first {
+            existing.update(with: session)
+        } else {
+            modelContext.insert(AmericanoRecord.create(from: session))
+        }
+    }
 }
 
-private struct NearbyMatchRow: View {
-    let match: NearbySharedMatch
+private struct NearbyGameRow: View {
+    let game: NearbyShared
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "sportscourt.fill")
+            Image(systemName: icon)
                 .font(.title3)
                 .foregroundStyle(Color.accentColor)
                 .frame(width: 36, height: 36)
@@ -172,25 +197,89 @@ private struct NearbyMatchRow: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Court \(match.court)")
-                    .font(.headline)
-                Text("\(match.state.teamA.displayName) vs \(match.state.teamB.displayName)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                switch game.content {
+                case .match(let state):
+                    Text("Court \(game.court)")
+                        .font(.headline)
+                    Text("\(state.teamA.displayName) vs \(state.teamB.displayName)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                case .americano(let session):
+                    Text(session.name)
+                        .font(.headline)
+                    Text("Americano · \(session.players.count) players")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Spacer()
 
-            let snap = match.state.snapshot
-            Text("Sets \(snap.setsWonA)-\(snap.setsWonB)")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
+            if case .match(let state) = game.content {
+                let snap = state.snapshot
+                Text("Sets \(snap.setsWonA)-\(snap.setsWonB)")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
 
             Image(systemName: "chevron.right")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.tertiary)
         }
+    }
+
+    private var icon: String {
+        if case .americano = game.content { return "person.3.fill" }
+        return "sportscourt.fill"
+    }
+}
+
+/// Asks the joining player which participant they are, so their standings
+/// row can be highlighted and points feel personal.
+struct WhoAreYouSheet: View {
+    let session: AmericanoSession
+    let onPick: (Player) -> Void
+    @AppStorage("profileName") private var profileName = ""
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(session.players) { player in
+                        Button {
+                            onPick(player)
+                        } label: {
+                            HStack(spacing: 12) {
+                                PlayerAvatar(player: player, size: 32)
+                                Text(player.name)
+                                Spacer()
+                                if isSuggested(player) {
+                                    StatusPill(text: "You", color: .accentColor)
+                                }
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                } footer: {
+                    Text("Pick your name so your standings row is highlighted on your phone.")
+                }
+            }
+            .navigationTitle("Who are you?")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private func isSuggested(_ player: Player) -> Bool {
+        let name = profileName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return false }
+        return player.name.localizedCaseInsensitiveContains(name) || name.localizedCaseInsensitiveContains(player.name)
     }
 }
 

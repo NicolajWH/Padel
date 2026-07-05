@@ -16,6 +16,15 @@ final class LocationProvider: NSObject, ObservableObject {
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
     }
 
+    /// Like `currentLocation()`, but never prompts for permission — returns
+    /// nil unless access was already granted. Used for passive discovery on
+    /// the home screen, where a surprise permission dialog would be rude.
+    func currentLocationIfAuthorized() async -> CLLocation? {
+        let status = manager.authorizationStatus
+        guard status == .authorizedWhenInUse || status == .authorizedAlways else { return nil }
+        return await currentLocation()
+    }
+
     /// Returns the current location, asking for permission if needed.
     /// Resolves to nil if permission is denied or the fix fails.
     func currentLocation() async -> CLLocation? {

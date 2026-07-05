@@ -6,11 +6,20 @@ struct SettingsView: View {
     @AppStorage("defaultGoldenPoint") private var defaultGoldenPoint = false
     @AppStorage("defaultSetsToWin") private var defaultSetsToWin = 2
     @AppStorage("defaultAmericanoPoints") private var defaultAmericanoPoints = 21
+    @AppStorage("profileName") private var profileName = ""
     @EnvironmentObject private var connectivity: PhoneConnectivityManager
     @Environment(\.openURL) private var openURL
 
     var body: some View {
         Form {
+            Section {
+                TextField("Name", text: $profileName)
+            } header: {
+                Text("Your Name")
+            } footer: {
+                Text("Used to suggest who you are when you join a shared Americano.")
+            }
+
             Section("Apple Watch") {
                 HStack {
                     Text("Status")
