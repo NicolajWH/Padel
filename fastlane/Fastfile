@@ -138,6 +138,12 @@ platform :ios do
       profile_name: watch_profile
     )
 
+    # Render the requested Apple Color Emoji tennis-ball app icons on the
+    # macOS runner immediately before archiving. Keeping this in fastlane avoids
+    # workflow merge conflicts and keeps PRs text-only instead of committing PNGs.
+    repo_root = File.expand_path("..", __dir__)
+    sh("cd #{repo_root.shellescape} && scripts/render-apple-emoji-app-icons.swift")
+
     build_app(
       scheme: "PadelApp",
       project: "Padel.xcodeproj",
