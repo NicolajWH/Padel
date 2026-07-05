@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import Contacts
 import PadelKit
 
 struct SettingsView: View {
@@ -9,15 +10,17 @@ struct SettingsView: View {
     @AppStorage("profileName") private var profileName = ""
     @EnvironmentObject private var connectivity: PhoneConnectivityManager
     @Environment(\.openURL) private var openURL
+    @State private var hasAttemptedProfileNamePrefill = false
 
     var body: some View {
         Form {
             Section {
                 TextField("Name", text: $profileName)
+                    .textContentType(.name)
             } header: {
                 Text("Your Name")
             } footer: {
-                Text("Used to suggest who you are when you join a shared Americano.")
+                Text("Used to suggest who you are when you join a shared Americano. If this is empty, Padel fills it from your contact card or iPhone name when possible.")
             }
 
             Section("Apple Watch") {
@@ -72,6 +75,92 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
+        .task { await fillProfileNameIfNeeded() }
+    }
+
+    private var iPhoneSettingsNameSuggestion: String? {
+        Self.profileNameSuggestion(from: UIDevice.current.name)
+    }
+
+    @MainActor
+    private func fillProfileNameIfNeeded() async {
+        guard !hasAttemptedProfileNamePrefill else { return }
+        hasAttemptedProfileNamePrefill = true
+        guard profileName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+
+        if let contactName = await Self.contactCardNameSuggestion() {
+            profileName = contactName
+            return
+        }
+
+        if let suggestedName = iPhoneSettingsNameSuggestion {
+            profileName = suggestedName
+        }
+    }
+
+    private static func contactCardNameSuggestion() async -> String? {
+        let store = CNContactStore()
+        let authorizationStatus = CNContactStore.authorizationStatus(for: .contacts)
+
+        if authorizationStatus == .notDetermined {
+            do {
+                guard try await store.requestAccess(for: .contacts) else { return nil }
+            } catch {
+                return nil
+            }
+        } else if authorizationStatus != .authorized {
+            return nil
+        }
+
+        let keys: [CNKeyDescriptor] = [
+            CNContactGivenNameKey as CNKeyDescriptor,
+            CNContactFamilyNameKey as CNKeyDescriptor,
+            CNContactNicknameKey as CNKeyDescriptor,
+            CNContactFormatter.descriptorForRequiredKeys(for: .fullName)
+        ]
+
+        guard let meContact = try? store.unifiedMeContactWithKeys(toFetch: keys) else { return nil }
+
+        if let formattedName = CNContactFormatter.string(from: meContact, style: .fullName),
+           let suggestion = normalizedNameSuggestion(formattedName) {
+            return suggestion
+        }
+
+        if let nickname = normalizedNameSuggestion(meContact.nickname) {
+            return nickname
+        }
+
+        return normalizedNameSuggestion([meContact.givenName, meContact.familyName].joined(separator: " "))
+    }
+
+    private static func normalizedNameSuggestion(_ name: String) -> String? {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmedName.isEmpty ? nil : trimmedName
+    }
+
+    private static func profileNameSuggestion(from deviceName: String) -> String? {
+        let trimmedName = deviceName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else { return nil }
+
+        let genericDeviceNames = ["iPhone", "iPad", "iPod touch"]
+        if genericDeviceNames.contains(where: { trimmedName.localizedCaseInsensitiveCompare($0) == .orderedSame }) {
+            return nil
+        }
+
+        let deviceSuffixes = ["'s iPhone", "’s iPhone", " iPhone", "'s iPad", "’s iPad", " iPad"]
+        for suffix in deviceSuffixes {
+            guard let suffixRange = trimmedName.range(of: suffix, options: [.caseInsensitive, .backwards]) else { continue }
+
+            let candidate = String(trimmedName[..<suffixRange.lowerBound])
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .trimmingCharacters(in: CharacterSet(charactersIn: "'’"))
+
+            if !candidate.isEmpty {
+                return candidate
+            }
+        }
+
+        return trimmedName
     }
 
     private var appVersion: String {
