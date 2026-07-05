@@ -1,6 +1,5 @@
 import SwiftUI
 import UIKit
-import Contacts
 import PadelKit
 
 struct SettingsView: View {
@@ -17,27 +16,10 @@ struct SettingsView: View {
             Section {
                 TextField("Name", text: $profileName)
                     .textContentType(.name)
-
-                if let suggestedName = iPhoneSettingsNameSuggestion, profileName != suggestedName {
-                    Button {
-                        profileName = suggestedName
-                    } label: {
-                        Label(
-                            String(
-                                format: NSLocalizedString(
-                                    "Use %@",
-                                    comment: "Button title for using a suggested iPhone settings name"
-                                ),
-                                suggestedName
-                            ),
-                            systemImage: "iphone"
-                        )
-                    }
-                }
             } header: {
                 Text("Your Name")
             } footer: {
-                Text("Used to suggest who you are when you join a shared Americano. If this is empty, Padel fills it from your contact card or iPhone name when possible.")
+                Text("Used to suggest who you are when you join a shared Americano.")
             }
 
             Section("Apple Watch") {
@@ -107,57 +89,9 @@ struct SettingsView: View {
         hasAttemptedProfileNamePrefill = true
         guard profileName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
 
-        let deviceNameSuggestion = iPhoneSettingsNameSuggestion
-        if let deviceNameSuggestion {
-            profileName = deviceNameSuggestion
+        if let suggestedName = iPhoneSettingsNameSuggestion {
+            profileName = suggestedName
         }
-
-        let canReplaceWithContactName = profileName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            || deviceNameSuggestion.map { profileName == $0 } == true
-        if let contactName = await Self.contactCardNameSuggestion(), canReplaceWithContactName {
-            profileName = contactName
-        }
-    }
-
-    private static func contactCardNameSuggestion() async -> String? {
-        let store = CNContactStore()
-        let authorizationStatus = CNContactStore.authorizationStatus(for: .contacts)
-
-        if authorizationStatus == .notDetermined {
-            do {
-                let granted = try await store.requestAccess(for: .contacts)
-                guard granted else { return nil }
-            } catch {
-                return nil
-            }
-        } else if authorizationStatus != .authorized {
-            return nil
-        }
-
-        let keys: [CNKeyDescriptor] = [
-            CNContactGivenNameKey as CNKeyDescriptor,
-            CNContactFamilyNameKey as CNKeyDescriptor,
-            CNContactNicknameKey as CNKeyDescriptor,
-            CNContactFormatter.descriptorForRequiredKeys(for: .fullName)
-        ]
-
-        guard let meContact = try? store.unifiedMeContactWithKeys(toFetch: keys) else { return nil }
-
-        if let formattedName = CNContactFormatter.string(from: meContact, style: .fullName),
-           let suggestion = normalizedNameSuggestion(formattedName) {
-            return suggestion
-        }
-
-        if let nickname = normalizedNameSuggestion(meContact.nickname) {
-            return nickname
-        }
-
-        return normalizedNameSuggestion([meContact.givenName, meContact.familyName].joined(separator: " "))
-    }
-
-    private static func normalizedNameSuggestion(_ name: String) -> String? {
-        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmedName.isEmpty ? nil : trimmedName
     }
 
     private static func profileNameSuggestion(from deviceName: String) -> String? {

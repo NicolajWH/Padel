@@ -1150,26 +1150,6 @@
           }
         }
       }
-    },
-    "Use %@": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Brug %@"
-          }
-        }
-      }
-    },
-    "Used to suggest who you are when you join a shared Americano. If this is empty, Padel fills it from your contact card or iPhone name when possible.": {
-      "localizations": {
-        "da": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bruges til at foreslå, hvem du er, når du deltager i en delt Americano. Hvis feltet er tomt, udfylder Padel det med dit kontaktkort eller iPhone-navn, når det er muligt."
-          }
-        }
-      }
     }
   },
   "version": "1.0"

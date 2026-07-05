@@ -44,7 +44,6 @@ targets:
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleLocalizations: [en, da]
         NSLocationWhenInUseUsageDescription: "Padel uses your location to find shared matches on nearby courts."
-        NSContactsUsageDescription: "Padel uses your contact card to prefill your player name in Settings."
         ITSAppUsesNonExemptEncryption: false
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
