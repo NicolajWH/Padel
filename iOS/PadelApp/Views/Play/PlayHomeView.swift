@@ -209,13 +209,9 @@ struct ActionCard: View {
         .padding(16)
         .frame(maxWidth: .infinity, minHeight: 92, alignment: .topLeading)
         .background(
-            Group {
-                if prominent {
-                    AnyShapeStyle(PadelTheme.courtGradient)
-                } else {
-                    AnyShapeStyle(Color(uiColor: .secondarySystemGroupedBackground))
-                }
-            }
+            prominent
+                ? AnyShapeStyle(PadelTheme.courtGradient)
+                : AnyShapeStyle(Color(uiColor: .secondarySystemGroupedBackground))
         )
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .shadow(color: .black.opacity(0.06), radius: 8, y: 4)
