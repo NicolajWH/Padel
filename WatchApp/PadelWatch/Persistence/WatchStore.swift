@@ -18,6 +18,12 @@ final class WatchStore: ObservableObject {
         didSet { save(recentMatches, key: Keys.recentMatches) }
     }
 
+    /// A brand-new match that just arrived from the iPhone and should be opened
+    /// on the watch automatically. The home view watches this, pushes the live
+    /// scoreboard, and clears it. Transient — never persisted, so relaunching
+    /// the watch app doesn't yank the user back into an old match.
+    @Published var matchToPresent: MatchState?
+
     private enum Keys {
         static let activeMatch = "watch.activeMatch"
         static let activeAmericano = "watch.activeAmericano"
@@ -28,6 +34,34 @@ final class WatchStore: ObservableObject {
         activeMatch = load(Keys.activeMatch)
         activeAmericano = load(Keys.activeAmericano)
         recentMatches = load(Keys.recentMatches) ?? []
+    }
+
+    /// Adopts a match pushed from the iPhone. Live score updates to the match
+    /// we're already tracking flow through the scoreboard view (which also plays
+    /// a haptic), so we only step in for a *new* match: it becomes active and is
+    /// flagged for the watch to open automatically.
+    func adoptIncomingMatch(_ state: MatchState) {
+        guard activeMatch?.id != state.id else { return }
+        activeMatch = state
+        if !state.isFinished {
+            matchToPresent = state
+        }
+    }
+
+    /// Adopts an Americano session pushed from the iPhone. As with matches, live
+    /// updates to the current session are handled by the round view, so we only
+    /// take over when a different session arrives.
+    func adoptIncomingAmericano(_ session: AmericanoSession) {
+        guard activeAmericano?.id != session.id else { return }
+        activeAmericano = session
+    }
+
+    /// Clears whatever is active — used when the iPhone signals the shared
+    /// session has ended.
+    func clearActiveSessions() {
+        activeMatch = nil
+        activeAmericano = nil
+        matchToPresent = nil
     }
 
     func archiveMatchIfFinished() {

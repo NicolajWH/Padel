@@ -1291,22 +1291,22 @@
         }
       }
     },
-    "Team A": {
+    "Their Team": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hold A"
+            "value": "Deres hold"
           }
         }
       }
     },
-    "Team B": {
+    "Your Team": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hold B"
+            "value": "Jeres hold"
           }
         }
       }
