@@ -1,33 +1,38 @@
 import SwiftUI
 import PadelKit
 
-/// Playful themed emoji for the two tournament formats: a cowboy 🤠 for
-/// **Americano** and a taco 🌮 for **Mexicano**. Kept as a small reusable view
-/// so the whole app shares one mapping and it's trivial to swap a glyph.
+extension AmericanoFormat {
+    /// Asset-catalog name of the illustrated poster mascot for this format.
+    var mascotAssetName: String {
+        switch self {
+        case .americano: return "MascotAmericano"
+        case .mexicano: return "MascotMexicano"
+        }
+    }
+}
+
+/// The illustrated poster mascot for a tournament format — a cowboy pup for
+/// **Americano**, a sombrero-wearing pup for **Mexicano** — shown as a rounded
+/// square thumbnail. Keeps one shared mapping so every screen stays in sync.
 struct FormatMascot: View {
     let format: AmericanoFormat
     var size: CGFloat = 56
-
-    private var emoji: String {
-        switch format {
-        case .americano: return "🤠"
-        case .mexicano: return "🌮"
-        }
-    }
+    var cornerRadius: CGFloat = 14
 
     var body: some View {
-        Text(emoji)
-            .font(.system(size: size * 0.82))
+        Image(format.mascotAssetName)
+            .resizable()
+            .scaledToFill()
             .frame(width: size, height: size)
-            .minimumScaleFactor(0.5)
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
             .accessibilityHidden(true)
     }
 }
 
 #Preview {
     HStack(spacing: 24) {
-        FormatMascot(format: .americano, size: 120)
-        FormatMascot(format: .mexicano, size: 120)
+        FormatMascot(format: .americano, size: 140, cornerRadius: 22)
+        FormatMascot(format: .mexicano, size: 140, cornerRadius: 22)
     }
     .padding()
 }

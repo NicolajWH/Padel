@@ -26,22 +26,14 @@ struct AmericanoHomeView: View {
                     NavigationLink {
                         AmericanoSetupView(initialFormat: .americano)
                     } label: {
-                        FormatCard(
-                            title: "New Americano",
-                            format: .americano,
-                            prominent: true
-                        )
+                        FormatCard(title: "New Americano", format: .americano)
                     }
                     .buttonStyle(.plain)
 
                     NavigationLink {
                         AmericanoSetupView(initialFormat: .mexicano)
                     } label: {
-                        FormatCard(
-                            title: "New Mexicano",
-                            format: .mexicano,
-                            prominent: false
-                        )
+                        FormatCard(title: "New Mexicano", format: .mexicano)
                     }
                     .buttonStyle(.plain)
                 }
@@ -95,7 +87,7 @@ private struct FormatExplainer: View {
 
     private func row(format: AmericanoFormat, title: LocalizedStringKey, text: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            FormatMascot(format: format, size: 38)
+            FormatMascot(format: format, size: 46, cornerRadius: 10)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline.bold())
@@ -107,30 +99,42 @@ private struct FormatExplainer: View {
     }
 }
 
-/// Tappable format card on the Americano home screen, fronted by its playful
-/// mascot — a cowboy for Americano, a charro for Mexicano.
+/// Tappable format card on the Americano home screen, fronted by its
+/// illustrated poster mascot — a cowboy pup for Americano, a sombrero pup for
+/// Mexicano — with the action label over a soft gradient at the bottom.
 private struct FormatCard: View {
     let title: LocalizedStringKey
     let format: AmericanoFormat
-    let prominent: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            FormatMascot(format: format, size: 52)
-            Text(title)
-                .font(.headline)
-                .foregroundStyle(prominent ? .white : .primary)
-                .multilineTextAlignment(.leading)
+        ZStack(alignment: .bottom) {
+            Image(format.mascotAssetName)
+                .resizable()
+                .scaledToFill()
+
+            LinearGradient(
+                colors: [.clear, .black.opacity(0.65)],
+                startPoint: .init(x: 0.5, y: 0.5),
+                endPoint: .bottom
+            )
+
+            HStack(spacing: 6) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.subheadline)
+                Text(title)
+                    .font(.subheadline.bold())
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Spacer(minLength: 0)
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
         }
-        .padding(16)
-        .frame(maxWidth: .infinity, minHeight: 118, alignment: .topLeading)
-        .background(
-            prominent
-                ? AnyShapeStyle(PadelTheme.courtGradient)
-                : AnyShapeStyle(Color(uiColor: .secondarySystemGroupedBackground))
-        )
+        .frame(maxWidth: .infinity)
+        .frame(height: 176)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 8, y: 4)
+        .shadow(color: .black.opacity(0.12), radius: 8, y: 4)
     }
 }
 

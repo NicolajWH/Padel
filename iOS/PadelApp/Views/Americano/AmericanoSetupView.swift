@@ -28,7 +28,7 @@ struct AmericanoSetupView: View {
             Section {
                 HStack {
                     Spacer()
-                    FormatMascot(format: format, size: 96)
+                    FormatMascot(format: format, size: 150, cornerRadius: 22)
                         .padding(.vertical, 4)
                     Spacer()
                 }
