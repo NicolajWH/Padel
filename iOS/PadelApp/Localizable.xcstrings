@@ -1550,6 +1550,26 @@
           }
         }
       }
+    },
+    "TB": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "TB"
+          }
+        }
+      }
+    },
+    "Match TB": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Match-TB"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

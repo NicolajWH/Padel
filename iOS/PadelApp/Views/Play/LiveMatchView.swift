@@ -29,11 +29,16 @@ struct LiveMatchView: View {
                 SetHistoryBar(sets: snap.completedSets)
                     .padding(.top, 12)
 
-                HStack(spacing: 14) {
-                    TeamScoreColumn(
+                // Teams stacked vertically (like the Watch) so the two big
+                // scores read top-to-bottom instead of side by side, with a
+                // live match-info strip in between.
+                VStack(spacing: 12) {
+                    TeamScoreRow(
                         team: state.teamA,
                         label: snap.gamePointLabelA,
                         games: snap.currentSetGamesA,
+                        setsWon: snap.setsWonA,
+                        showSets: state.settings.setsToWin > 1,
                         isServing: snap.servingSide == .teamA,
                         servingPlayerIndex: snap.servingPlayerIndex,
                         isTiebreak: snap.isTiebreak,
@@ -43,10 +48,19 @@ struct LiveMatchView: View {
                         score(.teamA)
                     }
 
-                    TeamScoreColumn(
+                    MatchInfoStrip(
+                        snap: snap,
+                        startedAt: state.createdAt,
+                        pointsPlayed: state.pointLog.count,
+                        isOver: snap.isMatchOver
+                    )
+
+                    TeamScoreRow(
                         team: state.teamB,
                         label: snap.gamePointLabelB,
                         games: snap.currentSetGamesB,
+                        setsWon: snap.setsWonB,
+                        showSets: state.settings.setsToWin > 1,
                         isServing: snap.servingSide == .teamB,
                         servingPlayerIndex: snap.servingPlayerIndex,
                         isTiebreak: snap.isTiebreak,
@@ -185,10 +199,15 @@ struct LiveMatchView: View {
     }
 }
 
-private struct TeamScoreColumn: View {
+/// A full-width team card: player names on the left, the big live point count
+/// in the middle, and the set/game tallies on the right — stacked vertically
+/// with the other team so both scores read top-to-bottom, like the Watch.
+private struct TeamScoreRow: View {
     let team: Team
     let label: String
     let games: Int
+    let setsWon: Int
+    let showSets: Bool
     let isServing: Bool
     let servingPlayerIndex: Int
     let isTiebreak: Bool
@@ -198,13 +217,13 @@ private struct TeamScoreColumn: View {
 
     var body: some View {
         Button(action: onScore) {
-            VStack(spacing: 14) {
-                VStack(spacing: 3) {
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
                     ForEach(Array(team.players.enumerated()), id: \.element.id) { index, player in
                         HStack(spacing: 6) {
                             if isServing && index == servingPlayerIndex {
                                 Image(systemName: "tennisball.fill")
-                                    .font(.system(size: 10))
+                                    .font(.system(size: 11))
                                     .foregroundStyle(PadelTheme.lime)
                             }
                             Text(player.name)
@@ -216,23 +235,27 @@ private struct TeamScoreColumn: View {
                         }
                     }
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 10)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 Text(isTiebreak ? "\(tiebreakPoints)" : label)
-                    .font(.system(size: 64, weight: .heavy, design: .rounded))
+                    .font(.system(size: 54, weight: .heavy, design: .rounded))
                     .foregroundStyle(color)
                     .contentTransition(.numericText())
+                    .lineLimit(1)
                     .minimumScaleFactor(0.5)
-                    .shadow(color: color.opacity(0.55), radius: 14)
+                    .shadow(color: color.opacity(0.55), radius: 12)
+                    .frame(minWidth: 78)
 
-                Text("Games: \(games)")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white.opacity(0.65))
-                    .contentTransition(.numericText())
+                HStack(spacing: 14) {
+                    if showSets {
+                        ScoreStat(value: setsWon, caption: "Sets")
+                    }
+                    ScoreStat(value: games, caption: "Games")
+                }
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 28)
+            .padding(.vertical, 22)
+            .padding(.horizontal, 18)
             .background(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .fill(color.opacity(0.14))
@@ -243,6 +266,108 @@ private struct TeamScoreColumn: View {
             )
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// A small labelled number so games and sets can't be mistaken for the points.
+private struct ScoreStat: View {
+    let value: Int
+    let caption: LocalizedStringKey
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Text("\(value)")
+                .font(.title3.weight(.bold).monospacedDigit())
+                .foregroundStyle(.white)
+                .contentTransition(.numericText())
+            Text(caption)
+                .font(.caption2.weight(.semibold))
+                .textCase(.uppercase)
+                .foregroundStyle(.white.opacity(0.55))
+        }
+    }
+}
+
+/// Between the two team cards: the score as it's called on court, plus live
+/// match stats — elapsed time and how many points have been played so far.
+private struct MatchInfoStrip: View {
+    let snap: MatchSnapshot
+    let startedAt: Date
+    let pointsPlayed: Int
+    let isOver: Bool
+
+    var body: some View {
+        HStack(spacing: 10) {
+            CalledScoreBadge(snap: snap)
+            Spacer(minLength: 8)
+            if !isOver {
+                TimelineView(.periodic(from: startedAt, by: 1)) { context in
+                    InfoPill(icon: "clock", text: elapsed(until: context.date))
+                }
+            }
+            InfoPill(icon: "circle.grid.cross.fill", text: "\(pointsPlayed)")
+        }
+    }
+
+    private func elapsed(until now: Date) -> String {
+        let seconds = max(0, Int(now.timeIntervalSince(startedAt)))
+        let minutes = seconds / 60
+        let hours = minutes / 60
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes % 60, seconds % 60)
+        }
+        return String(format: "%d:%02d", minutes, seconds % 60)
+    }
+}
+
+/// The score as you'd call it on court: the serving team's points come first
+/// ("15–0" when the server leads, "0–15" when the receiver does).
+private struct CalledScoreBadge: View {
+    let snap: MatchSnapshot
+
+    private var serverFirstScore: String {
+        let a = snap.isTiebreak ? "\(snap.tiebreakPointsA)" : snap.gamePointLabelA
+        let b = snap.isTiebreak ? "\(snap.tiebreakPointsB)" : snap.gamePointLabelB
+        return snap.servingSide == .teamA ? "\(a)–\(b)" : "\(b)–\(a)"
+    }
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "tennisball.fill")
+                .font(.caption2)
+                .foregroundStyle(snap.isTiebreak ? .black : PadelTheme.lime)
+            Text(serverFirstScore)
+                .font(.callout.weight(.bold).monospacedDigit())
+                .contentTransition(.numericText())
+            if snap.isTiebreak {
+                Text(snap.isMatchTiebreak ? "Match TB" : "TB")
+                    .font(.caption2.weight(.bold))
+            }
+        }
+        .foregroundStyle(snap.isTiebreak ? .black : .white)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(Capsule().fill(snap.isTiebreak ? PadelTheme.lime : Color.white.opacity(0.1)))
+    }
+}
+
+/// A compact icon + value chip used for the live match stats.
+private struct InfoPill: View {
+    let icon: String
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Image(systemName: icon)
+                .font(.caption2)
+            Text(text)
+                .font(.caption.weight(.semibold).monospacedDigit())
+                .contentTransition(.numericText())
+        }
+        .foregroundStyle(.white.opacity(0.75))
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Capsule().fill(Color.white.opacity(0.08)))
     }
 }
 

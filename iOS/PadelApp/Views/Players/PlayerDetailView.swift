@@ -29,12 +29,9 @@ struct PlayerDetailView: View {
                             Text("Rating \(rating.displayRating) · \(rating.gamesRated) rated games")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
-                        } else if let seed = record.ratingSeed {
-                            Text("Starting rating \(seed.formatted(.number.precision(.fractionLength(1))))")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
                         } else {
-                            Text("No rated games yet")
+                            let start = record.ratingSeed ?? PlayerRatingEntry.defaultRating
+                            Text("Starting rating \(start.formatted(.number.precision(.fractionLength(1))))")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }

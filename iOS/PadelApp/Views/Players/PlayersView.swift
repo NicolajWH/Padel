@@ -37,11 +37,9 @@ struct PlayersView: View {
                                 }
                             }
                             Spacer()
-                            if let text = ratingText(for: record, ratings: ratings) {
-                                Text(text)
-                                    .font(.subheadline.monospacedDigit().bold())
-                                    .foregroundStyle(.secondary)
-                            }
+                            Text(ratingText(for: record, ratings: ratings))
+                                .font(.subheadline.monospacedDigit().bold())
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -78,15 +76,13 @@ struct PlayersView: View {
     }
 
     /// The computed rating if the player has rated games, otherwise their
-    /// manual seed, otherwise nothing to show yet.
-    private func ratingText(for record: SavedPlayerRecord, ratings: [PlayerRatingEntry]) -> String? {
+    /// manual seed, otherwise the starting rating everyone begins at.
+    private func ratingText(for record: SavedPlayerRecord, ratings: [PlayerRatingEntry]) -> String {
         if let entry = ratings.first(where: { $0.key == PlayerKey.normalize(record.name) }) {
             return entry.displayRating
         }
-        if let seed = record.ratingSeed {
-            return seed.formatted(.number.precision(.fractionLength(1)))
-        }
-        return nil
+        let start = record.ratingSeed ?? PlayerRatingEntry.defaultRating
+        return start.formatted(.number.precision(.fractionLength(1)))
     }
 
     private func addPlayer() {

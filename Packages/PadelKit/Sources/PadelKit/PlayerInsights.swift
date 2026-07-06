@@ -180,8 +180,9 @@ public struct PlayerRatingEntry: Sendable, Identifiable, Hashable {
     /// Bounds of the official padel scale.
     public static let minRating: Double = 1.0
     public static let maxRating: Double = 7.0
-    /// Where a player lands before any manual seed or games — a mid-club level.
-    public static let defaultRating: Double = 3.0
+    /// Where a player lands before any manual seed or games — the bottom of
+    /// the official scale, so everyone starts as a beginner and earns their way up.
+    public static let defaultRating: Double = 1.0
     /// Logistic divisor: a 2.0 rating gap makes the stronger team a ~91% favorite.
     static let ratingScale: Double = 2.0
     /// A full match moves the rating twice as much as a single Americano round.
