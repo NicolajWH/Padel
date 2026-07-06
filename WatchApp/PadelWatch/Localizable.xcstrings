@@ -131,6 +131,11 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Optager til Sundhed" } }
       }
     },
+    "Rematch" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Omkamp" } }
+      }
+    },
     "Round %lld / %lld" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Runde %1$lld / %2$lld" } }
