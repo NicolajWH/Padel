@@ -111,6 +111,23 @@ struct WatchHomeView: View {
         .navigationDestination(isPresented: $quickMatchStarted) {
             WatchLiveMatchView()
         }
+        // When the iPhone starts a match, open the scoreboard here automatically
+        // so the watch is ready to score — no need to fumble with the tiny screen.
+        .onChange(of: store.matchToPresent?.id) { _, id in
+            guard id != nil else { return }
+            presentIncomingMatch()
+        }
+        .task {
+            // A match may have landed (e.g. via application context at launch)
+            // before this view began observing — catch it on appear too.
+            presentIncomingMatch()
+        }
+    }
+
+    private func presentIncomingMatch() {
+        guard store.matchToPresent != nil else { return }
+        store.matchToPresent = nil
+        quickMatchStarted = true
     }
 
     /// Starts scoring immediately with the standard casual ruleset — no setup

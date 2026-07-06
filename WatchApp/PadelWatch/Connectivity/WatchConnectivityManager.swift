@@ -57,9 +57,13 @@ final class WatchConnectivityManager: NSObject, ObservableObject {
             switch payload {
             case .match(let state), .matchFinished(let state):
                 self.lastReceivedMatch = state
+                WatchStore.shared.adoptIncomingMatch(state)
             case .americano(let session), .americanoFinished(let session):
                 self.lastReceivedAmericano = session
-            case .requestLatest, .clearActiveSession:
+                WatchStore.shared.adoptIncomingAmericano(session)
+            case .clearActiveSession:
+                WatchStore.shared.clearActiveSessions()
+            case .requestLatest:
                 break
             }
         }

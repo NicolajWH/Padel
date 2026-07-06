@@ -25,11 +25,11 @@ struct NewMatchSetupView: View {
 
     var body: some View {
         Form {
-            Section("Team A") {
+            Section("Your Team") {
                 TextField("Player 1", text: $teamAPlayer1)
                 TextField("Player 2", text: $teamAPlayer2)
             }
-            Section("Team B") {
+            Section("Their Team") {
                 TextField("Player 1", text: $teamBPlayer1)
                 TextField("Player 2", text: $teamBPlayer2)
             }
@@ -80,8 +80,8 @@ struct NewMatchSetupView: View {
                     Toggle("Match Tiebreak for Deciding Set", isOn: $finalSetMatchTiebreak)
                 }
                 Picker("First Serve", selection: $firstServer) {
-                    Text("Team A").tag(TeamSide.teamA)
-                    Text("Team B").tag(TeamSide.teamB)
+                    Text("Your Team").tag(TeamSide.teamA)
+                    Text("Their Team").tag(TeamSide.teamB)
                 }
             }
 
