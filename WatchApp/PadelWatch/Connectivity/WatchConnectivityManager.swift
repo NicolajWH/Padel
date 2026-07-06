@@ -12,6 +12,11 @@ final class WatchConnectivityManager: NSObject, ObservableObject {
 
     private var session: WCSession?
 
+    /// The last payload that couldn't be delivered live because the phone was
+    /// out of range. Application context gets it across eventually, but it can
+    /// lag — so when reachability returns we push it as a message right away.
+    private var pendingCatchUp: [String: Any]?
+
     private override init() {
         super.init()
         guard WCSession.isSupported() else { return }
@@ -25,12 +30,20 @@ final class WatchConnectivityManager: NSObject, ObservableObject {
         guard let session, session.activationState == .activated else { return }
         let dict: [String: Any] = ["payload": payload.encoded()]
         if session.isReachable {
+            pendingCatchUp = nil
             session.sendMessage(dict, replyHandler: nil) { [weak self] _ in
                 self?.updateContext(dict)
             }
         } else {
+            pendingCatchUp = dict
             updateContext(dict)
         }
+    }
+
+    private func flushPendingCatchUp() {
+        guard let session, session.isReachable, let dict = pendingCatchUp else { return }
+        pendingCatchUp = nil
+        session.sendMessage(dict, replyHandler: nil, errorHandler: nil)
     }
 
     private func updateContext(_ dict: [String: Any]) {
@@ -61,8 +74,12 @@ extension WatchConnectivityManager: WCSessionDelegate {
     }
 
     nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
+        let reachable = session.isReachable
         Task { @MainActor in
-            self.isPhoneReachable = session.isReachable
+            self.isPhoneReachable = reachable
+            if reachable {
+                self.flushPendingCatchUp()
+            }
         }
     }
 
