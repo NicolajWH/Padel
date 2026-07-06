@@ -8,12 +8,16 @@ public final class SavedPlayerRecord {
     public var name: String
     public var colorHex: String
     public var createdAt: Date
+    /// The player's manually set official padel rating (1–7), or nil when
+    /// unset. Used as the starting point the computed rating moves from.
+    public var ratingSeed: Double?
 
-    public init(id: UUID = UUID(), name: String, colorHex: String = Player.randomColorHex(), createdAt: Date = Date()) {
+    public init(id: UUID = UUID(), name: String, colorHex: String = Player.randomColorHex(), createdAt: Date = Date(), ratingSeed: Double? = nil) {
         self.id = id
         self.name = name
         self.colorHex = colorHex
         self.createdAt = createdAt
+        self.ratingSeed = ratingSeed
     }
 
     public var asPlayer: Player { Player(id: id, name: name, colorHex: colorHex) }

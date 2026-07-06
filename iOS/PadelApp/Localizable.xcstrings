@@ -1480,6 +1480,76 @@
           }
         }
       }
+    },
+    "Rating %@ · %lld rated games": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rating %1$@ · %2$lld ratede kampe"
+          }
+        }
+      }
+    },
+    "Starting rating %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Startrating %@"
+          }
+        }
+      }
+    },
+    "Ratings use the official 1–7 padel scale, like MATCHi. They start from a player's rating and move after every match and Americano round — beating a stronger team counts for more.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ratings bruger den officielle 1-7 padelskala som på MATCHi. De tager udgangspunkt i spillerens rating og ændrer sig efter hver kamp og Americano-runde — at slå et stærkere hold tæller mere."
+          }
+        }
+      }
+    },
+    "Set official rating": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angiv officiel rating"
+          }
+        }
+      }
+    },
+    "Level": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niveau"
+          }
+        }
+      }
+    },
+    "Official Rating (1–7)": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Officiel rating (1-7)"
+          }
+        }
+      }
+    },
+    "Set the player's official padel rating, as on MATCHi. The rating then adjusts automatically after each match and Americano round.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Angiv spillerens officielle padelrating som på MATCHi. Ratingen justeres derefter automatisk efter hver kamp og Americano-runde."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

@@ -6,10 +6,17 @@ import PadelKit
 /// record, chemistry with each partner, and head-to-head records.
 struct PlayerDetailView: View {
     @Environment(\.modelContext) private var modelContext
-    let player: Player
+    @Bindable var record: SavedPlayerRecord
 
     @State private var matches: [MatchState] = []
     @State private var americanoSessions: [AmericanoSession] = []
+    @State private var seeds: [String: Double] = [:]
+    @State private var seedEnabled = false
+    @State private var seedValue = PlayerRatingEntry.defaultRating
+    /// Guards the write-back while we sync local state from the stored record.
+    @State private var isSyncing = false
+
+    private var player: Player { record.asPlayer }
 
     var body: some View {
         List {
@@ -19,7 +26,11 @@ struct PlayerDetailView: View {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(player.name).font(.title3.bold())
                         if let rating {
-                            Text("Rating \(rating.roundedRating) · \(rating.gamesRated) rated games")
+                            Text("Rating \(rating.displayRating) · \(rating.gamesRated) rated games")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else if let seed = record.ratingSeed {
+                            Text("Starting rating \(seed.formatted(.number.precision(.fractionLength(1))))")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         } else {
@@ -34,8 +45,29 @@ struct PlayerDetailView: View {
                     }
                 }
             } footer: {
-                Text("Ratings start at \(Int(PlayerRatingEntry.baseRating)) and move after every match and Americano round — beating a stronger team counts for more.")
+                Text("Ratings use the official 1–7 padel scale, like MATCHi. They start from a player's rating and move after every match and Americano round — beating a stronger team counts for more.")
             }
+
+            Section {
+                Toggle("Set official rating", isOn: $seedEnabled)
+                if seedEnabled {
+                    Stepper(value: $seedValue, in: PlayerRatingEntry.minRating...PlayerRatingEntry.maxRating, step: 0.1) {
+                        HStack {
+                            Text("Level")
+                            Spacer()
+                            Text(seedValue.formatted(.number.precision(.fractionLength(1))))
+                                .monospacedDigit()
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            } header: {
+                Text("Official Rating (1–7)")
+            } footer: {
+                Text("Set the player's official padel rating, as on MATCHi. The rating then adjusts automatically after each match and Americano round.")
+            }
+            .onChange(of: seedEnabled) { _, _ in persistSeed() }
+            .onChange(of: seedValue) { _, _ in persistSeed() }
 
             if stats.played > 0 {
                 Section("Matches") {
@@ -106,7 +138,7 @@ struct PlayerDetailView: View {
     }
 
     private var allRatings: [PlayerRatingEntry] {
-        PlayerInsights.ratings(matches: matches, americanoSessions: americanoSessions)
+        PlayerInsights.ratings(matches: matches, americanoSessions: americanoSessions, seedRatings: seeds)
     }
 
     private var rating: PlayerRatingEntry? {
@@ -123,10 +155,41 @@ struct PlayerDetailView: View {
         matches = matchRecords.compactMap { $0.state }
         let americanoRecords = (try? modelContext.fetch(FetchDescriptor<AmericanoRecord>())) ?? []
         americanoSessions = americanoRecords.compactMap { $0.session }
+
+        let playerRecords = (try? modelContext.fetch(FetchDescriptor<SavedPlayerRecord>())) ?? []
+        var loadedSeeds: [String: Double] = [:]
+        for rec in playerRecords {
+            if let seed = rec.ratingSeed {
+                loadedSeeds[PlayerKey.normalize(rec.name)] = seed
+            }
+        }
+        seeds = loadedSeeds
+
+        syncSeedState()
+    }
+
+    /// Mirrors the stored seed into the editing controls without triggering a
+    /// write-back that would clobber it during the initial sync.
+    private func syncSeedState() {
+        isSyncing = true
+        if let seed = record.ratingSeed {
+            seedEnabled = true
+            seedValue = seed
+        } else {
+            seedEnabled = false
+            seedValue = PlayerRatingEntry.defaultRating
+        }
+        DispatchQueue.main.async { isSyncing = false }
+    }
+
+    private func persistSeed() {
+        guard !isSyncing else { return }
+        record.ratingSeed = seedEnabled ? PlayerRatingEntry.clamp(seedValue) : nil
+        seeds[PlayerKey.normalize(record.name)] = record.ratingSeed
     }
 }
 
 #Preview {
-    NavigationStack { PlayerDetailView(player: Player(name: "Nicolaj")) }
+    NavigationStack { PlayerDetailView(record: SavedPlayerRecord(name: "Nicolaj")) }
         .modelContainer(for: [SavedPlayerRecord.self, MatchRecord.self, AmericanoRecord.self], inMemory: true)
 }
