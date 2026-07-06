@@ -26,9 +26,9 @@ struct AmericanoHomeView: View {
                     NavigationLink {
                         AmericanoSetupView(initialFormat: .americano)
                     } label: {
-                        ActionCard(
+                        FormatCard(
                             title: "New Americano",
-                            systemImage: "person.3.fill",
+                            format: .americano,
                             prominent: true
                         )
                     }
@@ -37,9 +37,9 @@ struct AmericanoHomeView: View {
                     NavigationLink {
                         AmericanoSetupView(initialFormat: .mexicano)
                     } label: {
-                        ActionCard(
+                        FormatCard(
                             title: "New Mexicano",
-                            systemImage: "list.number",
+                            format: .mexicano,
                             prominent: false
                         )
                     }
@@ -79,13 +79,13 @@ private struct FormatExplainer: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             row(
-                icon: "arrow.triangle.2.circlepath",
+                format: .americano,
                 title: "Americano",
                 text: "Partners rotate every round, so you play with — and against — everyone in the group."
             )
             Divider()
             row(
-                icon: "list.number",
+                format: .mexicano,
                 title: "Mexicano",
                 text: "Each round is drawn from the live standings, so you always face players at your level."
             )
@@ -93,12 +93,9 @@ private struct FormatExplainer: View {
         .padelCard()
     }
 
-    private func row(icon: String, title: LocalizedStringKey, text: LocalizedStringKey) -> some View {
+    private func row(format: AmericanoFormat, title: LocalizedStringKey, text: LocalizedStringKey) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            Image(systemName: icon)
-                .font(.body.weight(.semibold))
-                .foregroundStyle(Color.accentColor)
-                .frame(width: 26)
+            FormatMascot(format: format, size: 38)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline.bold())
@@ -107,6 +104,33 @@ private struct FormatExplainer: View {
                     .foregroundStyle(.secondary)
             }
         }
+    }
+}
+
+/// Tappable format card on the Americano home screen, fronted by its playful
+/// mascot — a cowboy for Americano, a charro for Mexicano.
+private struct FormatCard: View {
+    let title: LocalizedStringKey
+    let format: AmericanoFormat
+    let prominent: Bool
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            FormatMascot(format: format, size: 52)
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(prominent ? .white : .primary)
+                .multilineTextAlignment(.leading)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 118, alignment: .topLeading)
+        .background(
+            prominent
+                ? AnyShapeStyle(PadelTheme.courtGradient)
+                : AnyShapeStyle(Color(uiColor: .secondarySystemGroupedBackground))
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(color: .black.opacity(0.06), radius: 8, y: 4)
     }
 }
 
