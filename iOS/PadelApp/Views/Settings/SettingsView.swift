@@ -7,6 +7,7 @@ struct SettingsView: View {
     @AppStorage("defaultSetsToWin") private var defaultSetsToWin = 2
     @AppStorage("defaultAmericanoPoints") private var defaultAmericanoPoints = 21
     @AppStorage("profileName") private var profileName = ""
+    @AppStorage(NearbyPlayersService.discoveryEnabledKey) private var nearbyDiscoveryEnabled = true
     @EnvironmentObject private var connectivity: PhoneConnectivityManager
     @Environment(\.openURL) private var openURL
 
@@ -37,6 +38,14 @@ struct SettingsView: View {
                 Text("Your Name")
             } footer: {
                 Text("Used to suggest who you are when you join a shared Americano. If this is empty, Padel fills it from your iPhone name in Settings when possible.")
+            }
+
+            Section {
+                Toggle("Visible to Players Nearby", isOn: $nearbyDiscoveryEnabled)
+            } header: {
+                Text("Players Nearby")
+            } footer: {
+                Text("When on, players at the same court can see your name and add you to a match or Americano with one tap. Your name and approximate location are shared through iCloud while you use the app.")
             }
 
             Section("Apple Watch") {
@@ -91,10 +100,15 @@ struct SettingsView: View {
             }
         }
         .navigationTitle("Settings")
+        .onChange(of: nearbyDiscoveryEnabled) { _, enabled in
+            if !enabled {
+                Task { await NearbyPlayersService.unpublish() }
+            }
+        }
     }
 
     private var iPhoneSettingsNameSuggestion: String? {
-        Self.profileNameSuggestion(from: UIDevice.current.name)
+        UserProfile.deviceNameSuggestion
     }
 
     private func fillProfileNameFromIPhoneSettingsIfNeeded() {
@@ -103,31 +117,6 @@ struct SettingsView: View {
         else { return }
 
         profileName = suggestedName
-    }
-
-    private static func profileNameSuggestion(from deviceName: String) -> String? {
-        let trimmedName = deviceName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedName.isEmpty else { return nil }
-
-        let genericDeviceNames = ["iPhone", "iPad", "iPod touch"]
-        if genericDeviceNames.contains(where: { trimmedName.localizedCaseInsensitiveCompare($0) == .orderedSame }) {
-            return nil
-        }
-
-        let deviceSuffixes = ["'s iPhone", "’s iPhone", " iPhone", "'s iPad", "’s iPad", " iPad"]
-        for suffix in deviceSuffixes {
-            guard let suffixRange = trimmedName.range(of: suffix, options: [.caseInsensitive, .backwards]) else { continue }
-
-            let candidate = String(trimmedName[..<suffixRange.lowerBound])
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-                .trimmingCharacters(in: CharacterSet(charactersIn: "'’"))
-
-            if !candidate.isEmpty {
-                return candidate
-            }
-        }
-
-        return trimmedName
     }
 
     private var appVersion: String {

@@ -11,6 +11,10 @@ struct AmericanoSetupView: View {
     @AppStorage("defaultAmericanoPoints") private var pointsPerRound = 21
     @State private var numberOfRounds = 5
 
+    @StateObject private var locationProvider = LocationProvider()
+    @State private var nearbyPlayers: [NearbyPlayer] = []
+    @State private var isSearchingNearby = false
+
     @State private var createdRecord: AmericanoRecord?
     @State private var navigate = false
 
@@ -30,6 +34,29 @@ struct AmericanoSetupView: View {
                     playerNames.append("")
                 } label: {
                     Label("Add Player", systemImage: "plus")
+                }
+            }
+
+            if isSearchingNearby || !availableNearbyPlayers.isEmpty {
+                Section {
+                    if isSearchingNearby && nearbyPlayers.isEmpty {
+                        HStack(spacing: 10) {
+                            ProgressView()
+                            Text("Looking for players nearby…")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    ForEach(availableNearbyPlayers) { player in
+                        Button {
+                            fill(name: player.name)
+                        } label: {
+                            Label(player.name, systemImage: "person.wave.2.fill")
+                        }
+                    }
+                } header: {
+                    Text("Players Nearby")
+                } footer: {
+                    Text("Players who have Padel open nearby appear here automatically — tap a name to add it.")
                 }
             }
 
@@ -66,10 +93,36 @@ struct AmericanoSetupView: View {
                 AmericanoRoundScoringView(record: createdRecord, session: session)
             }
         }
+        .task {
+            prefillOwnName()
+            await findNearbyPlayers()
+        }
     }
 
     private var validNames: [String] {
         playerNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+    }
+
+    /// Nearby players not already typed into one of the slots.
+    private var availableNearbyPlayers: [NearbyPlayer] {
+        let used = Set(validNames.map { $0.lowercased() })
+        return nearbyPlayers.filter { !used.contains($0.name.lowercased()) }
+    }
+
+    /// The person setting up the Americano is almost always playing in it.
+    private func prefillOwnName() {
+        guard !UserProfile.name.isEmpty, validNames.isEmpty, !playerNames.isEmpty else { return }
+        playerNames[0] = UserProfile.name
+    }
+
+    /// Looks up who else is at the court right now — and publishes our own
+    /// presence so their phones see us too.
+    private func findNearbyPlayers() async {
+        isSearchingNearby = true
+        defer { isSearchingNearby = false }
+        guard let location = await locationProvider.currentLocation() else { return }
+        await NearbyPlayersService.publish(name: UserProfile.name, location: location)
+        nearbyPlayers = (try? await NearbyPlayersService.fetchNearby(around: location)) ?? []
     }
 
     private var courtCount: Int { validNames.count / 4 }

@@ -401,6 +401,16 @@
         }
       }
     },
+    "Looking for players nearby…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leder efter spillere i nærheden…"
+          }
+        }
+      }
+    },
     "Location access is needed to find matches near you. Enable it for Padel in Settings, or join with a code below.": {
       "localizations": {
         "da": {
@@ -707,6 +717,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Spillere"
+          }
+        }
+      }
+    },
+    "Players Nearby": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spillere i nærheden"
+          }
+        }
+      }
+    },
+    "Players who have Padel open nearby appear here automatically — tap a name to add it.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spillere i nærheden, som har Padel åben, vises her automatisk — tryk på et navn for at tilføje det."
           }
         }
       }
@@ -1117,6 +1147,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Se stilling"
+          }
+        }
+      }
+    },
+    "Visible to Players Nearby": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Synlig for spillere i nærheden"
+          }
+        }
+      }
+    },
+    "When on, players at the same court can see your name and add you to a match or Americano with one tap. Your name and approximate location are shared through iCloud while you use the app.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Når slået til, kan spillere på samme bane se dit navn og tilføje dig til en kamp eller Americano med ét tryk. Dit navn og din omtrentlige placering deles via iCloud, mens du bruger appen."
           }
         }
       }
