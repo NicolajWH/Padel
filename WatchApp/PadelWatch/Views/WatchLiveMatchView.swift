@@ -8,6 +8,7 @@ struct WatchLiveMatchView: View {
     @ObservedObject private var workout = WorkoutManager.shared
     @Environment(\.dismiss) private var dismiss
     @State private var crownValue: Double = 0.5
+    @State private var lastUndoAt: Date = .distantPast
     @State private var showingFinished = false
 
     private var state: MatchState? { store.activeMatch }
@@ -57,12 +58,18 @@ struct WatchLiveMatchView: View {
             .toolbar(.hidden, for: .navigationBar)
             .gesture(backSwipe)
             .focusable(true)
-            .digitalCrownRotation($crownValue, from: 0, through: 1, by: 0.001, sensitivity: .medium, isContinuous: true, isHapticFeedbackEnabled: true)
+            .digitalCrownRotation($crownValue, from: 0, through: 1, by: 0.001, sensitivity: .low, isContinuous: true, isHapticFeedbackEnabled: true)
             .onChange(of: crownValue) { _, newValue in
-                if newValue < 0.35 || newValue > 0.65 {
-                    undo()
-                    crownValue = 0.5
-                }
+                // Undo one point per crown "step". A fast spin used to fire many
+                // undos before the value snapped back to centre, wiping a whole
+                // set (or the match) at once. Re-centre immediately and enforce a
+                // short cooldown so points back out one at a time, steadily.
+                guard newValue < 0.35 || newValue > 0.65 else { return }
+                crownValue = 0.5
+                let now = Date()
+                guard now.timeIntervalSince(lastUndoAt) > 0.3 else { return }
+                lastUndoAt = now
+                undo()
             }
             .onAppear {
                 workout.startIfNeeded()
@@ -83,7 +90,28 @@ struct WatchLiveMatchView: View {
                 WKInterfaceDevice.current().play(.notification)
             }
             .sheet(isPresented: $showingFinished) {
-                WatchMatchResultView(state: state)
+                WatchMatchResultView(
+                    state: state,
+                    onClose: {
+                        // Close the finished match and return to the start menu.
+                        showingFinished = false
+                        store.activeMatch = nil
+                        dismiss()
+                    },
+                    onRematch: {
+                        // Start a fresh match with the same teams and rules.
+                        showingFinished = false
+                        let rematch = MatchState(
+                            teamA: state.teamA,
+                            teamB: state.teamB,
+                            settings: state.settings
+                        )
+                        store.activeMatch = rematch
+                        connectivity.send(.match(rematch))
+                        crownValue = 0.5
+                        workout.startIfNeeded()
+                    }
+                )
             }
         } else {
             ContentUnavailableView("No Active Match", systemImage: "tennis.racket")
