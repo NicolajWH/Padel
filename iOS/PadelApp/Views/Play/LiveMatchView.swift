@@ -211,10 +211,13 @@ private struct TeamScoreColumn: View {
                                 .font(.subheadline.weight(.medium))
                                 .foregroundStyle(.white)
                                 .lineLimit(1)
-                                .minimumScaleFactor(0.7)
+                                .truncationMode(.tail)
+                                .minimumScaleFactor(0.5)
                         }
                     }
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 10)
 
                 Text(isTiebreak ? "\(tiebreakPoints)" : label)
                     .font(.system(size: 64, weight: .heavy, design: .rounded))
