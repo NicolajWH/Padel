@@ -4,6 +4,7 @@ import PadelKit
 struct WatchHomeView: View {
     @EnvironmentObject private var store: WatchStore
     @EnvironmentObject private var connectivity: WatchConnectivityManager
+    @State private var quickMatchStarted = false
 
     var body: some View {
         List {
@@ -18,7 +19,7 @@ struct WatchHomeView: View {
                                 .font(.title3)
                             VStack(alignment: .leading) {
                                 Text("Continue Match").font(.headline)
-                                Text("\(match.teamA.displayName) vs \(match.teamB.displayName)")
+                                Text(scoreSummary(for: match))
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                                     .lineLimit(1)
@@ -49,8 +50,8 @@ struct WatchHomeView: View {
             }
 
             Section {
-                NavigationLink {
-                    WatchNewMatchView()
+                Button {
+                    startQuickMatch()
                 } label: {
                     Label {
                         Text("New Match")
@@ -85,6 +86,29 @@ struct WatchHomeView: View {
             }
         }
         .navigationTitle("Padel")
+        .navigationDestination(isPresented: $quickMatchStarted) {
+            WatchLiveMatchView()
+        }
+    }
+
+    /// Starts scoring immediately with the standard casual ruleset — no setup
+    /// questions on the tiny screen. Advanced rule tweaks live on the iPhone.
+    private func startQuickMatch() {
+        let teamA = Team(players: [Player(name: "Team A-1"), Player(name: "Team A-2")])
+        let teamB = Team(players: [Player(name: "Team B-1"), Player(name: "Team B-2")])
+        let settings = MatchSettings(goldenPoint: false, setsToWin: 1)
+        let state = MatchState(teamA: teamA, teamB: teamB, settings: settings)
+        store.activeMatch = state
+        connectivity.send(.match(state))
+        quickMatchStarted = true
+    }
+
+    private func scoreSummary(for match: MatchState) -> String {
+        let snap = match.snapshot
+        let points = snap.isTiebreak
+            ? "\(snap.tiebreakPointsA)–\(snap.tiebreakPointsB)"
+            : "\(snap.gamePointLabelA)–\(snap.gamePointLabelB)"
+        return "\(snap.currentSetGamesA)–\(snap.currentSetGamesB) · \(points)"
     }
 }
 
