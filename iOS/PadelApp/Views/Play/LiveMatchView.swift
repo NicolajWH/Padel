@@ -10,6 +10,7 @@ struct LiveMatchView: View {
     @State private var showingFinishedSheet = false
     @State private var showingShareSheet = false
     @StateObject private var share = SharedMatchController()
+    @StateObject private var liveActivity = MatchLiveActivityController()
     @State private var suppressCloudPush = false
 
     init(record: MatchRecord, initialState: MatchState) {
@@ -82,6 +83,7 @@ struct LiveMatchView: View {
         .onChange(of: state.pointLog) { _, _ in
             record.update(with: state)
             connectivity.send(.match(state))
+            liveActivity.update(with: state)
             if share.isSharing {
                 if suppressCloudPush {
                     suppressCloudPush = false
@@ -94,9 +96,11 @@ struct LiveMatchView: View {
         .onAppear {
             share.attach(id: state.id)
             connectivity.send(.match(state))
+            liveActivity.start(for: state)
         }
         .onDisappear {
             share.detach()
+            liveActivity.end(with: state)
         }
         .onChange(of: connectivity.lastReceivedMatch) { _, incoming in
             guard let incoming, incoming.id == state.id, incoming != state else { return }
@@ -110,6 +114,7 @@ struct LiveMatchView: View {
         .onChange(of: snap.isMatchOver) { _, isOver in
             if isOver {
                 connectivity.send(.matchFinished(state))
+                liveActivity.end(with: state)
                 showingFinishedSheet = true
             }
         }

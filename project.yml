@@ -26,9 +26,12 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: iOS/PadelApp
+      - path: iOS/Shared
     dependencies:
       - package: PadelKit
       - target: PadelWatch
+        embed: true
+      - target: PadelWidgets
         embed: true
     entitlements:
       path: Generated/PadelApp.entitlements
@@ -44,6 +47,10 @@ targets:
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleLocalizations: [en, da]
         NSLocationWhenInUseUsageDescription: "Padel uses your location to find shared matches and players on nearby courts."
+        # Required in the companion app because the embedded Watch app uses HealthKit.
+        NSHealthShareUsageDescription: "Padel reads your heart rate and active energy to show live workout stats while you play."
+        NSHealthUpdateUsageDescription: "Padel saves your padel matches as workouts in Health, including heart rate and calories."
+        NSSupportsLiveActivities: true
         ITSAppUsesNonExemptEncryption: false
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
@@ -66,6 +73,10 @@ targets:
       - path: WatchApp/PadelWatch
     dependencies:
       - package: PadelKit
+    entitlements:
+      path: Generated/PadelWatch.entitlements
+      properties:
+        com.apple.developer.healthkit: true
     info:
       path: Generated/watchOS-Info.plist
       properties:
@@ -76,6 +87,9 @@ targets:
         WKApplication: true
         WKCompanionAppBundleIdentifier: com.worsa.padel
         WKRunsIndependentlyOfCompanionApp: true
+        WKBackgroundModes: [workout-processing]
+        NSHealthShareUsageDescription: "Padel reads your heart rate and active energy to show live workout stats while you play."
+        NSHealthUpdateUsageDescription: "Padel saves your padel matches as workouts in Health, including heart rate and calories."
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false
         NSHumanReadableCopyright: "© 2026 Padel"
@@ -84,6 +98,27 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.worsa.padel.watchapp
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+
+  PadelWidgets:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: iOS/PadelWidgets
+      - path: iOS/Shared
+    info:
+      path: Generated/PadelWidgets-Info.plist
+      properties:
+        CFBundleDisplayName: Padel Widgets
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.worsa.padel.widgets
+        TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: YES
 
 schemes:
   PadelApp:
