@@ -7,6 +7,7 @@ struct PlayersView: View {
     @Query(sort: \SavedPlayerRecord.name) private var players: [SavedPlayerRecord]
     @State private var newPlayerName = ""
     @State private var showingAdd = false
+    @State private var showingImport = false
 
     var body: some View {
         List {
@@ -49,8 +50,17 @@ struct PlayersView: View {
         .navigationTitle("Players")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showingAdd = true
+                Menu {
+                    Button {
+                        showingAdd = true
+                    } label: {
+                        Label("Add Player", systemImage: "person.badge.plus")
+                    }
+                    Button {
+                        showingImport = true
+                    } label: {
+                        Label("Import from list", systemImage: "square.and.arrow.down")
+                    }
                 } label: {
                     Image(systemName: "plus")
                 }
@@ -60,6 +70,9 @@ struct PlayersView: View {
             TextField("Name", text: $newPlayerName)
             Button("Cancel", role: .cancel) { newPlayerName = "" }
             Button("Add") { addPlayer() }
+        }
+        .sheet(isPresented: $showingImport) {
+            ImportPlayersView(existingNames: players.map(\.name))
         }
     }
 
