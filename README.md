@@ -17,9 +17,21 @@ to TestFlight via GitHub Actions.
 - **Americano mode** — set up a group of players (4, 8, 12, 16…), auto-generate
   a round schedule that rotates partners/opponents to minimise repeats, score
   each court's race-to-N points, and see a live individual leaderboard as
-  points accumulate across rounds. Fully playable from the Watch.
+  points accumulate across rounds. Fully playable from the Watch. When the
+  player count doesn't fill the courts, sit-outs rotate fairly and the app
+  shows who's resting each round.
+- **Mexicano mode** — the other tournament format the padel world plays:
+  every round is re-drawn from the live standings (1st + 4th vs 2nd + 3rd in
+  each group of four) so games get more even as the evening progresses.
+  Rounds appear one at a time as courts finish. Works on iPhone and Watch,
+  and both devices derive the next round deterministically so they can never
+  disagree about the draw.
 - **Match history & player stats** — every match and Americano session is
-  saved; the Players tab shows each saved player's win rate.
+  saved; the Players tab shows each saved player's win rate and an Elo-style
+  rating, and tapping a player opens head-to-head records and per-partner
+  chemistry computed across matches *and* Americano rounds.
+- **Shareable standings** — export the live or final Americano/Mexicano
+  leaderboard as an image straight into the group chat.
 - **Serve indicator** — shows which team *and which of the two partners* is
   serving, based on real padel serve rotation rules.
 - **Player profiles** — save players once, quick-add them into new matches or
@@ -145,8 +157,16 @@ player pool and, for every group of four, picks whichever of the three
 possible partner splits has been used least often so far. Over several
 rounds this gives a good spread of partners without needing precomputed
 "social golfer problem" tables, and it degrades gracefully for odd player
-counts (players are dropped one round at a time if the count isn't a
-multiple of 4).
+counts (sit-outs rotate so whoever has rested the least rests next).
+
+Mexicano rounds can't be scheduled up front — each draw depends on the
+standings — so they're generated one at a time by
+`AmericanoScheduler.nextRound(for:)` when every court in the current round
+has finished. That generation is *deterministic*: it's seeded from the
+session id and round index (`SeededRandomNumberGenerator`, SplitMix64),
+including the new round's UUIDs, so the iPhone and the Watch independently
+compute byte-identical rounds and WatchConnectivity sync converges without
+any merge logic.
 
 ## What's intentionally out of scope
 
