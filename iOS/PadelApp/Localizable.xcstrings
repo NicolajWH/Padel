@@ -41,12 +41,32 @@
         }
       }
     },
-    "%lld players · %lld rounds": {
+    "%@ · %lld players": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$lld spillere · %2$lld runder"
+            "value": "%1$@ · %2$lld spillere"
+          }
+        }
+      }
+    },
+    "%@ · %lld players · %lld rounds": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$lld spillere · %3$lld runder"
+          }
+        }
+      }
+    },
+    "%@ wins": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ vinder"
           }
         }
       }
@@ -131,12 +151,12 @@
         }
       }
     },
-    "Americano · %lld players": {
+    "Apple Health": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Americano · %lld spillere"
+            "value": "Apple Sundhed"
           }
         }
       }
@@ -271,6 +291,26 @@
         }
       }
     },
+    "Each round is drawn from the live standings — 1st + 4th play 2nd + 3rd — so games get more even as you go. The next round appears when all courts finish.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hver runde dannes ud fra den aktuelle stilling — nr. 1 + 4 spiller mod nr. 2 + 3 — så kampene bliver mere lige undervejs. Næste runde vises, når alle baner er færdige."
+          }
+        }
+      }
+    },
+    "Each round is drawn from the live standings, so you always face players at your level.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hver runde dannes ud fra den aktuelle stilling, så du altid møder spillere på dit niveau."
+          }
+        }
+      }
+    },
     "First Serve": {
       "localizations": {
         "da": {
@@ -301,6 +341,26 @@
         }
       }
     },
+    "Format": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Format"
+          }
+        }
+      }
+    },
+    "Games": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Partier"
+          }
+        }
+      }
+    },
     "Golden Point": {
       "localizations": {
         "da": {
@@ -317,6 +377,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Golden point (afgørende bold ved 40-40)"
+          }
+        }
+      }
+    },
+    "Head-to-Head": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indbyrdes opgør"
+          }
+        }
+      }
+    },
+    "Heart rate, calories, and duration": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Puls, kalorier og varighed"
           }
         }
       }
@@ -531,6 +611,16 @@
         }
       }
     },
+    "New Mexicano": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ny Mexicano"
+          }
+        }
+      }
+    },
     "New Match": {
       "localizations": {
         "da": {
@@ -577,6 +667,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ingen kampe endnu"
+          }
+        }
+      }
+    },
+    "No Games Yet": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen kampe endnu"
+          }
+        }
+      }
+    },
+    "No rated games yet": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen ratede kampe endnu"
           }
         }
       }
@@ -651,12 +761,42 @@
         }
       }
     },
-    "Padel — score matches with real padel rules, run Americano tournaments, and play it all from your Apple Watch.": {
+    "Padel — score matches with real padel rules, run Americano and Mexicano tournaments, and play it all from your Apple Watch.": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Padel — før score med rigtige padelregler, afvikl Americano-turneringer, og styr det hele fra dit Apple Watch."
+            "value": "Padel — før score med rigtige padelregler, afvikl Americano- og Mexicano-turneringer, og styr det hele fra dit Apple Watch."
+          }
+        }
+      }
+    },
+    "Partner Chemistry": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makkerkemi"
+          }
+        }
+      }
+    },
+    "Partners and opponents rotate so everyone plays with everyone. All rounds are drawn up front.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makkere og modstandere roterer, så alle spiller med alle. Alle runder lægges fast fra start."
+          }
+        }
+      }
+    },
+    "Partners rotate every round, so you play with — and against — everyone in the group.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makkerne roterer hver runde, så du spiller med — og mod — alle i gruppen."
           }
         }
       }
@@ -771,6 +911,26 @@
         }
       }
     },
+    "Play a match or an Americano with %@ and their stats will show up here.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spil en kamp eller en Americano med %@, så vises deres statistik her."
+          }
+        }
+      }
+    },
+    "Players: %lld · Courts per round: %lld · %lld sit out each round — sit-outs rotate fairly so everyone plays the same number of rounds.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spillere: %1$lld · Baner pr. runde: %2$lld · %3$lld sidder over hver runde — oversiddere roterer fair, så alle spiller lige mange runder."
+          }
+        }
+      }
+    },
     "Quick Add From Saved Players": {
       "localizations": {
         "da": {
@@ -791,6 +951,46 @@
         }
       }
     },
+    "Rating %lld · %lld rated games": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rating %1$lld · %2$lld ratede kampe"
+          }
+        }
+      }
+    },
+    "Ratings start at %lld and move after every match and Americano round — beating a stronger team counts for more.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ratings starter på %lld og ændrer sig efter hver kamp og Americano-runde — at slå et stærkere hold tæller mere."
+          }
+        }
+      }
+    },
+    "Record": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sejre–nederlag"
+          }
+        }
+      }
+    },
+    "Resting: %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sidder over: %@"
+          }
+        }
+      }
+    },
     "Round": {
       "localizations": {
         "da": {
@@ -807,6 +1007,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Runde %lld"
+          }
+        }
+      }
+    },
+    "Round %lld of %lld · the next round is drawn from the standings when all courts finish": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Runde %1$lld af %2$lld · næste runde dannes ud fra stillingen, når alle baner er færdige"
           }
         }
       }
@@ -881,12 +1091,22 @@
         }
       }
     },
-    "Set up a group, rotate partners automatically, and add up everyone's individual points — just like Americano padel, right on your Apple Watch.": {
+    "Scored with Padel": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Opret en gruppe, rotér makkere automatisk, og læg alles individuelle point sammen — præcis som Americano-padel, direkte på dit Apple Watch."
+            "value": "Ført med Padel"
+          }
+        }
+      }
+    },
+    "Sets": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sæt"
           }
         }
       }
@@ -1167,6 +1387,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Når slået til, kan spillere på samme bane se dit navn og tilføje dig til en kamp eller Americano med ét tryk. Dit navn og din omtrentlige placering deles via iCloud, mens du bruger appen."
+          }
+        }
+      }
+    },
+    "When you keep score on your Apple Watch, Padel records the match as a workout in the Health app. It shows up as tennis — Health doesn't have a padel workout type yet. You can manage access under Health in your iPhone's Settings.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Når du fører score på dit Apple Watch, gemmer Padel kampen som en træning i appen Sundhed. Den vises som tennis — Sundhed har endnu ikke padel som træningstype. Du kan styre adgangen under Sundhed i iPhonens Indstillinger."
+          }
+        }
+      }
+    },
+    "Win rate": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sejrsprocent"
+          }
+        }
+      }
+    },
+    "Wins–losses when teaming up, across matches and Americano rounds.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sejre–nederlag som makkere, på tværs af kampe og Americano-runder."
+          }
+        }
+      }
+    },
+    "Workouts on Apple Watch": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Træning på Apple Watch"
           }
         }
       }

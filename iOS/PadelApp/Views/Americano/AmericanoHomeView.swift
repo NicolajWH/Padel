@@ -22,21 +22,31 @@ struct AmericanoHomeView: View {
                     .buttonStyle(.plain)
                 }
 
-                NavigationLink {
-                    AmericanoSetupView()
-                } label: {
-                    ActionCard(
-                        title: "New Americano",
-                        systemImage: "person.3.fill",
-                        prominent: true
-                    )
-                }
-                .buttonStyle(.plain)
+                HStack(spacing: 12) {
+                    NavigationLink {
+                        AmericanoSetupView(initialFormat: .americano)
+                    } label: {
+                        ActionCard(
+                            title: "New Americano",
+                            systemImage: "person.3.fill",
+                            prominent: true
+                        )
+                    }
+                    .buttonStyle(.plain)
 
-                Text("Set up a group, rotate partners automatically, and add up everyone's individual points — just like Americano padel, right on your Apple Watch.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 4)
+                    NavigationLink {
+                        AmericanoSetupView(initialFormat: .mexicano)
+                    } label: {
+                        ActionCard(
+                            title: "New Mexicano",
+                            systemImage: "list.number",
+                            prominent: false
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                FormatExplainer()
 
                 if !sessions.isEmpty {
                     Text("Recent")
@@ -63,6 +73,43 @@ struct AmericanoHomeView: View {
     }
 }
 
+/// Side-by-side intro to the two tournament formats, so the page explains
+/// the choice instead of hiding Mexicano inside the setup form.
+private struct FormatExplainer: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            row(
+                icon: "arrow.triangle.2.circlepath",
+                title: "Americano",
+                text: "Partners rotate every round, so you play with — and against — everyone in the group."
+            )
+            Divider()
+            row(
+                icon: "list.number",
+                title: "Mexicano",
+                text: "Each round is drawn from the live standings, so you always face players at your level."
+            )
+        }
+        .padelCard()
+    }
+
+    private func row(icon: String, title: LocalizedStringKey, text: LocalizedStringKey) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color.accentColor)
+                .frame(width: 26)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.bold())
+                Text(text)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
 private struct OngoingAmericanoCard: View {
     let session: AmericanoSession
 
@@ -70,6 +117,9 @@ private struct OngoingAmericanoCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 StatusPill(text: "In progress", color: PadelTheme.lime)
+                Text(session.settings.format.displayName)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.7))
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.bold))

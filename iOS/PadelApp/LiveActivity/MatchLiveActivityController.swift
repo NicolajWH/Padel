@@ -53,7 +53,7 @@ final class MatchLiveActivityController: ObservableObject {
         let snap = state.snapshot
         let winnerText: String
         if let winner = snap.winner {
-            winnerText = "\(state.team(winner).displayName) wins"
+            winnerText = String(localized: "\(state.team(winner).displayName) wins")
         } else {
             winnerText = ""
         }
