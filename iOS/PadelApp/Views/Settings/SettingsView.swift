@@ -63,6 +63,23 @@ struct SettingsView: View {
             }
 
             Section {
+                HStack(spacing: 12) {
+                    Image(systemName: "heart.fill")
+                        .foregroundStyle(.red)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Workouts on Apple Watch")
+                        Text("Heart rate, calories, and duration")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } header: {
+                Text("Apple Health")
+            } footer: {
+                Text("When you keep score on your Apple Watch, Padel records the match as a workout in the Health app. It shows up as tennis — Health doesn't have a padel workout type yet. You can manage access under Health in your iPhone's Settings.")
+            }
+
+            Section {
                 Button {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
                         openURL(url)
@@ -94,7 +111,7 @@ struct SettingsView: View {
 
             Section("About") {
                 LabeledContent("Version", value: appVersion)
-                Text("Padel — score matches with real padel rules, run Americano tournaments, and play it all from your Apple Watch.")
+                Text("Padel — score matches with real padel rules, run Americano and Mexicano tournaments, and play it all from your Apple Watch.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }

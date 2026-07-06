@@ -10,7 +10,11 @@ struct AmericanoSetupView: View {
     @State private var playerNames: [String] = ["", "", "", ""]
     @AppStorage("defaultAmericanoPoints") private var pointsPerRound = 21
     @State private var numberOfRounds = 5
-    @State private var format: AmericanoFormat = .americano
+    @State private var format: AmericanoFormat
+
+    init(initialFormat: AmericanoFormat = .americano) {
+        _format = State(initialValue: initialFormat)
+    }
 
     @StateObject private var locationProvider = LocationProvider()
     @State private var nearbyPlayers: [NearbyPlayer] = []
@@ -103,12 +107,12 @@ struct AmericanoSetupView: View {
                     if sitOuts == 0 {
                         Text("Players: \(validNames.count) · Courts per round: \(courtCount)")
                     } else {
-                        Text("Players: \(validNames.count) · Courts per round: \(courtCount) · \(sitOuts) player\(sitOuts == 1 ? "" : "s") rest each round — sit-outs rotate fairly so everyone plays the same number of rounds.")
+                        Text("Players: \(validNames.count) · Courts per round: \(courtCount) · \(sitOuts) sit out each round — sit-outs rotate fairly so everyone plays the same number of rounds.")
                     }
                 }
             }
         }
-        .navigationTitle("New Americano")
+        .navigationTitle(format == .mexicano ? String(localized: "New Mexicano") : String(localized: "New Americano"))
         .navigationDestination(isPresented: $navigate) {
             if let createdRecord, let session = createdRecord.session {
                 AmericanoRoundScoringView(record: createdRecord, session: session)

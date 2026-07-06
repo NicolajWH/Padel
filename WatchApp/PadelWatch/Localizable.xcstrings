@@ -36,9 +36,19 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Færdig" } }
       }
     },
+    "End Workout" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Afslut træning" } }
+      }
+    },
     "Games %lld" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Partier %lld" } }
+      }
+    },
+    "Games" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Partier" } }
       }
     },
     "Generate & Start" : {
@@ -71,6 +81,11 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Match-TB" } }
       }
     },
+    "Mexicano (seed by standings)" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Mexicano (seedes efter stillingen)" } }
+      }
+    },
     "New Americano" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Ny Americano" } }
@@ -91,6 +106,11 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Ingen aktiv kamp" } }
       }
     },
+    "Offline" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Offline" } }
+      }
+    },
     "Padel" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Padel" } }
@@ -106,6 +126,11 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Point/runde: %lld" } }
       }
     },
+    "Recording to Health" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Optager til Sundhed" } }
+      }
+    },
     "Round %lld / %lld" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Runde %1$lld / %2$lld" } }
@@ -114,6 +139,11 @@
     "Rounds: %lld" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Runder: %lld" } }
+      }
+    },
+    "Sets" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Sæt" } }
       }
     },
     "Single Set" : {

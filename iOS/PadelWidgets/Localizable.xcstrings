@@ -1,0 +1,21 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Games %lld–%lld" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Partier %1$lld–%2$lld" } }
+      }
+    },
+    "· Sets %lld–%lld" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "· Sæt %1$lld–%2$lld" } }
+      }
+    },
+    "· Tiebreak" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "· Tiebreak" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

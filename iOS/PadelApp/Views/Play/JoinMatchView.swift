@@ -208,7 +208,7 @@ private struct NearbyGameRow: View {
                 case .americano(let session):
                     Text(session.name)
                         .font(.headline)
-                    Text("Americano · \(session.players.count) players")
+                    Text("\(session.settings.format.displayName) · \(session.players.count) players")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

@@ -112,6 +112,7 @@ targets:
         CFBundleDisplayName: Padel Widgets
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleLocalizations: [en, da]
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:

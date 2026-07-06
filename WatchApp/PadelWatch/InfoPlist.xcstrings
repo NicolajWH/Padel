@@ -14,13 +14,6 @@
         "en" : { "stringUnit" : { "state" : "translated", "value" : "Padel saves your padel matches as workouts in Health, including heart rate and calories." } },
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Padel gemmer dine padelkampe som træninger i Sundhed, inklusive puls og kalorier." } }
       }
-    },
-    "NSLocationWhenInUseUsageDescription" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : { "stringUnit" : { "state" : "translated", "value" : "Padel uses your location to find shared matches and players on nearby courts." } },
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Padel bruger din lokation til at finde delte kampe og spillere på baner i nærheden." } }
-      }
     }
   },
   "version" : "1.0"

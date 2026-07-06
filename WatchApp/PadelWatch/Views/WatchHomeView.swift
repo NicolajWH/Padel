@@ -129,7 +129,7 @@ struct WatchHomeView: View {
         var parts: [String] = []
         if workout.heartRate > 0 { parts.append("\(Int(workout.heartRate)) bpm") }
         if workout.activeCalories > 0 { parts.append("\(Int(workout.activeCalories)) kcal") }
-        return parts.isEmpty ? "Recording to Health" : parts.joined(separator: " · ")
+        return parts.isEmpty ? String(localized: "Recording to Health") : parts.joined(separator: " · ")
     }
 
     private func scoreSummary(for match: MatchState) -> String {

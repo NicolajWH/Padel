@@ -60,7 +60,7 @@ struct AmericanoRowView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(session.name).font(.subheadline).bold()
             HStack(spacing: 6) {
-                Text("\(session.players.count) players · \(session.plannedRoundCount) rounds")
+                Text("\(session.settings.format.displayName) · \(session.players.count) players · \(session.plannedRoundCount) rounds")
                 if session.isComplete, let leader = session.standings.first {
                     Text("\(leader.player.name) won").foregroundStyle(.green)
                 } else if !session.rounds.isEmpty {
