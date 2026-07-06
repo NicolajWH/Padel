@@ -142,7 +142,25 @@ public enum MatchEngine {
 
         let labelA = winner == nil ? label(for: ptsA, opponent: ptsB) : ""
         let labelB = winner == nil ? label(for: ptsB, opponent: ptsA) : ""
-        let servingCount = currentServer == .teamA ? serveCountA : serveCountB
+
+        // The loop keeps `currentServer` fixed on the game-by-game server. Inside
+        // a tiebreak the serve isn't tracked that way: the first server serves a
+        // single point, then serve alternates every two points. Derive the live
+        // server from how many tiebreak points have been played, keeping the two
+        // players on each team in their established alternating order.
+        let servingSide: TeamSide
+        let servingPlayerIndex: Int
+        if inTiebreak {
+            let pointsPlayed = tieA + tieB
+            let serviceTurn = (pointsPlayed + 1) / 2
+            let side = serviceTurn % 2 == 0 ? currentServer : currentServer.opposite
+            let baseGames = side == .teamA ? serveCountA : serveCountB
+            servingSide = side
+            servingPlayerIndex = (baseGames + serviceTurn / 2) % 2
+        } else {
+            servingSide = currentServer
+            servingPlayerIndex = (currentServer == .teamA ? serveCountA : serveCountB) % 2
+        }
 
         return MatchSnapshot(
             completedSets: completedSets,
@@ -154,8 +172,8 @@ public enum MatchEngine {
             isMatchTiebreak: inMatchTiebreak,
             tiebreakPointsA: tieA,
             tiebreakPointsB: tieB,
-            servingSide: currentServer,
-            servingPlayerIndex: servingCount % 2,
+            servingSide: servingSide,
+            servingPlayerIndex: servingPlayerIndex,
             setsWonA: setsWonA,
             setsWonB: setsWonB,
             isMatchOver: winner != nil,

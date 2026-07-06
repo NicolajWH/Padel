@@ -85,6 +85,51 @@ final class MatchEngineTests: XCTestCase {
         XCTAssertEqual(snap.setsWonA, 2)
     }
 
+    /// Six games each, alternating, so the set reaches 6-6 and enters a tiebreak
+    /// with teamA as the first tiebreak server.
+    private func sixAllLog() -> [TeamSide] {
+        var log: [TeamSide] = []
+        for _ in 0..<6 {
+            log.append(contentsOf: [.teamA, .teamA, .teamA, .teamA])
+            log.append(contentsOf: [.teamB, .teamB, .teamB, .teamB])
+        }
+        return log
+    }
+
+    func testTiebreakServeRotatesEveryTwoPointsAfterFirst() {
+        let base = sixAllLog()
+        XCTAssertTrue(MatchEngine.simulate(settings: .standard, pointLog: base).isTiebreak)
+
+        // Split the tiebreak points evenly so it never ends mid-test; the serving
+        // side depends only on how many points have been played.
+        func server(afterTiebreakPoints n: Int) -> TeamSide {
+            let tb = (0..<n).map { $0 % 2 == 0 ? TeamSide.teamA : .teamB }
+            return MatchEngine.simulate(settings: .standard, pointLog: base + tb).servingSide
+        }
+
+        XCTAssertEqual(server(afterTiebreakPoints: 0), .teamA, "First tiebreak point is served by the first server")
+        XCTAssertEqual(server(afterTiebreakPoints: 1), .teamB, "Serve flips after the first point")
+        XCTAssertEqual(server(afterTiebreakPoints: 2), .teamB, "Each turn after the first is two points")
+        XCTAssertEqual(server(afterTiebreakPoints: 3), .teamA, "Serve flips back after two points")
+        XCTAssertEqual(server(afterTiebreakPoints: 4), .teamA)
+        XCTAssertEqual(server(afterTiebreakPoints: 5), .teamB)
+    }
+
+    func testTiebreakServingPlayerContinuesRotation() {
+        let base = sixAllLog()
+
+        func playerIndex(afterTiebreakPoints n: Int) -> Int {
+            let tb = (0..<n).map { $0 % 2 == 0 ? TeamSide.teamA : .teamB }
+            return MatchEngine.simulate(settings: .standard, pointLog: base + tb).servingPlayerIndex
+        }
+
+        // Each team served six even-parity service games, so their first tiebreak
+        // turn keeps player index 0; a team's next turn advances to its other player.
+        XCTAssertEqual(playerIndex(afterTiebreakPoints: 0), 0)
+        XCTAssertEqual(playerIndex(afterTiebreakPoints: 1), 0)
+        XCTAssertEqual(playerIndex(afterTiebreakPoints: 3), 1, "teamA's second tiebreak turn uses the other player")
+    }
+
     func testUndoRemovesLastPoint() {
         var match = MatchState(teamA: makeTeams().0, teamB: makeTeams().1)
         match.addPoint(for: .teamA)
