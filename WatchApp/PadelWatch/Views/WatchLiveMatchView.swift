@@ -30,14 +30,7 @@ struct WatchLiveMatchView: View {
                     score(.teamB)
                 }
 
-                if snap.isTiebreak {
-                    Text(snap.isMatchTiebreak ? "Match Tiebreak" : "Tiebreak")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(.black)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 2)
-                        .background(Capsule().fill(PadelTheme.lime))
-                }
+                CalledScoreBadge(snap: snap)
 
                 TeamTapZone(
                     points: snap.isTiebreak ? "\(snap.tiebreakPointsA)" : snap.gamePointLabelA,
@@ -163,6 +156,39 @@ private struct TeamTapZone: View {
             )
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// The score as you'd call it on court: the serving team's points always come
+/// first ("15-0" when the server leads, "0-15" when the receiver does). The tap
+/// zones stay fixed top/bottom, so this badge is where the convention lives.
+private struct CalledScoreBadge: View {
+    let snap: MatchSnapshot
+
+    private var serverFirstScore: String {
+        let a = snap.isTiebreak ? "\(snap.tiebreakPointsA)" : snap.gamePointLabelA
+        let b = snap.isTiebreak ? "\(snap.tiebreakPointsB)" : snap.gamePointLabelB
+        return snap.servingSide == .teamA ? "\(a)–\(b)" : "\(b)–\(a)"
+    }
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "tennisball.fill")
+                .font(.system(size: 8))
+                .foregroundStyle(snap.isTiebreak ? .black : PadelTheme.lime)
+            Text(serverFirstScore)
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .contentTransition(.numericText())
+            if snap.isTiebreak {
+                Text(snap.isMatchTiebreak ? "Match TB" : "TB")
+                    .font(.system(size: 9, weight: .bold))
+            }
+        }
+        .foregroundStyle(snap.isTiebreak ? .black : .white)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 2)
+        .background(Capsule().fill(snap.isTiebreak ? PadelTheme.lime : Color.white.opacity(0.1)))
     }
 }
 
