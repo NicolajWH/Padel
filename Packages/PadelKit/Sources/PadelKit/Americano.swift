@@ -1,5 +1,21 @@
 import Foundation
 
+/// How players are matched up each round.
+public enum AmericanoFormat: String, Codable, Hashable, Sendable, CaseIterable {
+    /// Rotate partners and opponents so everyone plays with/against everyone.
+    case americano
+    /// Re-seed every round from the live standings so equally-scoring players
+    /// meet each other: 1st + 4th vs 2nd + 3rd within each group of four.
+    case mexicano
+
+    public var displayName: String {
+        switch self {
+        case .americano: return "Americano"
+        case .mexicano: return "Mexicano"
+        }
+    }
+}
+
 /// Configurable rules for an Americano tournament: everyone rotates partners
 /// and opponents, and individual points accumulate across rounds.
 public struct AmericanoSettings: Codable, Hashable, Sendable {
@@ -9,11 +25,29 @@ public struct AmericanoSettings: Codable, Hashable, Sendable {
     public var numberOfCourts: Int
     /// How many rounds to schedule.
     public var numberOfRounds: Int
+    /// How matchups are generated each round.
+    public var format: AmericanoFormat
 
-    public init(pointsPerRound: Int = 21, numberOfCourts: Int = 1, numberOfRounds: Int = 3) {
+    public init(pointsPerRound: Int = 21, numberOfCourts: Int = 1, numberOfRounds: Int = 3, format: AmericanoFormat = .americano) {
         self.pointsPerRound = pointsPerRound
         self.numberOfCourts = numberOfCourts
         self.numberOfRounds = numberOfRounds
+        self.format = format
+    }
+
+    // Sessions saved before `format` existed (on-watch UserDefaults, SwiftData
+    // records, in-flight sync payloads) must keep decoding, so the field is
+    // optional on the wire and defaults to classic Americano.
+    private enum CodingKeys: String, CodingKey {
+        case pointsPerRound, numberOfCourts, numberOfRounds, format
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        pointsPerRound = try container.decode(Int.self, forKey: .pointsPerRound)
+        numberOfCourts = try container.decode(Int.self, forKey: .numberOfCourts)
+        numberOfRounds = try container.decode(Int.self, forKey: .numberOfRounds)
+        format = try container.decodeIfPresent(AmericanoFormat.self, forKey: .format) ?? .americano
     }
 
     /// A sensible default given a player count: one court per 4 players, enough
@@ -108,8 +142,40 @@ public struct AmericanoSession: Codable, Hashable, Sendable, Identifiable {
         round.matchups.allSatisfy { $0.score(target: settings.pointsPerRound).isComplete }
     }
 
+    /// Mexicano rounds are generated one at a time, so the session isn't over
+    /// until every *planned* round exists and is finished — not just the
+    /// rounds generated so far.
     public var isComplete: Bool {
-        !rounds.isEmpty && rounds.allSatisfy { isRoundComplete($0) }
+        !rounds.isEmpty && rounds.count >= settings.numberOfRounds && rounds.allSatisfy { isRoundComplete($0) }
+    }
+
+    /// Total rounds this session will have once fully played.
+    public var plannedRoundCount: Int {
+        max(settings.numberOfRounds, rounds.count)
+    }
+
+    /// Players who don't play in the given round (more players than court slots).
+    public func sittingOut(in round: AmericanoRound) -> [Player] {
+        var playing = Set<UUID>()
+        for matchup in round.matchups {
+            for player in matchup.teamA.players + matchup.teamB.players {
+                playing.insert(player.id)
+            }
+        }
+        return players.filter { !playing.contains($0.id) }
+    }
+
+    /// Appends the next round when all generated rounds are finished but more
+    /// are planned (how Mexicano sessions grow round by round). Generation is
+    /// fully deterministic from the session state, so the iPhone and the Watch
+    /// independently produce byte-identical rounds and stay in sync.
+    @discardableResult
+    public mutating func appendNextRoundIfNeeded() -> Bool {
+        guard rounds.count < settings.numberOfRounds else { return false }
+        guard rounds.allSatisfy({ isRoundComplete($0) }) else { return false }
+        guard let next = AmericanoScheduler.nextRound(for: self) else { return false }
+        rounds.append(next)
+        return true
     }
 
     /// Index of the first round that still has unfinished matchups, or the last round if all are done.
@@ -134,6 +200,8 @@ public struct AmericanoSession: Codable, Hashable, Sendable, Identifiable {
                 }
             }
         }
+        // Ties are broken deterministically (name, then id) so Mexicano
+        // seeding derived from these standings is identical on every device.
         return players
             .map { player in
                 AmericanoStandingsEntry(
@@ -142,6 +210,10 @@ public struct AmericanoSession: Codable, Hashable, Sendable, Identifiable {
                     roundsPlayed: played[player.id] ?? 0
                 )
             }
-            .sorted { $0.totalPoints > $1.totalPoints }
+            .sorted {
+                if $0.totalPoints != $1.totalPoints { return $0.totalPoints > $1.totalPoints }
+                if $0.player.name != $1.player.name { return $0.player.name < $1.player.name }
+                return $0.player.id.uuidString < $1.player.id.uuidString
+            }
     }
 }

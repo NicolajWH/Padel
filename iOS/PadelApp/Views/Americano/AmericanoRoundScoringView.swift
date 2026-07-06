@@ -33,7 +33,21 @@ struct AmericanoRoundScoringView: View {
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
 
+                if session.plannedRoundCount > session.rounds.count {
+                    Text("Round \(roundIndex + 1) of \(session.plannedRoundCount) · the next round is drawn from the standings when all courts finish")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+
                 if let round {
+                    let resting = session.sittingOut(in: round)
+                    if !resting.isEmpty {
+                        SitOutBanner(players: resting)
+                            .padding(.horizontal)
+                    }
+
                     ForEach(round.matchups) { matchup in
                         MatchupCard(matchup: matchup, target: session.settings.pointsPerRound) { side in
                             addPoint(matchupID: matchup.id, side: side)
@@ -67,6 +81,15 @@ struct AmericanoRoundScoringView: View {
             }
         }
         .onChange(of: session) { _, newValue in
+            // Mexicano rounds are drawn from the standings one at a time; the
+            // append re-triggers this handler with the grown session, which
+            // then falls through to the persistence/sync below.
+            var grown = newValue
+            if grown.appendNextRoundIfNeeded() {
+                session = grown
+                roundIndex = grown.currentRoundIndex
+                return
+            }
             record.update(with: newValue)
             connectivity.send(.americano(newValue))
             if newValue.isComplete {
@@ -82,7 +105,15 @@ struct AmericanoRoundScoringView: View {
         }
         .onAppear {
             share.attach(id: session.id)
-            connectivity.send(.americano(session))
+            // A session reopened from history may already be due for its next
+            // Mexicano round (the growth normally happens in onChange).
+            var grown = session
+            if grown.appendNextRoundIfNeeded() {
+                session = grown
+                roundIndex = grown.currentRoundIndex
+            } else {
+                connectivity.send(.americano(session))
+            }
         }
         .onDisappear {
             share.detach()
@@ -125,6 +156,26 @@ struct AmericanoRoundScoringView: View {
         guard let matchupIndex = round.matchups.firstIndex(where: { $0.id == matchupID }) else { return }
         round.matchups[matchupIndex].undoLastPoint()
         session.rounds[roundIndex] = round
+    }
+}
+
+/// Who rests this round when the player count doesn't fill the courts.
+private struct SitOutBanner: View {
+    let players: [Player]
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "cup.and.saucer.fill")
+                .foregroundStyle(.secondary)
+            Text("Resting: \(players.map(\.name).joined(separator: ", "))")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Spacer()
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
 

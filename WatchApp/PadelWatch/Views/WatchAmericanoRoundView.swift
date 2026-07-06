@@ -16,7 +16,7 @@ struct WatchAmericanoRoundView: View {
 
             VStack(spacing: 4) {
                 HStack(spacing: 4) {
-                    Text("Round \(roundIndex + 1) / \(session.rounds.count)")
+                    Text("Round \(roundIndex + 1) / \(session.plannedRoundCount)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                     if !connectivity.isPhoneReachable {
@@ -68,7 +68,12 @@ struct WatchAmericanoRoundView: View {
             }
             .onChange(of: connectivity.lastReceivedAmericano) { _, incoming in
                 guard let incoming, incoming.id == session.id, incoming != session else { return }
-                store.activeAmericano = incoming
+                // Growing the session here too is safe: Mexicano round
+                // generation is deterministic, so the watch and the phone
+                // derive the exact same next round.
+                var grown = incoming
+                grown.appendNextRoundIfNeeded()
+                store.activeAmericano = grown
                 // Someone else (phone or another player) updated the score.
                 WKInterfaceDevice.current().play(.notification)
             }
@@ -78,6 +83,10 @@ struct WatchAmericanoRoundView: View {
     }
 
     private func apply(_ updated: AmericanoSession) {
+        var updated = updated
+        if updated.appendNextRoundIfNeeded() {
+            roundIndex = updated.currentRoundIndex
+        }
         store.activeAmericano = updated
         connectivity.send(.americano(updated))
         if updated.isComplete {

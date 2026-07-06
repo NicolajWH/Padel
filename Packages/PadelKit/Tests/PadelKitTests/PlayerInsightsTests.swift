@@ -1,0 +1,119 @@
+import XCTest
+@testable import PadelKit
+
+final class PlayerInsightsTests: XCTestCase {
+
+    /// Builds a finished best-of-1 match won by team A.
+    private func finishedMatch(teamA: [String], teamB: [String], createdAt: Date = Date()) -> MatchState {
+        var state = MatchState(
+            teamA: Team(players: teamA.map { Player(name: $0) }),
+            teamB: Team(players: teamB.map { Player(name: $0) }),
+            settings: MatchSettings(goldenPoint: true, setsToWin: 1),
+            createdAt: createdAt
+        )
+        while !state.isFinished {
+            state.addPoint(for: .teamA)
+        }
+        return state
+    }
+
+    func testStatsMatchPlayersByNameAcrossFreshUUIDs() {
+        // Every match setup creates new Player UUIDs, so a saved player must
+        // still be credited via their name.
+        let match = finishedMatch(teamA: ["Nicolaj", "Anna"], teamB: ["Bo", "Carla"])
+        let savedPlayer = Player(name: " nicolaj ")
+
+        let stats = MatchStatistics.stats(for: savedPlayer, in: [match])
+        XCTAssertEqual(stats.played, 1)
+        XCTAssertEqual(stats.wins, 1)
+
+        let loser = MatchStatistics.stats(for: Player(name: "Bo"), in: [match])
+        XCTAssertEqual(loser.losses, 1)
+    }
+
+    func testHeadToHeadCountsOpponentsOnly() {
+        let m1 = finishedMatch(teamA: ["A", "B"], teamB: ["C", "D"])
+        let m2 = finishedMatch(teamA: ["C", "B"], teamB: ["A", "D"])
+
+        let records = PlayerInsights.headToHead(for: Player(name: "A"), matches: [m1, m2])
+        let vsC = records.first { $0.opponent.name == "C" }
+        XCTAssertEqual(vsC?.wins, 1)
+        XCTAssertEqual(vsC?.losses, 1)
+        let vsB = records.first { $0.opponent.name == "B" }
+        XCTAssertEqual(vsB?.wins, 0)
+        XCTAssertEqual(vsB?.losses, 1)
+        XCTAssertNil(records.first { $0.opponent.name == "A" })
+    }
+
+    func testPartnerStatsTrackWinRatePerPartner() {
+        let m1 = finishedMatch(teamA: ["A", "B"], teamB: ["C", "D"])
+        let m2 = finishedMatch(teamA: ["C", "D"], teamB: ["A", "B"])
+        let m3 = finishedMatch(teamA: ["A", "C"], teamB: ["B", "D"])
+
+        let records = PlayerInsights.partnerStats(for: Player(name: "A"), matches: [m1, m2, m3])
+        let withB = records.first { $0.partner.name == "B" }
+        XCTAssertEqual(withB?.played, 2)
+        XCTAssertEqual(withB?.wins, 1)
+        let withC = records.first { $0.partner.name == "C" }
+        XCTAssertEqual(withC?.played, 1)
+        XCTAssertEqual(withC?.wins, 1)
+    }
+
+    func testRatingsRewardWinnersAndStartAtBase() {
+        let match = finishedMatch(teamA: ["A", "B"], teamB: ["C", "D"])
+        let ratings = PlayerInsights.ratings(matches: [match])
+
+        XCTAssertEqual(ratings.count, 4)
+        let winner = ratings.first { $0.player.name == "A" }!
+        let loser = ratings.first { $0.player.name == "C" }!
+        XCTAssertGreaterThan(winner.rating, PlayerRatingEntry.baseRating)
+        XCTAssertLessThan(loser.rating, PlayerRatingEntry.baseRating)
+        // Equal starting ratings: winners gain exactly what losers lose (K/2 = 16).
+        XCTAssertEqual(winner.rating - PlayerRatingEntry.baseRating, 16, accuracy: 0.001)
+        XCTAssertEqual(PlayerRatingEntry.baseRating - loser.rating, 16, accuracy: 0.001)
+    }
+
+    func testUpsetMovesRatingMoreThanExpectedWin() {
+        let day: TimeInterval = 86_400
+        let start = Date(timeIntervalSince1970: 1_700_000_000)
+        // A+B beat C+D twice to build a rating lead...
+        let m1 = finishedMatch(teamA: ["A", "B"], teamB: ["C", "D"], createdAt: start)
+        let m2 = finishedMatch(teamA: ["A", "B"], teamB: ["C", "D"], createdAt: start.addingTimeInterval(day))
+        // ...then lose the third match as favorites.
+        let m3 = finishedMatch(teamA: ["C", "D"], teamB: ["A", "B"], createdAt: start.addingTimeInterval(2 * day))
+
+        let afterTwo = PlayerInsights.ratings(matches: [m1, m2])
+        let afterUpset = PlayerInsights.ratings(matches: [m1, m2, m3])
+        let favoriteBefore = afterTwo.first { $0.player.name == "A" }!.rating
+        let favoriteAfter = afterUpset.first { $0.player.name == "A" }!.rating
+
+        // Losing as the favorite costs more than 16 points (the even-odds delta).
+        XCTAssertLessThan(favoriteAfter, favoriteBefore - 16)
+    }
+
+    func testAmericanoMatchupsFeedInsights() {
+        let p = ["A", "B", "C", "D"].map { Player(name: $0) }
+        var matchup = AmericanoMatchup(court: 1, teamA: Team(players: [p[0], p[1]]), teamB: Team(players: [p[2], p[3]]))
+        for _ in 0..<15 { matchup.addPoint(to: .teamA, target: 16) }
+        for _ in 0..<7 { matchup.addPoint(to: .teamB, target: 16) }
+        matchup.addPoint(to: .teamA, target: 16)
+        let round = AmericanoRound(index: 0, matchups: [matchup])
+        let session = AmericanoSession(
+            players: p,
+            settings: AmericanoSettings(pointsPerRound: 16, numberOfCourts: 1, numberOfRounds: 1),
+            rounds: [round]
+        )
+
+        let ratings = PlayerInsights.ratings(matches: [], americanoSessions: [session])
+        let winner = ratings.first { $0.player.name == "A" }!
+        XCTAssertGreaterThan(winner.rating, PlayerRatingEntry.baseRating)
+        // Americano rounds use half the K factor of a full match.
+        XCTAssertEqual(winner.rating - PlayerRatingEntry.baseRating, 8, accuracy: 0.001)
+
+        let h2h = PlayerInsights.headToHead(for: p[0], matches: [], americanoSessions: [session])
+        XCTAssertEqual(h2h.first { $0.opponent.name == "C" }?.wins, 1)
+
+        let partners = PlayerInsights.partnerStats(for: p[0], matches: [], americanoSessions: [session])
+        XCTAssertEqual(partners.first { $0.partner.name == "B" }?.wins, 1)
+    }
+}

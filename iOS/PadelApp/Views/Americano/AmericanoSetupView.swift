@@ -6,10 +6,11 @@ struct AmericanoSetupView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \SavedPlayerRecord.name) private var savedPlayers: [SavedPlayerRecord]
 
-    @State private var sessionName = "Americano"
+    @State private var sessionName = ""
     @State private var playerNames: [String] = ["", "", "", ""]
     @AppStorage("defaultAmericanoPoints") private var pointsPerRound = 21
     @State private var numberOfRounds = 5
+    @State private var format: AmericanoFormat = .americano
 
     @StateObject private var locationProvider = LocationProvider()
     @State private var nearbyPlayers: [NearbyPlayer] = []
@@ -20,8 +21,23 @@ struct AmericanoSetupView: View {
 
     var body: some View {
         Form {
-            Section("Session") {
-                TextField("Name", text: $sessionName)
+            Section {
+                TextField(format.displayName, text: $sessionName)
+                Picker("Format", selection: $format) {
+                    ForEach(AmericanoFormat.allCases, id: \.self) { format in
+                        Text(format.displayName).tag(format)
+                    }
+                }
+                .pickerStyle(.segmented)
+            } header: {
+                Text("Session")
+            } footer: {
+                switch format {
+                case .americano:
+                    Text("Partners and opponents rotate so everyone plays with everyone. All rounds are drawn up front.")
+                case .mexicano:
+                    Text("Each round is drawn from the live standings — 1st + 4th play 2nd + 3rd — so games get more even as you go. The next round appears when all courts finish.")
+                }
             }
 
             Section("Players (min. 4, multiples of 4 work best)") {
@@ -83,7 +99,12 @@ struct AmericanoSetupView: View {
                     .disabled(!isValid)
             } footer: {
                 if courtCount > 0 {
-                    Text("Players: \(validNames.count) · Courts per round: \(courtCount)")
+                    let sitOuts = validNames.count % 4
+                    if sitOuts == 0 {
+                        Text("Players: \(validNames.count) · Courts per round: \(courtCount)")
+                    } else {
+                        Text("Players: \(validNames.count) · Courts per round: \(courtCount) · \(sitOuts) player\(sitOuts == 1 ? "" : "s") rest each round — sit-outs rotate fairly so everyone plays the same number of rounds.")
+                    }
                 }
             }
         }
@@ -139,9 +160,9 @@ struct AmericanoSetupView: View {
 
     private func start() {
         let players = validNames.map { Player(name: $0) }
-        let settings = AmericanoSettings(pointsPerRound: pointsPerRound, numberOfCourts: max(1, courtCount), numberOfRounds: numberOfRounds)
+        let settings = AmericanoSettings(pointsPerRound: pointsPerRound, numberOfCourts: max(1, courtCount), numberOfRounds: numberOfRounds, format: format)
         let rounds = AmericanoScheduler.generateSchedule(players: players, settings: settings)
-        let session = AmericanoSession(name: sessionName.isEmpty ? "Americano" : sessionName, players: players, settings: settings, rounds: rounds)
+        let session = AmericanoSession(name: sessionName.isEmpty ? format.displayName : sessionName, players: players, settings: settings, rounds: rounds)
         let record = AmericanoRecord.create(from: session)
         modelContext.insert(record)
         createdRecord = record

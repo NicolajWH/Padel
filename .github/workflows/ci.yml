@@ -1,0 +1,60 @@
+name: CI
+
+# Feature-branch safety net: the TestFlight workflow only runs on main, so
+# without this nothing compiles or tests changes before they land there.
+on:
+  push:
+    branches-ignore: [main, certificates]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-padel-kit:
+    name: Test PadelKit
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26"
+
+      - name: Run PadelKit unit tests
+        working-directory: Packages/PadelKit
+        run: swift test
+
+  build-apps:
+    name: Build iOS + Watch apps (simulator)
+    needs: test-padel-kit
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26"
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate app icons
+        run: python3 scripts/generate_app_icons.py
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build PadelApp scheme (compiles both apps, no signing)
+        run: |
+          xcodebuild build \
+            -project Padel.xcodeproj \
+            -scheme PadelApp \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY=""
