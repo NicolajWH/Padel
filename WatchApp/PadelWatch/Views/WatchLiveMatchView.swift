@@ -7,9 +7,14 @@ struct WatchLiveMatchView: View {
     @EnvironmentObject private var connectivity: WatchConnectivityManager
     @ObservedObject private var workout = WorkoutManager.shared
     @Environment(\.dismiss) private var dismiss
-    @State private var crownValue: Double = 0.5
+    @State private var crownValue: Double = 0
+    @State private var crownBaseline: Double = 0
     @State private var lastUndoAt: Date = .distantPast
     @State private var showingFinished = false
+
+    /// How much crown travel counts as one "undo" notch. Coarse enough that a
+    /// normal flick backs out a single point, so a spin can't wipe a whole set.
+    private let undoNotch: Double = 2
 
     private var state: MatchState? { store.activeMatch }
 
@@ -58,16 +63,19 @@ struct WatchLiveMatchView: View {
             .toolbar(.hidden, for: .navigationBar)
             .gesture(backSwipe)
             .focusable(true)
-            .digitalCrownRotation($crownValue, from: 0, through: 1, by: 0.001, sensitivity: .low, isContinuous: true, isHapticFeedbackEnabled: true)
+            // A wide, non-continuous range that the crown never runs out of, so
+            // it spins freely in either direction. The built-in detent haptic is
+            // off: it fired on every tiny step and buried the wrist in buzzes.
+            .digitalCrownRotation($crownValue, from: -10_000, through: 10_000, by: 1, sensitivity: .low, isContinuous: false, isHapticFeedbackEnabled: false)
             .onChange(of: crownValue) { _, newValue in
-                // Undo one point per crown "step". A fast spin used to fire many
-                // undos before the value snapped back to centre, wiping a whole
-                // set (or the match) at once. Re-centre immediately and enforce a
-                // short cooldown so points back out one at a time, steadily.
-                guard newValue < 0.35 || newValue > 0.65 else { return }
-                crownValue = 0.5
+                // Undo one point per notch of crown travel. We accumulate the
+                // rotation instead of snapping the bound value back to centre, so
+                // the crown never fights the finger and stays fluid. A short
+                // cooldown caps the rate so a fast spin can't wipe a whole set.
+                guard abs(newValue - crownBaseline) >= undoNotch else { return }
+                crownBaseline = newValue
                 let now = Date()
-                guard now.timeIntervalSince(lastUndoAt) > 0.3 else { return }
+                guard now.timeIntervalSince(lastUndoAt) > 0.2 else { return }
                 lastUndoAt = now
                 undo()
             }
@@ -108,7 +116,7 @@ struct WatchLiveMatchView: View {
                         )
                         store.activeMatch = rematch
                         connectivity.send(.match(rematch))
-                        crownValue = 0.5
+                        crownBaseline = crownValue
                         workout.startIfNeeded()
                     }
                 )
