@@ -22,8 +22,11 @@ public enum MatchStatistics {
         var stats = PlayerMatchStats(player: player, played: 0, wins: 0, losses: 0, setsWon: 0, setsLost: 0, gamesWon: 0, gamesLost: 0)
 
         for match in matches where match.isFinished {
-            let onA = match.teamA.players.contains { $0.id == player.id }
-            let onB = match.teamB.players.contains { $0.id == player.id }
+            // Match setup creates fresh Player values (new UUIDs) every time,
+            // so saved players can only be recognised by name — id alone
+            // never matches and would report zero games for everyone.
+            let onA = match.teamA.players.contains { PlayerKey.isSamePlayer($0, as: player) }
+            let onB = match.teamB.players.contains { PlayerKey.isSamePlayer($0, as: player) }
             guard onA || onB else { continue }
 
             let side: TeamSide = onA ? .teamA : .teamB
