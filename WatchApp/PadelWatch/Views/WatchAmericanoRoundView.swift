@@ -109,62 +109,55 @@ private struct MatchupScoringView: View {
 
     var body: some View {
         let score = matchup.score(target: session.settings.pointsPerRound)
-        VStack(spacing: 6) {
-            Text("Court \(matchup.court)").font(.caption2).foregroundStyle(.secondary)
-
-            Button {
-                addPoint(.teamA)
-            } label: {
-                scoreRow(name: matchup.teamA.displayName, points: score.a, color: PadelTheme.teamA)
-            }
-            .buttonStyle(.plain)
-            .disabled(score.isComplete)
-
-            Button {
-                addPoint(.teamB)
-            } label: {
-                scoreRow(name: matchup.teamB.displayName, points: score.b, color: PadelTheme.teamB)
-            }
-            .buttonStyle(.plain)
-            .disabled(score.isComplete)
-
-            HStack {
+        // Mirror the regular match layout: two full-height gradient zones with a
+        // big rounded number that auto-scales, so Americano feels like the same
+        // scoreboard. A compact header carries the court, target and undo that
+        // the point structure here (a straight race, no games/sets) needs.
+        VStack(spacing: 4) {
+            HStack(spacing: 6) {
+                Text("Court \(matchup.court)")
+                    .font(.system(size: 11, weight: .semibold))
+                Text("to \(session.settings.pointsPerRound)")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.secondary)
                 if score.isComplete {
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(.green).font(.caption2)
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.green)
                 }
                 Spacer()
                 Button {
                     undo()
                 } label: {
                     Image(systemName: "arrow.uturn.backward")
+                        .font(.system(size: 11))
                 }
-                .font(.caption2)
+                .buttonStyle(.plain)
                 .disabled(matchup.pointLog.isEmpty)
             }
-        }
-        .padding(.horizontal, 6)
-    }
+            .padding(.horizontal, 6)
 
-    private func scoreRow(name: String, points: Int, color: Color) -> some View {
-        HStack {
-            Text(name).font(.system(size: 12)).lineLimit(1).minimumScaleFactor(0.6)
-            Spacer()
-            Text("\(points)")
-                .font(.system(size: 26, weight: .bold, design: .rounded))
-                .foregroundStyle(color)
-                .contentTransition(.numericText())
+            AmericanoTeamZone(
+                name: matchup.teamA.displayName,
+                points: score.a,
+                color: PadelTheme.teamA,
+                isWinner: score.isComplete && score.a > score.b
+            ) {
+                addPoint(.teamA)
+            }
+            .disabled(score.isComplete)
+
+            AmericanoTeamZone(
+                name: matchup.teamB.displayName,
+                points: score.b,
+                color: PadelTheme.teamB,
+                isWinner: score.isComplete && score.b > score.a
+            ) {
+                addPoint(.teamB)
+            }
+            .disabled(score.isComplete)
         }
-        .padding(8)
-        .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [color.opacity(0.3), color.opacity(0.12)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-        )
+        .padding(.horizontal, 4)
     }
 
     private func addPoint(_ side: TeamSide) {
@@ -184,6 +177,54 @@ private struct MatchupScoringView: View {
         round.matchups[idx].undoLastPoint()
         session.rounds[roundIndex] = round
         onUpdate(session)
+    }
+}
+
+/// A full-height team zone matching the regular match's `TeamTapZone`: a gradient
+/// card with the team name and a big rounded number that scales down to fit. The
+/// winner is highlighted with a brighter border, echoing how the live match marks
+/// the serving side.
+private struct AmericanoTeamZone: View {
+    let name: String
+    let points: Int
+    let color: Color
+    let isWinner: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 8) {
+                Text(name)
+                    .font(.system(size: 13, weight: .semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Text("\(points)")
+                    .font(.system(size: 40, weight: .heavy, design: .rounded))
+                    .foregroundStyle(color)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.5)
+                    .contentTransition(.numericText())
+            }
+            .padding(.horizontal, 12)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [color.opacity(0.32), color.opacity(0.12)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .strokeBorder(color.opacity(isWinner ? 0.8 : 0.25), lineWidth: isWinner ? 1.5 : 1)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 
