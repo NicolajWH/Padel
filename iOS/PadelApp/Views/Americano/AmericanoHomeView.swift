@@ -82,7 +82,7 @@ private struct OngoingAmericanoCard: View {
 
             HStack(spacing: 12) {
                 Label("\(session.players.count)", systemImage: "person.3.fill")
-                Label("\(session.currentRoundIndex + 1)/\(session.rounds.count)", systemImage: "arrow.triangle.2.circlepath")
+                Label("\(session.currentRoundIndex + 1)/\(session.plannedRoundCount)", systemImage: "arrow.triangle.2.circlepath")
             }
             .font(.subheadline.weight(.semibold))
             .foregroundStyle(PadelTheme.lime)

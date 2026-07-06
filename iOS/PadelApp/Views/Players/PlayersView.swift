@@ -17,18 +17,30 @@ struct PlayersView: View {
                     description: Text("Add players so you can quickly pick them when starting a match or Americano.")
                 )
             } else {
+                let matches = allFinishedMatches()
+                let ratings = PlayerInsights.ratings(matches: matches, americanoSessions: allAmericanoSessions())
                 ForEach(players) { record in
-                    HStack {
-                        PlayerAvatar(player: record.asPlayer)
-                        VStack(alignment: .leading) {
-                            Text(record.name).font(.headline)
-                            let stats = MatchStatistics.stats(for: record.asPlayer, in: allFinishedMatches())
-                            if stats.played > 0 {
-                                Text("\(stats.wins) wins · \(stats.losses) losses")
-                                    .font(.caption)
+                    NavigationLink {
+                        PlayerDetailView(player: record.asPlayer)
+                    } label: {
+                        HStack {
+                            PlayerAvatar(player: record.asPlayer)
+                            VStack(alignment: .leading) {
+                                Text(record.name).font(.headline)
+                                let stats = MatchStatistics.stats(for: record.asPlayer, in: matches)
+                                if stats.played > 0 {
+                                    Text("\(stats.wins) wins · \(stats.losses) losses")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                } else {
+                                    Text("No matches yet").font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                            Spacer()
+                            if let rating = ratings.first(where: { $0.key == PlayerKey.normalize(record.name) }) {
+                                Text("\(rating.roundedRating)")
+                                    .font(.subheadline.monospacedDigit().bold())
                                     .foregroundStyle(.secondary)
-                            } else {
-                                Text("No matches yet").font(.caption).foregroundStyle(.secondary)
                             }
                         }
                     }
@@ -71,6 +83,12 @@ struct PlayersView: View {
         let descriptor = FetchDescriptor<MatchRecord>()
         let records = (try? modelContext.fetch(descriptor)) ?? []
         return records.compactMap { $0.state }
+    }
+
+    private func allAmericanoSessions() -> [AmericanoSession] {
+        let descriptor = FetchDescriptor<AmericanoRecord>()
+        let records = (try? modelContext.fetch(descriptor)) ?? []
+        return records.compactMap { $0.session }
     }
 }
 
