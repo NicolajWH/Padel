@@ -26,6 +26,16 @@ struct AmericanoSetupView: View {
     var body: some View {
         Form {
             Section {
+                HStack {
+                    Spacer()
+                    FormatMascot(format: format, size: 96)
+                        .padding(.vertical, 4)
+                    Spacer()
+                }
+                .listRowBackground(Color.clear)
+            }
+
+            Section {
                 TextField(format.displayName, text: $sessionName)
                 Picker("Format", selection: $format) {
                     ForEach(AmericanoFormat.allCases, id: \.self) { format in
