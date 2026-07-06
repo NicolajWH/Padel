@@ -10,41 +10,14 @@ struct PlayersView: View {
     @State private var showingImport = false
 
     var body: some View {
-        List {
+        Group {
             if players.isEmpty {
-                ContentUnavailableView(
-                    "No Players Yet",
-                    systemImage: "person.badge.plus",
-                    description: Text("Add players so you can quickly pick them when starting a match or Americano.")
+                PlayersEmptyStateView(
+                    onImport: { showingImport = true },
+                    onAddManually: { showingAdd = true }
                 )
             } else {
-                let matches = allFinishedMatches()
-                let ratings = PlayerInsights.ratings(matches: matches, americanoSessions: allAmericanoSessions(), seedRatings: seedRatings())
-                ForEach(players) { record in
-                    NavigationLink {
-                        PlayerDetailView(record: record)
-                    } label: {
-                        HStack {
-                            PlayerAvatar(player: record.asPlayer)
-                            VStack(alignment: .leading) {
-                                Text(record.name).font(.headline)
-                                let stats = MatchStatistics.stats(for: record.asPlayer, in: matches)
-                                if stats.played > 0 {
-                                    Text("\(stats.wins) wins · \(stats.losses) losses")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                } else {
-                                    Text("No matches yet").font(.caption).foregroundStyle(.secondary)
-                                }
-                            }
-                            Spacer()
-                            Text(ratingText(for: record, ratings: ratings))
-                                .font(.subheadline.monospacedDigit().bold())
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                .onDelete(perform: delete)
+                playerList
             }
         }
         .navigationTitle("Players")
@@ -73,6 +46,38 @@ struct PlayersView: View {
         }
         .sheet(isPresented: $showingImport) {
             ImportPlayersView(existingNames: players.map(\.name))
+        }
+    }
+
+    private var playerList: some View {
+        List {
+            let matches = allFinishedMatches()
+            let ratings = PlayerInsights.ratings(matches: matches, americanoSessions: allAmericanoSessions(), seedRatings: seedRatings())
+            ForEach(players) { record in
+                NavigationLink {
+                    PlayerDetailView(record: record)
+                } label: {
+                    HStack {
+                        PlayerAvatar(player: record.asPlayer)
+                        VStack(alignment: .leading) {
+                            Text(record.name).font(.headline)
+                            let stats = MatchStatistics.stats(for: record.asPlayer, in: matches)
+                            if stats.played > 0 {
+                                Text("\(stats.wins) wins · \(stats.losses) losses")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("No matches yet").font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                        Spacer()
+                        Text(ratingText(for: record, ratings: ratings))
+                            .font(.subheadline.monospacedDigit().bold())
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .onDelete(perform: delete)
         }
     }
 
