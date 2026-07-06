@@ -61,16 +61,55 @@ final class PlayerInsightsTests: XCTestCase {
 
     func testRatingsRewardWinnersAndStartAtBase() {
         let match = finishedMatch(teamA: ["A", "B"], teamB: ["C", "D"])
-        let ratings = PlayerInsights.ratings(matches: [match])
+        // Seed everyone mid-scale so movement isn't clipped by the 1.0 floor.
+        let seeds = ["a": 3.0, "b": 3.0, "c": 3.0, "d": 3.0]
+        let ratings = PlayerInsights.ratings(matches: [match], seedRatings: seeds)
 
         XCTAssertEqual(ratings.count, 4)
         let winner = ratings.first { $0.player.name == "A" }!
         let loser = ratings.first { $0.player.name == "C" }!
-        XCTAssertGreaterThan(winner.rating, PlayerRatingEntry.baseRating)
-        XCTAssertLessThan(loser.rating, PlayerRatingEntry.baseRating)
-        // Equal starting ratings: winners gain exactly what losers lose (K/2 = 16).
-        XCTAssertEqual(winner.rating - PlayerRatingEntry.baseRating, 16, accuracy: 0.001)
-        XCTAssertEqual(PlayerRatingEntry.baseRating - loser.rating, 16, accuracy: 0.001)
+        XCTAssertGreaterThan(winner.rating, 3.0)
+        XCTAssertLessThan(loser.rating, 3.0)
+        // Equal starting ratings: winners gain exactly what losers lose (matchK/2 = 0.1).
+        XCTAssertEqual(winner.rating - 3.0, 0.1, accuracy: 0.0001)
+        XCTAssertEqual(3.0 - loser.rating, 0.1, accuracy: 0.0001)
+    }
+
+    func testNewPlayersStartAtBottomOfScale() {
+        // Unseeded players begin at 1.0; the losers can't drop below the floor.
+        let match = finishedMatch(teamA: ["A", "B"], teamB: ["C", "D"])
+        let ratings = PlayerInsights.ratings(matches: [match])
+
+        XCTAssertEqual(PlayerRatingEntry.defaultRating, 1.0, accuracy: 0.0001)
+        let winner = ratings.first { $0.player.name == "A" }!
+        let loser = ratings.first { $0.player.name == "C" }!
+        XCTAssertEqual(winner.rating, 1.1, accuracy: 0.0001)
+        XCTAssertEqual(loser.rating, PlayerRatingEntry.minRating, accuracy: 0.0001)
+    }
+
+    func testSeedRatingStartsPlayerAtOfficialLevel() {
+        let match = finishedMatch(teamA: ["A", "B"], teamB: ["C", "D"])
+        // A is seeded at 5.0; the others fall back to the default.
+        let ratings = PlayerInsights.ratings(matches: [match], seedRatings: ["a": 5.0])
+
+        let seeded = ratings.first { $0.player.name == "A" }!
+        // Winning from a big lead over default-rated opponents barely moves it.
+        XCTAssertGreaterThan(seeded.rating, 5.0)
+        XCTAssertLessThan(seeded.rating, 5.1)
+    }
+
+    func testRatingsStayWithinOfficialScale() {
+        // A dominant team beating a weak team many times stays capped at 7.
+        var matches: [MatchState] = []
+        let start = Date(timeIntervalSince1970: 1_700_000_000)
+        for i in 0..<200 {
+            matches.append(finishedMatch(teamA: ["A", "B"], teamB: ["C", "D"], createdAt: start.addingTimeInterval(Double(i))))
+        }
+        let ratings = PlayerInsights.ratings(matches: matches)
+        let winner = ratings.first { $0.player.name == "A" }!
+        let loser = ratings.first { $0.player.name == "C" }!
+        XCTAssertLessThanOrEqual(winner.rating, PlayerRatingEntry.maxRating)
+        XCTAssertGreaterThanOrEqual(loser.rating, PlayerRatingEntry.minRating)
     }
 
     func testUpsetMovesRatingMoreThanExpectedWin() {
@@ -82,13 +121,15 @@ final class PlayerInsightsTests: XCTestCase {
         // ...then lose the third match as favorites.
         let m3 = finishedMatch(teamA: ["C", "D"], teamB: ["A", "B"], createdAt: start.addingTimeInterval(2 * day))
 
-        let afterTwo = PlayerInsights.ratings(matches: [m1, m2])
-        let afterUpset = PlayerInsights.ratings(matches: [m1, m2, m3])
+        // Seed mid-scale so the favorite has room to fall without hitting the floor.
+        let seeds = ["a": 3.0, "b": 3.0, "c": 3.0, "d": 3.0]
+        let afterTwo = PlayerInsights.ratings(matches: [m1, m2], seedRatings: seeds)
+        let afterUpset = PlayerInsights.ratings(matches: [m1, m2, m3], seedRatings: seeds)
         let favoriteBefore = afterTwo.first { $0.player.name == "A" }!.rating
         let favoriteAfter = afterUpset.first { $0.player.name == "A" }!.rating
 
-        // Losing as the favorite costs more than 16 points (the even-odds delta).
-        XCTAssertLessThan(favoriteAfter, favoriteBefore - 16)
+        // Losing as the favorite costs more than the even-odds delta (0.1).
+        XCTAssertLessThan(favoriteAfter, favoriteBefore - 0.1)
     }
 
     func testAmericanoMatchupsFeedInsights() {
@@ -106,9 +147,9 @@ final class PlayerInsightsTests: XCTestCase {
 
         let ratings = PlayerInsights.ratings(matches: [], americanoSessions: [session])
         let winner = ratings.first { $0.player.name == "A" }!
-        XCTAssertGreaterThan(winner.rating, PlayerRatingEntry.baseRating)
-        // Americano rounds use half the K factor of a full match.
-        XCTAssertEqual(winner.rating - PlayerRatingEntry.baseRating, 8, accuracy: 0.001)
+        XCTAssertGreaterThan(winner.rating, PlayerRatingEntry.defaultRating)
+        // Americano rounds use half the K factor of a full match (roundK/2 = 0.05).
+        XCTAssertEqual(winner.rating - PlayerRatingEntry.defaultRating, 0.05, accuracy: 0.0001)
 
         let h2h = PlayerInsights.headToHead(for: p[0], matches: [], americanoSessions: [session])
         XCTAssertEqual(h2h.first { $0.opponent.name == "C" }?.wins, 1)

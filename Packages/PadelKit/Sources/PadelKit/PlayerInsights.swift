@@ -46,18 +46,25 @@ struct DecidedGame {
 
 public enum PlayerInsights {
 
-    /// Every player's Elo-style rating, computed chronologically from the
-    /// whole saved history. New players start at 1200; beating a stronger
-    /// team moves the rating more than beating a weaker one.
+    /// Every player's rating on the official 1–7 padel scale used on MATCHi,
+    /// computed chronologically from the whole saved history.
+    ///
+    /// Each player starts from their manually set rating in `seedRatings`
+    /// (keyed by normalized name), or the default level when none is set, and
+    /// the rating is then adjusted after every game — beating a stronger team
+    /// moves it more than beating a weaker one, and it always stays in 1...7.
     public static func ratings(
         matches: [MatchState],
-        americanoSessions: [AmericanoSession] = []
+        americanoSessions: [AmericanoSession] = [],
+        seedRatings: [String: Double] = [:]
     ) -> [PlayerRatingEntry] {
         var ratings: [String: PlayerRatingEntry] = [:]
 
         func entry(for player: Player) -> PlayerRatingEntry {
             let key = PlayerKey.normalize(player.name)
-            return ratings[key] ?? PlayerRatingEntry(key: key, player: player, rating: PlayerRatingEntry.baseRating, gamesRated: 0)
+            if let existing = ratings[key] { return existing }
+            let start = seedRatings[key].map(PlayerRatingEntry.clamp) ?? PlayerRatingEntry.defaultRating
+            return PlayerRatingEntry(key: key, player: player, rating: start, gamesRated: 0)
         }
 
         for game in decidedGames(matches: matches, americanoSessions: americanoSessions).sorted(by: { $0.date < $1.date }) {
@@ -67,17 +74,17 @@ public enum PlayerInsights {
 
             let winnerAverage = winnerEntries.map(\.rating).reduce(0, +) / Double(winnerEntries.count)
             let loserAverage = loserEntries.map(\.rating).reduce(0, +) / Double(loserEntries.count)
-            let expectedWin = 1.0 / (1.0 + pow(10, (loserAverage - winnerAverage) / 400))
-            let k: Double = game.isFullMatch ? 32 : 16
+            let expectedWin = 1.0 / (1.0 + pow(10, (loserAverage - winnerAverage) / PlayerRatingEntry.ratingScale))
+            let k: Double = game.isFullMatch ? PlayerRatingEntry.matchK : PlayerRatingEntry.roundK
             let delta = k * (1 - expectedWin)
 
             for var entry in winnerEntries {
-                entry.rating += delta
+                entry.rating = PlayerRatingEntry.clamp(entry.rating + delta)
                 entry.gamesRated += 1
                 ratings[entry.key] = entry
             }
             for var entry in loserEntries {
-                entry.rating -= delta
+                entry.rating = PlayerRatingEntry.clamp(entry.rating - delta)
                 entry.gamesRated += 1
                 ratings[entry.key] = entry
             }
@@ -167,9 +174,25 @@ public enum PlayerInsights {
     }
 }
 
-/// One player's Elo-style rating over the whole saved history.
+/// One player's rating on the official 1–7 padel scale (as used on MATCHi),
+/// computed over the whole saved history.
 public struct PlayerRatingEntry: Sendable, Identifiable, Hashable {
-    public static let baseRating: Double = 1200
+    /// Bounds of the official padel scale.
+    public static let minRating: Double = 1.0
+    public static let maxRating: Double = 7.0
+    /// Where a player lands before any manual seed or games — the bottom of
+    /// the official scale, so everyone starts as a beginner and earns their way up.
+    public static let defaultRating: Double = 1.0
+    /// Logistic divisor: a 2.0 rating gap makes the stronger team a ~91% favorite.
+    static let ratingScale: Double = 2.0
+    /// A full match moves the rating twice as much as a single Americano round.
+    static let matchK: Double = 0.2
+    static let roundK: Double = 0.1
+
+    /// Keeps a rating inside the official 1...7 range.
+    public static func clamp(_ value: Double) -> Double {
+        min(max(value, minRating), maxRating)
+    }
 
     public var id: String { key }
     public let key: String
@@ -177,5 +200,8 @@ public struct PlayerRatingEntry: Sendable, Identifiable, Hashable {
     public var rating: Double
     public var gamesRated: Int
 
-    public var roundedRating: Int { Int(rating.rounded()) }
+    /// The rating shown to players, e.g. "3.4" (localized separator).
+    public var displayRating: String {
+        rating.formatted(.number.precision(.fractionLength(1)))
+    }
 }

@@ -18,10 +18,10 @@ struct PlayersView: View {
                 )
             } else {
                 let matches = allFinishedMatches()
-                let ratings = PlayerInsights.ratings(matches: matches, americanoSessions: allAmericanoSessions())
+                let ratings = PlayerInsights.ratings(matches: matches, americanoSessions: allAmericanoSessions(), seedRatings: seedRatings())
                 ForEach(players) { record in
                     NavigationLink {
-                        PlayerDetailView(player: record.asPlayer)
+                        PlayerDetailView(record: record)
                     } label: {
                         HStack {
                             PlayerAvatar(player: record.asPlayer)
@@ -37,11 +37,9 @@ struct PlayersView: View {
                                 }
                             }
                             Spacer()
-                            if let rating = ratings.first(where: { $0.key == PlayerKey.normalize(record.name) }) {
-                                Text("\(rating.roundedRating)")
-                                    .font(.subheadline.monospacedDigit().bold())
-                                    .foregroundStyle(.secondary)
-                            }
+                            Text(ratingText(for: record, ratings: ratings))
+                                .font(.subheadline.monospacedDigit().bold())
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -63,6 +61,28 @@ struct PlayersView: View {
             Button("Cancel", role: .cancel) { newPlayerName = "" }
             Button("Add") { addPlayer() }
         }
+    }
+
+    /// Manual starting ratings keyed by normalized name, fed into the rating
+    /// calculation so seeded players begin from their official 1–7 level.
+    private func seedRatings() -> [String: Double] {
+        var seeds: [String: Double] = [:]
+        for record in players {
+            if let seed = record.ratingSeed {
+                seeds[PlayerKey.normalize(record.name)] = seed
+            }
+        }
+        return seeds
+    }
+
+    /// The computed rating if the player has rated games, otherwise their
+    /// manual seed, otherwise the starting rating everyone begins at.
+    private func ratingText(for record: SavedPlayerRecord, ratings: [PlayerRatingEntry]) -> String {
+        if let entry = ratings.first(where: { $0.key == PlayerKey.normalize(record.name) }) {
+            return entry.displayRating
+        }
+        let start = record.ratingSeed ?? PlayerRatingEntry.defaultRating
+        return start.formatted(.number.precision(.fractionLength(1)))
     }
 
     private func addPlayer() {
