@@ -117,18 +117,22 @@ public enum AmericanoScheduler {
             let group = Array(pool.prefix(4))
             pool.removeFirst(4)
 
-            let (teamA, teamB): (Team, Team)
+            let (playersA, playersB): ([Player], [Player])
             switch settings.format {
             case .mexicano:
                 // Classic Mexicano split: 1st + 4th vs 2nd + 3rd.
-                teamA = Team(players: [group[0], group[3]])
-                teamB = Team(players: [group[1], group[2]])
+                (playersA, playersB) = ([group[0], group[3]], [group[1], group[2]])
             case .americano:
-                (teamA, teamB) = bestSplit(of: group, partnerCount: partnerCount)
-                partnerCount[Set(teamA.players.map(\.id)), default: 0] += 1
-                partnerCount[Set(teamB.players.map(\.id)), default: 0] += 1
+                let (splitA, splitB) = bestSplit(of: group, partnerCount: partnerCount)
+                (playersA, playersB) = (splitA.players, splitB.players)
+                partnerCount[Set(playersA.map(\.id)), default: 0] += 1
+                partnerCount[Set(playersB.map(\.id)), default: 0] += 1
             }
 
+            // Team ids come from the seeded generator too — Team's default
+            // init would mint random UUIDs and break cross-device equality.
+            let teamA = Team(id: deterministicUUID(using: &rng), players: playersA)
+            let teamB = Team(id: deterministicUUID(using: &rng), players: playersB)
             matchups.append(
                 AmericanoMatchup(id: deterministicUUID(using: &rng), court: court, teamA: teamA, teamB: teamB)
             )
