@@ -4,6 +4,7 @@ import PadelKit
 struct WatchHomeView: View {
     @EnvironmentObject private var store: WatchStore
     @EnvironmentObject private var connectivity: WatchConnectivityManager
+    @ObservedObject private var workout = WorkoutManager.shared
     @State private var quickMatchStarted = false
 
     var body: some View {
@@ -72,6 +73,27 @@ struct WatchHomeView: View {
                 }
             }
 
+            // Safety valve: a workout keeps running when a match is abandoned
+            // mid-set, so make it visible and endable from the home screen.
+            if workout.isRunning {
+                Section {
+                    Button {
+                        workout.end()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "heart.fill")
+                                .foregroundStyle(.red)
+                            VStack(alignment: .leading) {
+                                Text("End Workout").font(.headline)
+                                Text(workoutSummary)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+            }
+
             Section {
                 HStack {
                     Image(systemName: connectivity.isPhoneReachable ? "iphone.gen3" : "iphone.slash")
@@ -101,6 +123,13 @@ struct WatchHomeView: View {
         store.activeMatch = state
         connectivity.send(.match(state))
         quickMatchStarted = true
+    }
+
+    private var workoutSummary: String {
+        var parts: [String] = []
+        if workout.heartRate > 0 { parts.append("\(Int(workout.heartRate)) bpm") }
+        if workout.activeCalories > 0 { parts.append("\(Int(workout.activeCalories)) kcal") }
+        return parts.isEmpty ? "Recording to Health" : parts.joined(separator: " · ")
     }
 
     private func scoreSummary(for match: MatchState) -> String {

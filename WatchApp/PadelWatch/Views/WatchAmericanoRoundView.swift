@@ -5,6 +5,7 @@ import PadelKit
 struct WatchAmericanoRoundView: View {
     @EnvironmentObject private var store: WatchStore
     @EnvironmentObject private var connectivity: WatchConnectivityManager
+    @ObservedObject private var workout = WorkoutManager.shared
     @State private var roundIndex: Int = 0
     @State private var didInitializeRound = false
 
@@ -61,6 +62,7 @@ struct WatchAmericanoRoundView: View {
             }
             .navigationTitle(session.name)
             .onAppear {
+                workout.startIfNeeded()
                 if !didInitializeRound {
                     roundIndex = session.currentRoundIndex
                     didInitializeRound = true
@@ -74,6 +76,9 @@ struct WatchAmericanoRoundView: View {
                 var grown = incoming
                 grown.appendNextRoundIfNeeded()
                 store.activeAmericano = grown
+                if grown.isComplete {
+                    WorkoutManager.shared.end()
+                }
                 // Someone else (phone or another player) updated the score.
                 WKInterfaceDevice.current().play(.notification)
             }
@@ -91,6 +96,7 @@ struct WatchAmericanoRoundView: View {
         connectivity.send(.americano(updated))
         if updated.isComplete {
             connectivity.send(.americanoFinished(updated))
+            WorkoutManager.shared.end()
         }
     }
 }

@@ -34,6 +34,15 @@ to TestFlight via GitHub Actions.
   leaderboard as an image straight into the group chat.
 - **Serve indicator** — shows which team *and which of the two partners* is
   serving, based on real padel serve rotation rules.
+- **Watch workout tracking** — scoring on the Watch runs a HealthKit workout
+  session alongside: live heart rate on the scoreboard, active calories, and
+  a workout saved to the Health app (recorded as tennis — HealthKit has no
+  padel type). The session also keeps the app alive for the whole match so
+  watchOS never suspends it mid-set. Requires the one-time Apple setup below;
+  without it (or if the user declines Health access) scoring works unchanged.
+- **Live Activity** — while a match is scored on the iPhone (including points
+  relayed live from the Watch), the score lives on the lock screen and in the
+  Dynamic Island.
 - **Player profiles** — save players once, quick-add them into new matches or
   Americano sessions, colour-coded avatars.
 
@@ -105,6 +114,27 @@ outright because they don't use the team Issuer ID.
 - App record in App Store Connect with bundle ID `com.worsa.padel`
 - The Watch app's `com.worsa.padel.watchapp` identifier is registered
   automatically by cloud signing — no manual step
+
+### One-time Apple setup for HealthKit & Live Activities
+
+Two manual steps in the [Apple Developer portal](https://developer.apple.com/account/resources/identifiers/list)
+(Certificates, Identifiers & Profiles → Identifiers). **Do them before merging
+these features to `main`** — until they're done, the TestFlight deploy fails
+at the signing step (nothing breaks permanently; it succeeds on re-run once
+the steps are done):
+
+1. **HealthKit on the Watch app**: open the `com.worsa.padel.watchapp`
+   identifier → Capabilities → tick **HealthKit** (no options/entitlement
+   sub-choices needed) → Save. This invalidates the stored provisioning
+   profile for the Watch app; the next deploy detects that and regenerates
+   it automatically (`match` runs with `readonly: false`).
+2. **Register the widget extension**: Identifiers → **+** → App IDs → App →
+   Description `Padel Widgets`, Bundle ID **explicit** `com.worsa.padel.widgets`
+   → no capabilities needed (Live Activities don't require one) → Register.
+   The next deploy creates its App Store provisioning profile automatically.
+
+No new certificates, no new secrets, and no App Store Connect changes are
+needed — the widget ships inside the existing app record.
 
 The Fastlane lane validates the key against the App Store Connect API before
 building, so a misconfigured secret fails in under a minute with a precise
