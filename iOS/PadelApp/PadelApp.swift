@@ -20,6 +20,10 @@ struct PadelApp: App {
 
     @StateObject private var connectivity = PhoneConnectivityManager.shared
 
+    init() {
+        UserProfile.autofillNameIfNeeded()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootTabView()

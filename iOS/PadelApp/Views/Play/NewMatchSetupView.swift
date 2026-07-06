@@ -11,6 +11,10 @@ struct NewMatchSetupView: View {
     @State private var teamBPlayer1 = ""
     @State private var teamBPlayer2 = ""
 
+    @StateObject private var locationProvider = LocationProvider()
+    @State private var nearbyPlayers: [NearbyPlayer] = []
+    @State private var isSearchingNearby = false
+
     @AppStorage("defaultGoldenPoint") private var goldenPoint = false
     @AppStorage("defaultSetsToWin") private var setsToWin = 2
     @State private var finalSetMatchTiebreak = false
@@ -28,6 +32,29 @@ struct NewMatchSetupView: View {
             Section("Team B") {
                 TextField("Player 1", text: $teamBPlayer1)
                 TextField("Player 2", text: $teamBPlayer2)
+            }
+
+            if isSearchingNearby || !availableNearbyPlayers.isEmpty {
+                Section {
+                    if isSearchingNearby && nearbyPlayers.isEmpty {
+                        HStack(spacing: 10) {
+                            ProgressView()
+                            Text("Looking for players nearby…")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    ForEach(availableNearbyPlayers) { player in
+                        Button {
+                            fill(name: player.name)
+                        } label: {
+                            Label(player.name, systemImage: "person.wave.2.fill")
+                        }
+                    }
+                } header: {
+                    Text("Players Nearby")
+                } footer: {
+                    Text("Players who have Padel open nearby appear here automatically — tap a name to add it.")
+                }
             }
 
             if !savedPlayers.isEmpty {
@@ -69,11 +96,42 @@ struct NewMatchSetupView: View {
                 LiveMatchView(record: createdRecord, initialState: state)
             }
         }
+        .task {
+            prefillOwnName()
+            await findNearbyPlayers()
+        }
     }
 
     private var isValid: Bool {
         [teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2]
             .allSatisfy { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    }
+
+    /// Nearby players not already typed into one of the four slots.
+    private var availableNearbyPlayers: [NearbyPlayer] {
+        let used = Set(
+            [teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2]
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+        )
+        return nearbyPlayers.filter { !used.contains($0.name.lowercased()) }
+    }
+
+    /// The person creating the match is almost always playing in it.
+    private func prefillOwnName() {
+        guard !UserProfile.name.isEmpty,
+              [teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2].allSatisfy(\.isEmpty)
+        else { return }
+        teamAPlayer1 = UserProfile.name
+    }
+
+    /// Looks up who else is at the court right now — and publishes our own
+    /// presence so their phones see us too.
+    private func findNearbyPlayers() async {
+        isSearchingNearby = true
+        defer { isSearchingNearby = false }
+        guard let location = await locationProvider.currentLocation() else { return }
+        await NearbyPlayersService.publish(name: UserProfile.name, location: location)
+        nearbyPlayers = (try? await NearbyPlayersService.fetchNearby(around: location)) ?? []
     }
 
     private func fill(name: String) {
