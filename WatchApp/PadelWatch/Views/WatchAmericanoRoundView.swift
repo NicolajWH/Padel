@@ -15,9 +15,16 @@ struct WatchAmericanoRoundView: View {
             let round = session.rounds.indices.contains(roundIndex) ? session.rounds[roundIndex] : nil
 
             VStack(spacing: 4) {
-                Text("Round \(roundIndex + 1) / \(session.rounds.count)")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 4) {
+                    Text("Round \(roundIndex + 1) / \(session.rounds.count)")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    if !connectivity.isPhoneReachable {
+                        WatchOfflineBadge()
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                }
+                .animation(.snappy, value: connectivity.isPhoneReachable)
 
                 if let round {
                     TabView {

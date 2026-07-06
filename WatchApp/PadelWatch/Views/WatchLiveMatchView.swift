@@ -30,7 +30,14 @@ struct WatchLiveMatchView: View {
                     score(.teamB)
                 }
 
-                CalledScoreBadge(snap: snap)
+                HStack(spacing: 4) {
+                    CalledScoreBadge(snap: snap)
+                    if !connectivity.isPhoneReachable {
+                        WatchOfflineBadge()
+                            .transition(.scale.combined(with: .opacity))
+                    }
+                }
+                .animation(.snappy, value: connectivity.isPhoneReachable)
 
                 TeamTapZone(
                     points: snap.isTiebreak ? "\(snap.tiebreakPointsA)" : snap.gamePointLabelA,
