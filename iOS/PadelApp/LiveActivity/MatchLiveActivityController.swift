@@ -24,8 +24,8 @@ final class MatchLiveActivityController: ObservableObject {
 
         let attributes = MatchActivityAttributes(
             matchID: state.id,
-            teamAName: state.teamA.displayName,
-            teamBName: state.teamB.displayName
+            teamAName: state.teamA.shortDisplayName,
+            teamBName: state.teamB.shortDisplayName
         )
         activity = try? Activity.request(
             attributes: attributes,
@@ -53,7 +53,7 @@ final class MatchLiveActivityController: ObservableObject {
         let snap = state.snapshot
         let winnerText: String
         if let winner = snap.winner {
-            winnerText = String(localized: "\(state.team(winner).displayName) wins")
+            winnerText = String(localized: "\(state.team(winner).shortDisplayName) wins")
         } else {
             winnerText = ""
         }

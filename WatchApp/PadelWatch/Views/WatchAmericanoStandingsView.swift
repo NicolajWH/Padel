@@ -15,7 +15,7 @@ struct WatchAmericanoStandingsView: View {
                     Circle()
                         .fill(Color(hex: entry.player.colorHex))
                         .frame(width: 8, height: 8)
-                    Text(entry.player.name)
+                    Text(entry.player.initials)
                         .font(.system(size: 13))
                         .lineLimit(1)
                         .minimumScaleFactor(0.6)

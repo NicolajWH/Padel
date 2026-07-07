@@ -157,7 +157,7 @@ private struct MatchupScoringView: View {
             .padding(.horizontal, 6)
 
             AmericanoTeamZone(
-                name: matchup.teamA.displayName,
+                name: matchup.teamA.shortDisplayName,
                 points: score.a,
                 color: PadelTheme.teamA,
                 isWinner: score.isComplete && score.a > score.b
@@ -167,7 +167,7 @@ private struct MatchupScoringView: View {
             .disabled(score.isComplete)
 
             AmericanoTeamZone(
-                name: matchup.teamB.displayName,
+                name: matchup.teamB.shortDisplayName,
                 points: score.b,
                 color: PadelTheme.teamB,
                 isWinner: score.isComplete && score.b > score.a

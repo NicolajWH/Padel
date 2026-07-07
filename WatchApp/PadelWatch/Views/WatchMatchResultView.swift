@@ -17,7 +17,7 @@ struct WatchMatchResultView: View {
                     .font(.title2)
                     .shadow(color: PadelTheme.lime.opacity(0.6), radius: 8)
                 if let winner = snap.winner {
-                    Text("\(state.team(winner).displayName) Wins")
+                    Text("\(state.team(winner).shortDisplayName) Wins")
                         .font(.headline)
                         .multilineTextAlignment(.center)
                 }
