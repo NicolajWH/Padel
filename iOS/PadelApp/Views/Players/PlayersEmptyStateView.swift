@@ -13,7 +13,7 @@ struct PlayersEmptyStateView: View {
 
     private struct Step: Identifiable {
         let id: Int
-        let title: String
+        let title: LocalizedStringKey
         let icon: String
     }
 

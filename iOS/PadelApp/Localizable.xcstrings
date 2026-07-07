@@ -71,6 +71,16 @@
         }
       }
     },
+    "%lld already added — skipped": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld allerede tilføjet — sprunget over"
+          }
+        }
+      }
+    },
     "%lld rounds played": {
       "localizations": {
         "da": {
@@ -111,12 +121,32 @@
         }
       }
     },
+    "Add %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj %lld"
+          }
+        }
+      }
+    },
     "Add Player": {
       "localizations": {
         "da": {
           "stringUnit": {
             "state": "translated",
             "value": "Tilføj spiller"
+          }
+        }
+      }
+    },
+    "Add players manually": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj spillere manuelt"
           }
         }
       }
@@ -361,6 +391,26 @@
         }
       }
     },
+    "Get MATCHi in the App Store": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hent MATCHi i App Store"
+          }
+        }
+      }
+    },
+    "Go to Profile": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gå til Profil"
+          }
+        }
+      }
+    },
     "Golden Point": {
       "localizations": {
         "da": {
@@ -377,6 +427,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Golden point (afgørende bold ved 40-40)"
+          }
+        }
+      }
+    },
+    "Got MATCHi? Import your friends": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Har du MATCHi? Importér dine venner"
           }
         }
       }
@@ -417,6 +477,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "iCloud kræves for at dele kampe. Log ind på iCloud på denne iPhone, og prøv igen."
+          }
+        }
+      }
+    },
+    "Import from list": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importér fra liste"
+          }
+        }
+      }
+    },
+    "Import from screenshot": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importér fra skærmbillede"
+          }
+        }
+      }
+    },
+    "Import Players": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Importér spillere"
           }
         }
       }
@@ -591,6 +681,16 @@
         }
       }
     },
+    "Names": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Navne"
+          }
+        }
+      }
+    },
     "Nearby Matches": {
       "localizations": {
         "da": {
@@ -751,6 +851,16 @@
         }
       }
     },
+    "Open MATCHi": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Åbn MATCHi"
+          }
+        }
+      }
+    },
     "Padel follows your iPhone's language. To use a different language just for this app, change it in Settings. Your Apple Watch follows automatically.": {
       "localizations": {
         "da": {
@@ -797,6 +907,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "Makkerne roterer hver runde, så du spiller med — og mod — alle i gruppen."
+          }
+        }
+      }
+    },
+    "Paste names, one per line": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indsæt navne, ét pr. linje"
+          }
+        }
+      }
+    },
+    "Paste your friends list from another app (e.g. MATCHi) — one name per line — or scan a screenshot of the list and the names are read for you. Review them here before adding; names you already have are skipped.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indsæt din venneliste fra en anden app (f.eks. MATCHi) — ét navn pr. linje — eller scan et skærmbillede af listen, så læses navnene for dig. Gennemse dem her, før du tilføjer; navne du allerede har, springes over."
           }
         }
       }
@@ -941,6 +1071,16 @@
         }
       }
     },
+    "Reading names…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Læser navne…"
+          }
+        }
+      }
+    },
     "Recent": {
       "localizations": {
         "da": {
@@ -1027,6 +1167,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rundeindstillinger"
+          }
+        }
+      }
+    },
+    "Scan screenshot": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan skærmbillede"
           }
         }
       }
@@ -1281,6 +1431,36 @@
         }
       }
     },
+    "Take a screenshot": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag et skærmbillede"
+          }
+        }
+      }
+    },
+    "Take a screenshot of your friends list and import them as players — the names are read for you, no typing.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tag et skærmbillede af din venneliste og importér dem som spillere — navnene læses for dig, ingen indtastning."
+          }
+        }
+      }
+    },
+    "Tap Friends": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tryk på Venner"
+          }
+        }
+      }
+    },
     "Tap to see who's playing and join in.": {
       "localizations": {
         "da": {
@@ -1297,6 +1477,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deres hold"
+          }
+        }
+      }
+    },
+    "Will add %lld": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføjer %lld"
           }
         }
       }
