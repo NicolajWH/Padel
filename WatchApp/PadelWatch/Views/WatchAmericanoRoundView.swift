@@ -11,6 +11,13 @@ struct WatchAmericanoRoundView: View {
 
     private var session: AmericanoSession? { store.activeAmericano }
 
+    /// True once any round has every court finished — i.e. there are real
+    /// standings worth showing rather than a table of zeros.
+    private var hasCompletedRound: Bool {
+        guard let session else { return false }
+        return session.rounds.contains { session.isRoundComplete($0) }
+    }
+
     var body: some View {
         if let session {
             let round = session.rounds.indices.contains(roundIndex) ? session.rounds[roundIndex] : nil
@@ -28,6 +35,10 @@ struct WatchAmericanoRoundView: View {
                 .animation(.snappy, value: connectivity.isPhoneReachable)
 
                 if let round {
+                    // One page per court. With two courts running at once, each
+                    // scorer just swipes to their own court and taps — the sync
+                    // carries the result back, so nobody has to reconcile scores
+                    // out loud. Dots only appear when there's more than one court.
                     TabView {
                         ForEach(round.matchups) { matchup in
                             MatchupScoringView(session: session, roundIndex: roundIndex, matchup: matchup) { updated in
@@ -35,7 +46,7 @@ struct WatchAmericanoRoundView: View {
                             }
                         }
                     }
-                    .tabViewStyle(.page)
+                    .tabViewStyle(.page(indexDisplayMode: round.matchups.count > 1 ? .automatic : .never))
                 }
 
                 HStack {
@@ -46,10 +57,18 @@ struct WatchAmericanoRoundView: View {
                     }
                     .disabled(roundIndex == 0)
 
-                    NavigationLink("Standings") {
-                        WatchAmericanoStandingsView(session: session)
+                    Spacer()
+
+                    // Standings are all zeros until a round finishes, so the link
+                    // only appears once there's a real table to look at.
+                    if hasCompletedRound {
+                        NavigationLink("Standings") {
+                            WatchAmericanoStandingsView(session: session)
+                        }
+                        .font(.caption2)
                     }
-                    .font(.caption2)
+
+                    Spacer()
 
                     Button {
                         roundIndex = min(session.rounds.count - 1, roundIndex + 1)
@@ -195,13 +214,13 @@ private struct AmericanoTeamZone: View {
         Button(action: onTap) {
             HStack(spacing: 8) {
                 Text(name)
-                    .font(.system(size: 13, weight: .semibold))
-                    .lineLimit(1)
+                    .font(.system(size: 12, weight: .semibold))
+                    .lineLimit(2)
                     .minimumScaleFactor(0.6)
                     .frame(maxWidth: .infinity, alignment: .leading)
 
                 Text("\(points)")
-                    .font(.system(size: 40, weight: .heavy, design: .rounded))
+                    .font(.system(size: 32, weight: .heavy, design: .rounded))
                     .foregroundStyle(color)
                     .lineLimit(1)
                     .minimumScaleFactor(0.5)

@@ -11,6 +11,21 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "%@ vinder" } }
       }
     },
+    "%lld courts" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "%lld baner" } }
+      }
+    },
+    "%lld rounds" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "%lld runder" } }
+      }
+    },
+    "1 court" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "1 bane" } }
+      }
+    },
     "Americano" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Americano" } }
@@ -41,14 +56,19 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Afslut træning" } }
       }
     },
-    "Games %lld" : {
+    "Format" : {
       "localizations" : {
-        "da" : { "stringUnit" : { "state" : "translated", "value" : "Partier %lld" } }
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Format" } }
       }
     },
     "Games" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Partier" } }
+      }
+    },
+    "Games %lld" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Partier %lld" } }
       }
     },
     "Generate & Start" : {
