@@ -6,29 +6,68 @@ struct WatchNewAmericanoView: View {
     @EnvironmentObject private var connectivity: WatchConnectivityManager
     @State private var playerCount = 4
     @State private var pointsPerRound = 21
-    @State private var numberOfRounds = 3
-    @State private var isMexicano = false
+    @State private var format: AmericanoFormat = .americano
     @State private var navigate = false
+
+    /// One court per four players — the same rule the phone uses. Shown so the
+    /// setup reads as a plain summary instead of yet another dial to fiddle with.
+    private var courtCount: Int { max(1, playerCount / 4) }
 
     var body: some View {
         Form {
-            Stepper("Players: \(playerCount)", value: $playerCount, in: 4...16, step: 4)
-            Stepper("Points/round: \(pointsPerRound)", value: $pointsPerRound, in: 8...40, step: 1)
-            Stepper("Rounds: \(numberOfRounds)", value: $numberOfRounds, in: 1...10)
-            Toggle("Mexicano (seed by standings)", isOn: $isMexicano)
+            // Format first, as a plain segmented choice: the old toggle buried
+            // "Mexicano" behind a parenthetical nobody reads on a tiny screen.
+            Section {
+                Picker("Format", selection: $format) {
+                    ForEach(AmericanoFormat.allCases, id: \.self) { fmt in
+                        Text(fmt.displayName).tag(fmt)
+                    }
+                }
+                .pickerStyle(.navigationLink)
+            }
 
-            Button("Generate & Start") { start() }
+            // Only the two knobs that actually change how it plays. Rounds and
+            // courts are derived so setup is "pick players, pick points, start".
+            Section {
+                Stepper("Players: \(playerCount)", value: $playerCount, in: 4...16, step: 4)
+                Stepper("Points/round: \(pointsPerRound)", value: $pointsPerRound, in: 8...40, step: 1)
+            } footer: {
+                Text(summary)
+            }
+
+            Section {
+                Button {
+                    start()
+                } label: {
+                    Text("Start")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                }
+                .tint(PadelTheme.lime)
+            }
         }
-        .navigationTitle("Americano")
+        .navigationTitle(format.displayName)
         .navigationDestination(isPresented: $navigate) {
             WatchAmericanoRoundView()
         }
     }
 
+    private var summary: String {
+        let rounds = AmericanoSettings.standard(playerCount: playerCount).numberOfRounds
+        let courtsText = courtCount == 1
+            ? String(localized: "1 court")
+            : String(localized: "\(courtCount) courts")
+        let roundsText = String(localized: "\(rounds) rounds")
+        return "\(courtsText) · \(roundsText)"
+    }
+
     private func start() {
-        let format: AmericanoFormat = isMexicano ? .mexicano : .americano
         let players = (1...playerCount).map { Player(name: "P\($0)") }
-        let settings = AmericanoSettings(pointsPerRound: pointsPerRound, numberOfCourts: max(1, playerCount / 4), numberOfRounds: numberOfRounds, format: format)
+        // Derive rounds/courts from the shared default so the watch matches the
+        // phone; only the two hand-picked values (points, format) override it.
+        var settings = AmericanoSettings.standard(playerCount: playerCount)
+        settings.pointsPerRound = pointsPerRound
+        settings.format = format
         let rounds = AmericanoScheduler.generateSchedule(players: players, settings: settings)
         let session = AmericanoSession(name: format.displayName, players: players, settings: settings, rounds: rounds)
         store.activeAmericano = session
