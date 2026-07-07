@@ -11,8 +11,8 @@ extension AmericanoFormat {
     }
 }
 
-/// The illustrated poster mascot for a tournament format — a cowboy pup for
-/// **Americano**, a sombrero-wearing pup for **Mexicano** — shown as a rounded
+/// The poster mascot for a tournament format — an American theme for
+/// **Americano**, a Mexican theme for **Mexicano** — shown as a rounded
 /// square thumbnail. Keeps one shared mapping so every screen stays in sync.
 struct FormatMascot: View {
     let format: AmericanoFormat

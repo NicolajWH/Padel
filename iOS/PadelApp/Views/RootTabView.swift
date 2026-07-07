@@ -10,7 +10,7 @@ struct RootTabView: View {
                 .tabItem { Label("Play", systemImage: "tennis.racket") }
 
             NavigationStack { AmericanoHomeView() }
-                .tabItem { Label("Americano", systemImage: "person.3.fill") }
+                .tabItem { Label("Mix", systemImage: "person.3.fill") }
 
             NavigationStack { HistoryView() }
                 .tabItem { Label("History", systemImage: "clock.arrow.circlepath") }

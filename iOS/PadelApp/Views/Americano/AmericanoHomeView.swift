@@ -61,7 +61,7 @@ struct AmericanoHomeView: View {
             .padding()
         }
         .background(Color(uiColor: .systemGroupedBackground))
-        .navigationTitle("Americano")
+        .navigationTitle("Mix")
     }
 }
 
@@ -99,8 +99,8 @@ private struct FormatExplainer: View {
     }
 }
 
-/// Tappable format card on the Americano home screen, fronted by its
-/// illustrated poster mascot — a cowboy pup for Americano, a sombrero pup for
+/// Tappable format card on the Mix home screen, fronted by its poster
+/// mascot — an American theme for Americano, a Mexican theme for
 /// Mexicano — with the action label over a soft gradient at the bottom.
 private struct FormatCard: View {
     let title: LocalizedStringKey
