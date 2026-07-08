@@ -12,9 +12,11 @@ struct AmericanoSetupView: View {
     @State private var format: AmericanoFormat
     @State private var fixedPartners = false
 
-    /// Selection state. In free mode the roster is a flat, order-agnostic list;
-    /// in fixed-partners mode players live in explicit two-slot pair cards.
-    @State private var roster: [Player] = []
+    /// Selection state. In free mode players fill numbered court-style slots,
+    /// exactly like the match court; in fixed-partners mode they live in
+    /// explicit two-slot pair cards. Both are order-agnostic for scheduling.
+    @State private var freeSlots: [Player?] = [nil, nil, nil, nil]
+    @State private var selectedFreeSlot: Int?
     @State private var pairSlots: [[Player?]] = [[nil, nil], [nil, nil]]
     @State private var selectedPairSlot: PairSlotID?
 
@@ -122,7 +124,7 @@ struct AmericanoSetupView: View {
             if fixedPartners {
                 pairsBuilder
             } else {
-                freeRoster
+                freeSlotsBuilder
             }
         } header: {
             Text(fixedPartners ? "Pairs (min. 2)" : "Players (min. 4, multiples of 4 work best)")
@@ -168,32 +170,51 @@ struct AmericanoSetupView: View {
         }
     }
 
-    private var freeRoster: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if roster.isEmpty {
-                Text("Tap players below to build your line-up.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
-            } else {
-                FlowLayout(spacing: 8) {
-                    ForEach(roster) { player in
-                        PlayerChip(player: player, trailingSystemImage: "xmark.circle.fill") {
-                            withAnimation(.snappy) { roster.removeAll { $0.id == player.id } }
-                        }
+    private var freeSlotsBuilder: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(freeSlotRows, id: \.self) { row in
+                HStack(spacing: 10) {
+                    freeSlot(index: row[0])
+                    if row.count > 1 {
+                        freeSlot(index: row[1])
+                    } else {
+                        Color.clear.frame(maxWidth: .infinity)
                     }
                 }
-                Text("\(roster.count) players")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
+            Text("\(selectedPlayers.count) players")
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .contentShape(Rectangle())
-        .dropDestination(for: String.self) { items, _ in
-            guard let id = items.first else { return false }
-            return dropIntoRoster(id)
+        .listRowBackground(Color.clear)
+    }
+
+    /// Free slots laid out two-per-row, mirroring the match court.
+    private var freeSlotRows: [[Int]] {
+        stride(from: 0, to: freeSlots.count, by: 2).map { start in
+            Array(start..<min(start + 2, freeSlots.count))
         }
+    }
+
+    private func freeSlot(index: Int) -> some View {
+        PlayerSlotView(
+            player: freeSlots[index],
+            accent: PadelTheme.courtBlue,
+            isSelected: selectedFreeSlot == index,
+            onTapEmpty: {
+                withAnimation(.snappy) {
+                    selectedFreeSlot = (selectedFreeSlot == index) ? nil : index
+                }
+            },
+            onRemove: {
+                withAnimation(.snappy) {
+                    freeSlots[index] = nil
+                    normalizeFreeSlots()
+                    selectedFreeSlot = firstEmptyFreeSlot()
+                }
+            },
+            onDrop: { id in dropIntoFreeSlot(id, index: index) }
+        )
     }
 
     private var pairsBuilder: some View {
@@ -258,13 +279,13 @@ struct AmericanoSetupView: View {
 
     /// Players already chosen, regardless of mode.
     private var selectedPlayers: [Player] {
-        fixedPartners ? pairSlots.flatMap { $0 }.compactMap { $0 } : roster
+        fixedPartners ? pairSlots.flatMap { $0 }.compactMap { $0 } : freeSlots.compactMap { $0 }
     }
 
     /// The players a session will actually start with — complete pairs only
     /// when partners are fixed.
     private var chosenPlayers: [Player] {
-        guard fixedPartners else { return roster }
+        guard fixedPartners else { return freeSlots.compactMap { $0 } }
         return pairSlots.filter { $0.allSatisfy { $0 != nil } }.flatMap { $0 }.compactMap { $0 }
     }
 
@@ -303,14 +324,31 @@ struct AmericanoSetupView: View {
                 pairSlots[target.pair][target.slot] = player
                 selectedPairSlot = firstEmptyPairSlot()
             } else {
-                roster.append(player)
+                let target = selectedFreeSlot ?? firstEmptyFreeSlot()
+                if let target { freeSlots[target] = player } else { freeSlots.append(player) }
+                normalizeFreeSlots()
+                selectedFreeSlot = firstEmptyFreeSlot()
             }
         }
     }
 
-    private func dropIntoRoster(_ id: String) -> Bool {
+    private func dropIntoFreeSlot(_ id: String, index: Int) -> Bool {
+        if let source = freeSlots.firstIndex(where: { $0?.id.uuidString == id }) {
+            guard source != index else { return false }
+            withAnimation(.snappy) {
+                let displaced = freeSlots[index]
+                freeSlots[index] = freeSlots[source]
+                freeSlots[source] = displaced
+                normalizeFreeSlots()
+            }
+            return true
+        }
         guard let player = candidatePlayers.first(where: { $0.id.uuidString == id }), !isChosen(player) else { return false }
-        withAnimation(.snappy) { roster.append(player) }
+        withAnimation(.snappy) {
+            freeSlots[index] = player
+            normalizeFreeSlots()
+            selectedFreeSlot = firstEmptyFreeSlot()
+        }
         return true
     }
 
@@ -330,6 +368,20 @@ struct AmericanoSetupView: View {
             selectedPairSlot = firstEmptyPairSlot()
         }
         return true
+    }
+
+    private func firstEmptyFreeSlot() -> Int? {
+        freeSlots.firstIndex(where: { $0 == nil })
+    }
+
+    /// Keep filled slots first, always leave one trailing empty slot to drop or
+    /// tap into, and never show fewer than four — so the court can grow to any
+    /// number of players while staying tidy.
+    private func normalizeFreeSlots() {
+        var slots: [Player?] = freeSlots.compactMap { $0 }.map { Optional($0) }
+        slots.append(nil)
+        while slots.count < 4 { slots.append(nil) }
+        freeSlots = slots
     }
 
     private func firstEmptyPairSlot() -> PairSlotID? {
@@ -359,7 +411,7 @@ struct AmericanoSetupView: View {
     /// Keep the picked players when the pairs toggle flips.
     private func convertSelection(toPairs: Bool) {
         if toPairs {
-            let players = roster
+            let players = freeSlots.compactMap { $0 }
             var slots: [[Player?]] = []
             var index = 0
             while index < players.count {
@@ -369,9 +421,13 @@ struct AmericanoSetupView: View {
             }
             while slots.count < 2 { slots.append([nil, nil]) }
             pairSlots = slots
+            freeSlots = [nil, nil, nil, nil]
+            selectedFreeSlot = nil
         } else {
-            roster = pairSlots.flatMap { $0 }.compactMap { $0 }
+            freeSlots = pairSlots.flatMap { $0 }.compactMap { $0 }.map { Optional($0) }
+            normalizeFreeSlots()
             pairSlots = [[nil, nil], [nil, nil]]
+            selectedFreeSlot = firstEmptyFreeSlot()
         }
         selectedPairSlot = nil
     }
@@ -405,7 +461,9 @@ struct AmericanoSetupView: View {
             pairSlots[0][0] = owner
             selectedPairSlot = PairSlotID(0, 1)
         } else {
-            roster = [owner]
+            freeSlots[0] = owner
+            normalizeFreeSlots()
+            selectedFreeSlot = firstEmptyFreeSlot()
         }
     }
 
