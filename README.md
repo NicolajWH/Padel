@@ -43,6 +43,10 @@ to TestFlight via GitHub Actions.
 - **Live Activity** — while a match is scored on the iPhone (including points
   relayed live from the Watch), the score lives on the lock screen and in the
   Dynamic Island.
+- **Watch-face complication** — add the Padel complication to any watch face
+  (circular, rectangular, corner or inline) and one tap jumps straight into the
+  scoreboard: it resumes the match in progress, or starts a fresh quick match,
+  ready to register points without opening the app first.
 - **Player profiles** — save players once, quick-add them into new matches or
   Americano sessions, colour-coded avatars.
 
@@ -132,6 +136,11 @@ the steps are done):
    Description `Padel Widgets`, Bundle ID **explicit** `com.worsa.padel.widgets`
    → no capabilities needed (Live Activities don't require one) → Register.
    The next deploy creates its App Store provisioning profile automatically.
+3. **Register the Watch complication extension**: Identifiers → **+** → App IDs
+   → App → Description `Padel Watch Widgets`, Bundle ID **explicit**
+   `com.worsa.padel.watchapp.widgets` → no capabilities needed → Register. As
+   with the iPhone widget, the next deploy creates its provisioning profile
+   automatically and it ships inside the existing app record.
 
 No new certificates, no new secrets, and no App Store Connect changes are
 needed — the widget ships inside the existing app record.
@@ -203,4 +212,6 @@ any merge logic.
 - iPad-specific layouts (the app is iPhone + Watch only, `TARGETED_DEVICE_FAMILY: "1"`)
 - iCloud/CloudKit sync across a user's own multiple devices (Watch↔iPhone
   sync is handled directly over WatchConnectivity instead)
-- watch complications
+- A live score *on* the watch-face complication itself (it's a launcher into
+  the scoreboard — showing the running score on the face would need an App
+  Group to share state across processes)

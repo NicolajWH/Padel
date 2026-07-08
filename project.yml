@@ -73,6 +73,8 @@ targets:
       - path: WatchApp/PadelWatch
     dependencies:
       - package: PadelKit
+      - target: PadelWatchWidgets
+        embed: true
     entitlements:
       path: Generated/PadelWatch.entitlements
       properties:
@@ -119,6 +121,26 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.worsa.padel.widgets
         TARGETED_DEVICE_FAMILY: "1"
+        SKIP_INSTALL: YES
+
+  PadelWatchWidgets:
+    type: app-extension
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: WatchApp/PadelWatchWidgets
+    info:
+      path: Generated/PadelWatchWidgets-Info.plist
+      properties:
+        CFBundleDisplayName: Padel
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        CFBundleLocalizations: [en, da]
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.worsa.padel.watchapp.widgets
         SKIP_INSTALL: YES
 
 schemes:

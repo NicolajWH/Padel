@@ -64,6 +64,31 @@ final class WatchStore: ObservableObject {
         matchToPresent = nil
     }
 
+    /// The standard casual ruleset used for one-tap quick matches on the watch —
+    /// no setup questions on the tiny screen. Shared by the home screen's
+    /// "New Match" button and the watch-face complication so they can't drift.
+    static func makeQuickMatch() -> MatchState {
+        let teamA = Team(players: [Player(name: "Team A-1"), Player(name: "Team A-2")])
+        let teamB = Team(players: [Player(name: "Team B-1"), Player(name: "Team B-2")])
+        return MatchState(teamA: teamA, teamB: teamB, settings: MatchSettings(goldenPoint: false, setsToWin: 1))
+    }
+
+    /// Opens the scoreboard from outside the app (the watch-face complication):
+    /// resumes the match in progress, or spins up a fresh quick match, then flags
+    /// it so the home view pushes the live scoreboard automatically. Returns the
+    /// match that should be broadcast to the phone, if a new one was created.
+    @discardableResult
+    func openScoring() -> MatchState? {
+        if let match = activeMatch, !match.isFinished {
+            matchToPresent = match
+            return nil
+        }
+        let match = WatchStore.makeQuickMatch()
+        activeMatch = match
+        matchToPresent = match
+        return match
+    }
+
     func archiveMatchIfFinished() {
         guard let activeMatch, activeMatch.isFinished else { return }
         recentMatches.removeAll { $0.id == activeMatch.id }
