@@ -1,15 +1,85 @@
 import SwiftUI
 import PadelKit
 
-/// A visual court where players are assigned to the four match slots by
-/// tapping or dragging. Because a player can occupy only one slot at a time
-/// — and assigned players drop out of the pool below — the same person can
-/// never be picked twice.
+/// A single player slot: tap an empty one to target it, drag a player onto it,
+/// or remove the occupant. Reused by the match court and the Mix pair builder.
+struct PlayerSlotView: View {
+    let player: Player?
+    var accent: Color
+    var isSelected: Bool = false
+    var minHeight: CGFloat = 54
+    var onTapEmpty: () -> Void = {}
+    var onRemove: () -> Void = {}
+    var onDrop: (String) -> Bool = { _ in false }
+
+    var body: some View {
+        content
+            .dropDestination(for: String.self) { items, _ in
+                guard let id = items.first else { return false }
+                return onDrop(id)
+            }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if let player {
+            HStack(spacing: 8) {
+                PlayerAvatar(player: player, size: 30)
+                Text(player.name)
+                    .font(.subheadline.weight(.medium))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+                Spacer(minLength: 0)
+                Button(action: onRemove) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 10)
+            .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .leading)
+            .background(accent.opacity(0.14), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(accent.opacity(0.35), lineWidth: 1)
+            )
+            .draggable(player.id.uuidString)
+        } else {
+            VStack(spacing: 3) {
+                Image(systemName: "plus")
+                    .font(.headline)
+                Text("Add")
+                    .font(.caption)
+            }
+            .foregroundStyle(isSelected ? accent : Color.secondary)
+            .frame(maxWidth: .infinity, minHeight: minHeight)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(isSelected ? accent.opacity(0.12) : Color.clear)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(
+                        isSelected ? accent : Color.secondary.opacity(0.4),
+                        style: StrokeStyle(lineWidth: 1.5, dash: [5])
+                    )
+            )
+            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .onTapGesture(perform: onTapEmpty)
+        }
+    }
+}
+
+/// A visual court where a match's two teams' four slots are filled by tapping
+/// or dragging players. Because a player occupies a single slot — and assigned
+/// players drop out of the pool — the same person can never be picked twice.
 struct TeamBuilder: View {
     /// The four slots: index 0/1 = Team A, index 2/3 = Team B.
     @Binding var slots: [Player?]
     /// The slot a tapped pool player fills, or `nil` to fill the first empty one.
     @Binding var selectedSlot: Int?
+    /// Resolves a pool drag by id so it can be dropped into `target`.
+    var onDropFromPool: (String, Int) -> Bool
 
     var body: some View {
         VStack(spacing: 10) {
@@ -53,70 +123,23 @@ struct TeamBuilder: View {
     }
 
     private func slotView(_ index: Int, side: TeamSide) -> some View {
-        let color = PadelTheme.teamColor(side)
-        let isSelected = selectedSlot == index
-        return Group {
-            if let player = slots[index] {
-                HStack(spacing: 8) {
-                    PlayerAvatar(player: player, size: 30)
-                    Text(player.name)
-                        .font(.subheadline.weight(.medium))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                    Spacer(minLength: 0)
-                    Button {
-                        withAnimation(.snappy) { clear(index) }
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                    .buttonStyle(.plain)
+        PlayerSlotView(
+            player: slots[index],
+            accent: PadelTheme.teamColor(side),
+            isSelected: selectedSlot == index,
+            onTapEmpty: {
+                withAnimation(.snappy) {
+                    selectedSlot = (selectedSlot == index) ? nil : index
                 }
-                .padding(.horizontal, 10)
-                .frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
-                .background(color.opacity(0.14), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .stroke(color.opacity(0.35), lineWidth: 1)
-                )
-                .draggable(player.id.uuidString)
-            } else {
-                VStack(spacing: 3) {
-                    Image(systemName: "plus")
-                        .font(.headline)
-                    Text("Add")
-                        .font(.caption)
+            },
+            onRemove: {
+                withAnimation(.snappy) {
+                    slots[index] = nil
+                    selectedSlot = index
                 }
-                .foregroundStyle(isSelected ? color : Color.secondary)
-                .frame(maxWidth: .infinity, minHeight: 54)
-                .background(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .fill(isSelected ? color.opacity(0.12) : Color.clear)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(
-                            isSelected ? color : Color.secondary.opacity(0.4),
-                            style: StrokeStyle(lineWidth: 1.5, dash: [5])
-                        )
-                )
-                .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .onTapGesture {
-                    withAnimation(.snappy) {
-                        selectedSlot = (selectedSlot == index) ? nil : index
-                    }
-                }
-            }
-        }
-        .dropDestination(for: String.self) { items, _ in
-            guard let idString = items.first else { return false }
-            return handleDrop(idString: idString, into: index)
-        }
-    }
-
-    private func clear(_ index: Int) {
-        slots[index] = nil
-        selectedSlot = index
+            },
+            onDrop: { id in handleDrop(idString: id, into: index) }
+        )
     }
 
     /// Resolves a dragged player id and moves them into `target`, swapping
@@ -131,12 +154,8 @@ struct TeamBuilder: View {
             }
             return true
         }
-        // Dragged in from the pool — let the coordinator resolve the id.
-        return onDropFromPool?(idString, target) ?? false
+        return onDropFromPool(idString, target)
     }
-
-    /// Set by the owner so pool drags can be resolved against its candidate list.
-    var onDropFromPool: ((String, Int) -> Bool)?
 }
 
 /// A wrapping row of items — used for the tappable / draggable player pool.
@@ -176,9 +195,11 @@ struct FlowLayout: Layout {
     }
 }
 
-/// A tappable, draggable player chip shown in the selection pool.
+/// A tappable, draggable player chip shown in the selection pool. An optional
+/// trailing icon turns it into a removable "chosen player" chip.
 struct PlayerChip: View {
     let player: Player
+    var trailingSystemImage: String? = nil
     var onTap: () -> Void
 
     var body: some View {
@@ -188,6 +209,11 @@ struct PlayerChip: View {
                 Text(player.name)
                     .font(.subheadline)
                     .lineLimit(1)
+                if let trailingSystemImage {
+                    Image(systemName: trailingSystemImage)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 6)

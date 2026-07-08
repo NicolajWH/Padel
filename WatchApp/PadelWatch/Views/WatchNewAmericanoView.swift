@@ -7,6 +7,7 @@ struct WatchNewAmericanoView: View {
     @State private var playerCount = 4
     @State private var pointsPerRound = 21
     @State private var format: AmericanoFormat = .americano
+    @State private var fixedPartners = false
     @State private var navigate = false
 
     /// One court per four players — the same rule the phone uses. Shown so the
@@ -31,6 +32,7 @@ struct WatchNewAmericanoView: View {
             Section {
                 Stepper("Players: \(playerCount)", value: $playerCount, in: 4...16, step: 4)
                 Stepper("Points/round: \(pointsPerRound)", value: $pointsPerRound, in: 8...40, step: 1)
+                Toggle("Fixed partners", isOn: $fixedPartners)
             } footer: {
                 Text(summary)
             }
@@ -68,6 +70,7 @@ struct WatchNewAmericanoView: View {
         var settings = AmericanoSettings.standard(playerCount: playerCount)
         settings.pointsPerRound = pointsPerRound
         settings.format = format
+        settings.fixedPartners = fixedPartners
         let rounds = AmericanoScheduler.generateSchedule(players: players, settings: settings)
         let session = AmericanoSession(name: format.displayName, players: players, settings: settings, rounds: rounds)
         store.activeAmericano = session

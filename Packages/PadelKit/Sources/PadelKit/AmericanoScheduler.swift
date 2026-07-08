@@ -25,6 +25,11 @@ public enum AmericanoScheduler {
             return session.rounds
         }
 
+        // Fixed partners: opponents rotate but pairs never split up.
+        if settings.fixedPartners {
+            return generatePairedAmericano(players: players, settings: settings)
+        }
+
         let courts = max(1, settings.numberOfCourts)
         let playersPerRound = min(players.count, courts * 4)
 
@@ -71,6 +76,10 @@ public enum AmericanoScheduler {
     public static func nextRound(for session: AmericanoSession) -> AmericanoRound? {
         let players = session.players
         guard players.count >= 4 else { return nil }
+
+        if session.settings.fixedPartners {
+            return nextPairedRound(for: session)
+        }
 
         let settings = session.settings
         let roundIndex = session.rounds.count
@@ -133,6 +142,166 @@ public enum AmericanoScheduler {
             // init would mint random UUIDs and break cross-device equality.
             let teamA = Team(id: deterministicUUID(using: &rng), players: playersA)
             let teamB = Team(id: deterministicUUID(using: &rng), players: playersB)
+            matchups.append(
+                AmericanoMatchup(id: deterministicUUID(using: &rng), court: court, teamA: teamA, teamB: teamB)
+            )
+            court += 1
+        }
+        guard !matchups.isEmpty else { return nil }
+        return AmericanoRound(id: deterministicUUID(using: &rng), index: roundIndex, matchups: matchups)
+    }
+
+    // MARK: - Fixed partners
+
+    /// Splits the roster into fixed pairs — consecutive players two at a time.
+    /// A trailing unpaired player (odd roster) is dropped.
+    private static func pairs(from players: [Player]) -> [[Player]] {
+        var result: [[Player]] = []
+        var index = 0
+        while index + 1 < players.count {
+            result.append([players[index], players[index + 1]])
+            index += 2
+        }
+        return result
+    }
+
+    /// The candidate index whose pair has faced `pair` the fewest times, so
+    /// fixed pairs still meet as many different opponents as possible.
+    private static func freshestOpponent(for pair: Int, in candidates: [Int], opponentCount: [Set<Int>: Int]) -> Int {
+        var bestIndex = 0
+        var bestScore = Int.max
+        for (i, candidate) in candidates.enumerated() {
+            let score = opponentCount[Set([pair, candidate])] ?? 0
+            if score < bestScore {
+                bestScore = score
+                bestIndex = i
+            }
+        }
+        return bestIndex
+    }
+
+    /// Pre-generates a fixed-partners Americano: pairs stay together, whole
+    /// pairs rotate through sit-outs, and opponents vary as much as possible.
+    private static func generatePairedAmericano(players: [Player], settings: AmericanoSettings) -> [AmericanoRound] {
+        let allPairs = pairs(from: players)
+        guard allPairs.count >= 2 else { return [] }
+        let courts = max(1, settings.numberOfCourts)
+        let usablePairs = (min(allPairs.count, courts * 2) / 2) * 2
+        guard usablePairs >= 2 else { return [] }
+
+        var pairSitOut: [Int: Int] = [:]
+        var opponentCount: [Set<Int>: Int] = [:]
+        var rounds: [AmericanoRound] = []
+        var rng = SystemRandomNumberGenerator()
+
+        for roundIndex in 0..<max(0, settings.numberOfRounds) {
+            let ordered = allPairs.indices.shuffled(using: &rng).sorted {
+                (pairSitOut[$0] ?? 0) < (pairSitOut[$1] ?? 0)
+            }
+            for idx in ordered.prefix(allPairs.count - usablePairs) {
+                pairSitOut[idx, default: 0] += 1
+            }
+            var active = Array(ordered.suffix(usablePairs)).shuffled(using: &rng)
+
+            var matchups: [AmericanoMatchup] = []
+            var court = 1
+            while active.count >= 2 {
+                let first = active.removeFirst()
+                let pick = freshestOpponent(for: first, in: active, opponentCount: opponentCount)
+                let opponent = active.remove(at: pick)
+                opponentCount[Set([first, opponent]), default: 0] += 1
+                matchups.append(
+                    AmericanoMatchup(
+                        court: court,
+                        teamA: Team(players: allPairs[first]),
+                        teamB: Team(players: allPairs[opponent])
+                    )
+                )
+                court += 1
+            }
+            rounds.append(AmericanoRound(index: roundIndex, matchups: matchups))
+        }
+        return rounds
+    }
+
+    /// The next fixed-partners round, deterministic from the session state so
+    /// phone and watch agree. Americano keeps opponents fresh; Mexicano orders
+    /// pairs by their combined score so evenly-matched pairs meet.
+    private static func nextPairedRound(for session: AmericanoSession) -> AmericanoRound? {
+        let allPairs = pairs(from: session.players)
+        guard allPairs.count >= 2 else { return nil }
+        let settings = session.settings
+        let roundIndex = session.rounds.count
+        let courts = max(1, settings.numberOfCourts)
+        let usablePairs = (min(allPairs.count, courts * 2) / 2) * 2
+        guard usablePairs >= 2 else { return nil }
+
+        var rng = SeededRandomNumberGenerator(seed: seed(sessionID: session.id, roundIndex: roundIndex))
+
+        var pairIndexByKey: [Set<UUID>: Int] = [:]
+        for (i, pair) in allPairs.enumerated() {
+            pairIndexByKey[Set(pair.map(\.id))] = i
+        }
+
+        // Sit-out and opponent history, rebuilt from prior rounds by matching
+        // each team back to its pair.
+        var pairSitOut: [Int: Int] = [:]
+        var opponentCount: [Set<Int>: Int] = [:]
+        for round in session.rounds {
+            var played = Set<Int>()
+            for matchup in round.matchups {
+                guard let a = pairIndexByKey[Set(matchup.teamA.players.map(\.id))],
+                      let b = pairIndexByKey[Set(matchup.teamB.players.map(\.id))] else { continue }
+                played.insert(a)
+                played.insert(b)
+                opponentCount[Set([a, b]), default: 0] += 1
+            }
+            for i in allPairs.indices where !played.contains(i) {
+                pairSitOut[i, default: 0] += 1
+            }
+        }
+
+        // Fair sit-out rotation over a deterministic (seeded-shuffled) order.
+        let byRest = allPairs.indices.shuffled(using: &rng).sorted {
+            (pairSitOut[$0] ?? 0) < (pairSitOut[$1] ?? 0)
+        }
+        let activeArray = Array(byRest.suffix(usablePairs))
+
+        // Seeding order: Mexicano rounds after the first follow the combined
+        // standings so similar pairs meet; otherwise keep the rested order.
+        let ordered: [Int]
+        if settings.format == .mexicano, !session.rounds.isEmpty {
+            let pointsByPlayer = Dictionary(
+                session.standings.map { ($0.player.id, $0.totalPoints) },
+                uniquingKeysWith: { first, _ in first }
+            )
+            func pairPoints(_ index: Int) -> Int {
+                allPairs[index].reduce(0) { $0 + (pointsByPlayer[$1.id] ?? 0) }
+            }
+            ordered = activeArray.sorted {
+                let lhs = pairPoints($0), rhs = pairPoints($1)
+                if lhs != rhs { return lhs > rhs }
+                return $0 < $1
+            }
+        } else {
+            ordered = activeArray
+        }
+
+        var matchups: [AmericanoMatchup] = []
+        var pool = ordered
+        var court = 1
+        while pool.count >= 2 {
+            let first = pool.removeFirst()
+            let opponent: Int
+            if settings.format == .mexicano {
+                opponent = pool.removeFirst()   // adjacent in standings order
+            } else {
+                let pick = freshestOpponent(for: first, in: pool, opponentCount: opponentCount)
+                opponent = pool.remove(at: pick)
+            }
+            opponentCount[Set([first, opponent]), default: 0] += 1
+            let teamA = Team(id: deterministicUUID(using: &rng), players: allPairs[first])
+            let teamB = Team(id: deterministicUUID(using: &rng), players: allPairs[opponent])
             matchups.append(
                 AmericanoMatchup(id: deterministicUUID(using: &rng), court: court, teamA: teamA, teamB: teamB)
             )
