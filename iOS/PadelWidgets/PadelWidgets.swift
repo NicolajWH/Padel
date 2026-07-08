@@ -142,8 +142,8 @@ private struct GamesAndSetsLine: View {
 
 /// Mirrors PadelTheme in the main app (the extension doesn't link it).
 private enum Theme {
-    static let teamA = Color(red: 0x4D / 255, green: 0xA3 / 255, blue: 0xFF / 255)
-    static let teamB = Color(red: 0xFF / 255, green: 0x7A / 255, blue: 0x59 / 255)
-    static let lime = Color(red: 0xC6 / 255, green: 0xED / 255, blue: 0x3F / 255)
-    static let night = Color(red: 0x07 / 255, green: 0x1A / 255, blue: 0x30 / 255)
+    static let teamA = Color(red: 0x5B / 255, green: 0x93 / 255, blue: 0xD6 / 255)
+    static let teamB = Color(red: 0xE0 / 255, green: 0x8A / 255, blue: 0x5B / 255)
+    static let lime = Color(red: 0xE3 / 255, green: 0xC3 / 255, blue: 0x6B / 255)
+    static let night = Color(red: 0x0A / 255, green: 0x21 / 255, blue: 0x19 / 255)
 }

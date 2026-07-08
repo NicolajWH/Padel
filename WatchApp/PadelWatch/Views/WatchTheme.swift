@@ -1,13 +1,13 @@
 import SwiftUI
 
-/// Watch-side mirror of the iOS design language: padel-court blues with a
-/// padel-ball lime accent.
+/// Watch-side mirror of the iOS design language: deep emerald greens with a
+/// champagne-gold accent.
 enum PadelTheme {
-    static let courtBlue = Color(hex: "1B6CA8")
-    static let courtDeep = Color(hex: "0C2B4E")
-    static let lime = Color(hex: "C6ED3F")
-    static let teamA = Color(hex: "4DA3FF")
-    static let teamB = Color(hex: "FF7A59")
+    static let courtBlue = Color(hex: "1E5C45")
+    static let courtDeep = Color(hex: "123D2E")
+    static let lime = Color(hex: "E3C36B")
+    static let teamA = Color(hex: "5B93D6")
+    static let teamB = Color(hex: "E08A5B")
 }
 
 extension Color {
