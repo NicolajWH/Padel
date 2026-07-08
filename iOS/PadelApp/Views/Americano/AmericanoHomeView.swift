@@ -41,8 +41,7 @@ struct AmericanoHomeView: View {
                 FormatExplainer()
 
                 if !sessions.isEmpty {
-                    Text("Recent")
-                        .font(.title3.bold())
+                    SectionHeader(title: "Recent", systemImage: "clock.arrow.circlepath")
                         .padding(.top, 8)
 
                     ForEach(sessions.prefix(5)) { record in
@@ -60,7 +59,7 @@ struct AmericanoHomeView: View {
             }
             .padding()
         }
-        .background(Color(uiColor: .systemGroupedBackground))
+        .padelBackground()
         .navigationTitle("Mix")
     }
 }
@@ -173,9 +172,9 @@ private struct OngoingAmericanoCard: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(PadelTheme.courtGradient)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: PadelTheme.courtDeep.opacity(0.35), radius: 10, y: 6)
+        .background(PadelTheme.heroGradient)
+        .clipShape(RoundedRectangle(cornerRadius: PadelTheme.Radius.large, style: .continuous))
+        .shadow(color: PadelTheme.courtDeep.opacity(0.4), radius: 14, y: 8)
     }
 }
 

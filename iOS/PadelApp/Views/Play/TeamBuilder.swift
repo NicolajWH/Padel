@@ -229,8 +229,8 @@ struct PlayerChip: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(Color(hex: player.colorHex).opacity(0.15), in: Capsule())
-            .overlay(Capsule().stroke(Color(hex: player.colorHex).opacity(0.4), lineWidth: 1))
+            .background(Color(hex: player.displayColorHex).opacity(0.15), in: Capsule())
+            .overlay(Capsule().stroke(Color(hex: player.displayColorHex).opacity(0.4), lineWidth: 1))
         }
         .buttonStyle(.plain)
         // An explicit preview lifts just this chip — without it a chip inside a
@@ -244,7 +244,7 @@ struct PlayerChip: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(Color(hex: player.colorHex).opacity(0.15), in: Capsule())
+            .background(Color(hex: player.displayColorHex).opacity(0.15), in: Capsule())
         }
     }
 }

@@ -13,7 +13,7 @@ struct WatchAmericanoStandingsView: View {
                         .foregroundStyle(rankColor(index + 1))
                         .frame(width: 16)
                     Circle()
-                        .fill(Color(hex: entry.player.colorHex))
+                        .fill(Color(hex: entry.player.displayColorHex))
                         .frame(width: 8, height: 8)
                     Text(entry.player.initials)
                         .font(.system(size: 13))
