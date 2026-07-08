@@ -6,17 +6,12 @@ struct WatchAmericanoRoundView: View {
     @EnvironmentObject private var store: WatchStore
     @EnvironmentObject private var connectivity: WatchConnectivityManager
     @ObservedObject private var workout = WorkoutManager.shared
+    @Environment(\.dismiss) private var dismiss
     @State private var roundIndex: Int = 0
     @State private var didInitializeRound = false
+    @State private var showingFinished = false
 
     private var session: AmericanoSession? { store.activeAmericano }
-
-    /// True once any round has every court finished — i.e. there are real
-    /// standings worth showing rather than a table of zeros.
-    private var hasCompletedRound: Bool {
-        guard let session else { return false }
-        return session.rounds.contains { session.isRoundComplete($0) }
-    }
 
     var body: some View {
         if let session {
@@ -27,6 +22,11 @@ struct WatchAmericanoRoundView: View {
                     Text("Round \(roundIndex + 1) / \(session.plannedRoundCount)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
+                    // Same live-training badge as a regular match, so a Mix also
+                    // visibly records heart rate to Health while it's scored.
+                    if workout.isRunning, workout.heartRate > 0 {
+                        WatchHeartRateBadge(bpm: workout.heartRate)
+                    }
                     if !connectivity.isPhoneReachable {
                         WatchOfflineBadge()
                             .transition(.scale.combined(with: .opacity))
@@ -49,6 +49,9 @@ struct WatchAmericanoRoundView: View {
                     .tabViewStyle(.page(indexDisplayMode: round.matchups.count > 1 ? .automatic : .never))
                 }
 
+                // Just round navigation while playing. Standings are deliberately
+                // kept off the scoring screen so nothing distracts from counting
+                // points — the full table appears once the session is finished.
                 HStack {
                     Button {
                         roundIndex = max(0, roundIndex - 1)
@@ -56,17 +59,6 @@ struct WatchAmericanoRoundView: View {
                         Image(systemName: "chevron.left")
                     }
                     .disabled(roundIndex == 0)
-
-                    Spacer()
-
-                    // Standings are all zeros until a round finishes, so the link
-                    // only appears once there's a real table to look at.
-                    if hasCompletedRound {
-                        NavigationLink("Standings") {
-                            WatchAmericanoStandingsView(session: session)
-                        }
-                        .font(.caption2)
-                    }
 
                     Spacer()
 
@@ -86,6 +78,14 @@ struct WatchAmericanoRoundView: View {
                     roundIndex = session.currentRoundIndex
                     didInitializeRound = true
                 }
+                // Reopened an already-finished session — go straight to results.
+                if session.isComplete { showingFinished = true }
+            }
+            .onChange(of: session.isComplete) { _, isComplete in
+                if isComplete {
+                    WKInterfaceDevice.current().play(.success)
+                    showingFinished = true
+                }
             }
             .onChange(of: connectivity.lastReceivedAmericano) { _, incoming in
                 guard let incoming, incoming.id == session.id, incoming != session else { return }
@@ -100,6 +100,9 @@ struct WatchAmericanoRoundView: View {
                 }
                 // Someone else (phone or another player) updated the score.
                 WKInterfaceDevice.current().play(.notification)
+            }
+            .sheet(isPresented: $showingFinished) {
+                WatchAmericanoResultView(session: session) { endSession() }
             }
         } else {
             ContentUnavailableView("No Active Americano", systemImage: "person.3")
@@ -117,6 +120,18 @@ struct WatchAmericanoRoundView: View {
             connectivity.send(.americanoFinished(updated))
             WorkoutManager.shared.end()
         }
+    }
+
+    /// Wraps up a finished Mix: stops the workout, tells the phone, clears the
+    /// active session, and returns to the home menu.
+    private func endSession() {
+        showingFinished = false
+        workout.end()
+        if let session = store.activeAmericano {
+            connectivity.send(.americanoFinished(session))
+        }
+        store.activeAmericano = nil
+        dismiss()
     }
 }
 

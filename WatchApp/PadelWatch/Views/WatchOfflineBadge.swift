@@ -20,6 +20,27 @@ struct WatchOfflineBadge: View {
     }
 }
 
+/// Live heart rate from the running workout session — the visible proof that a
+/// match (regular or Mix) is recording to Health while it's being scored.
+struct WatchHeartRateBadge: View {
+    let bpm: Double
+
+    var body: some View {
+        HStack(spacing: 2) {
+            Image(systemName: "heart.fill")
+                .font(.system(size: 8))
+                .foregroundStyle(.red)
+            Text("\(Int(bpm))")
+                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .monospacedDigit()
+                .contentTransition(.numericText())
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 2)
+        .background(Capsule().fill(Color.white.opacity(0.1)))
+    }
+}
+
 #Preview {
     WatchOfflineBadge()
 }

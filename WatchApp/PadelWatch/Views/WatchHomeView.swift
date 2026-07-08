@@ -41,7 +41,7 @@ struct WatchHomeView: View {
                                 .foregroundStyle(PadelTheme.lime)
                                 .font(.caption)
                             VStack(alignment: .leading) {
-                                Text("Continue Americano").font(.headline)
+                                Text("Continue Mix").font(.headline)
                                 Text(session.name).font(.caption2).foregroundStyle(.secondary)
                             }
                         }
@@ -65,7 +65,7 @@ struct WatchHomeView: View {
                     WatchNewAmericanoView()
                 } label: {
                     Label {
-                        Text("New Americano")
+                        Text("New Mix")
                     } icon: {
                         Image(systemName: "person.3.fill")
                             .foregroundStyle(PadelTheme.teamB)

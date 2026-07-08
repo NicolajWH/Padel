@@ -41,6 +41,11 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Fortsæt kamp" } }
       }
     },
+    "Continue Mix" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Fortsæt Mix" } }
+      }
+    },
     "Court %lld" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Bane %lld" } }
@@ -51,9 +56,24 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Færdig" } }
       }
     },
+    "End Match" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Afslut kamp" } }
+      }
+    },
     "End Workout" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Afslut træning" } }
+      }
+    },
+    "Final Standings" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Slutstilling" } }
+      }
+    },
+    "Fixed partners" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Faste makkere" } }
       }
     },
     "Format" : {
@@ -106,6 +126,11 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Mexicano (seedes efter stillingen)" } }
       }
     },
+    "Mix" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Mix" } }
+      }
+    },
     "New Americano" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Ny Americano" } }
@@ -114,6 +139,11 @@
     "New Match" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Ny kamp" } }
+      }
+    },
+    "New Mix" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ny Mix" } }
       }
     },
     "No Active Americano" : {
@@ -134,6 +164,16 @@
     "Padel" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Padel" } }
+      }
+    },
+    "Player %lld" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spiller %lld" } }
+      }
+    },
+    "Players" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spillere" } }
       }
     },
     "Players: %lld" : {
