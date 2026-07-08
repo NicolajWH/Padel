@@ -104,5 +104,5 @@ private struct ComplicationView: View {
 
 /// Mirrors PadelTheme in the Watch app (the extension doesn't link it).
 private enum WidgetTheme {
-    static let lime = Color(red: 0xC6 / 255, green: 0xED / 255, blue: 0x3F / 255)
+    static let lime = Color(red: 0xE3 / 255, green: 0xC3 / 255, blue: 0x6B / 255)
 }

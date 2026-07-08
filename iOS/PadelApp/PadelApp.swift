@@ -22,6 +22,7 @@ struct PadelApp: App {
 
     init() {
         UserProfile.autofillNameIfNeeded()
+        PadelTheme.configureAppearance()
     }
 
     var body: some Scene {
