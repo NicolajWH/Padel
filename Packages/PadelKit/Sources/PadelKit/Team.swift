@@ -13,6 +13,13 @@ public struct Team: Identifiable, Codable, Hashable, Sendable {
     public var displayName: String {
         players.map { $0.name }.joined(separator: " & ")
     }
+
+    /// A compact form using each player's initials (e.g. "NW & AB"). Used where
+    /// space is tight — the watch face and the Live Activity — so full names
+    /// don't wrap and push controls off-screen.
+    public var shortDisplayName: String {
+        players.map { $0.initials }.joined(separator: " & ")
+    }
 }
 
 public enum TeamSide: String, Codable, Sendable, CaseIterable, Identifiable {
