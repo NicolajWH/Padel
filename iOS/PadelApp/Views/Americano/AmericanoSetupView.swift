@@ -7,21 +7,37 @@ struct AmericanoSetupView: View {
     @Query(sort: \SavedPlayerRecord.name) private var savedPlayers: [SavedPlayerRecord]
 
     @State private var sessionName = ""
-    @State private var playerNames: [String] = ["", "", "", ""]
     @AppStorage("defaultAmericanoPoints") private var pointsPerRound = 21
     @State private var numberOfRounds = 5
     @State private var format: AmericanoFormat
+    @State private var fixedPartners = false
+
+    /// Selection state. In free mode the roster is a flat, order-agnostic list;
+    /// in fixed-partners mode players live in explicit two-slot pair cards.
+    @State private var roster: [Player] = []
+    @State private var pairSlots: [[Player?]] = [[nil, nil], [nil, nil]]
+    @State private var selectedPairSlot: PairSlotID?
+
+    @State private var manualName = ""
+    @State private var ownerPlayer: Player?
+    @State private var guestPlayers: [Player] = []
 
     init(initialFormat: AmericanoFormat = .americano) {
         _format = State(initialValue: initialFormat)
     }
 
     @StateObject private var locationProvider = LocationProvider()
-    @State private var nearbyPlayers: [NearbyPlayer] = []
+    @State private var nearbyPlayerList: [Player] = []
     @State private var isSearchingNearby = false
 
     @State private var createdRecord: AmericanoRecord?
     @State private var navigate = false
+
+    private struct PairSlotID: Hashable {
+        let pair: Int
+        let slot: Int
+        init(_ pair: Int, _ slot: Int) { self.pair = pair; self.slot = slot }
+    }
 
     var body: some View {
         Form {
@@ -54,54 +70,7 @@ struct AmericanoSetupView: View {
                 }
             }
 
-            Section("Players (min. 4, multiples of 4 work best)") {
-                ForEach(playerNames.indices, id: \.self) { index in
-                    TextField("Player \(index + 1)", text: $playerNames[index])
-                }
-                .onDelete { offsets in playerNames.remove(atOffsets: offsets) }
-
-                Button {
-                    playerNames.append("")
-                } label: {
-                    Label("Add Player", systemImage: "plus")
-                }
-            }
-
-            if isSearchingNearby || !availableNearbyPlayers.isEmpty {
-                Section {
-                    if isSearchingNearby && nearbyPlayers.isEmpty {
-                        HStack(spacing: 10) {
-                            ProgressView()
-                            Text("Looking for players nearby…")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    ForEach(availableNearbyPlayers) { player in
-                        Button {
-                            fill(name: player.name)
-                        } label: {
-                            Label(player.name, systemImage: "person.wave.2.fill")
-                        }
-                    }
-                } header: {
-                    Text("Players Nearby")
-                } footer: {
-                    Text("Players who have Padel open nearby appear here automatically — tap a name to add it.")
-                }
-            }
-
-            if !savedPlayers.isEmpty {
-                Section("Quick Add From Saved Players") {
-                    ForEach(savedPlayers) { player in
-                        Button {
-                            fill(name: player.name)
-                        } label: {
-                            PlayerRow(player: player.asPlayer)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
+            playersSection
 
             Section("Round Settings") {
                 Stepper("Points per round: \(pointsPerRound)", value: $pointsPerRound, in: 8...40, step: 1)
@@ -113,11 +82,11 @@ struct AmericanoSetupView: View {
                     .disabled(!isValid)
             } footer: {
                 if courtCount > 0 {
-                    let sitOuts = validNames.count % 4
+                    let sitOuts = chosenPlayers.count % 4
                     if sitOuts == 0 {
-                        Text("Players: \(validNames.count) · Courts per round: \(courtCount)")
+                        Text("Players: \(chosenPlayers.count) · Courts per round: \(courtCount)")
                     } else {
-                        Text("Players: \(validNames.count) · Courts per round: \(courtCount) · \(sitOuts) sit out each round — sit-outs rotate fairly so everyone plays the same number of rounds.")
+                        Text("Players: \(chosenPlayers.count) · Courts per round: \(courtCount) · \(sitOuts) sit out each round — sit-outs rotate fairly so everyone plays the same number of rounds.")
                     }
                 }
             }
@@ -128,26 +97,316 @@ struct AmericanoSetupView: View {
                 AmericanoRoundScoringView(record: createdRecord, session: session)
             }
         }
+        .onChange(of: fixedPartners) { _, enabled in
+            withAnimation(.snappy) { convertSelection(toPairs: enabled) }
+        }
         .task {
             prefillOwnName()
             await findNearbyPlayers()
         }
     }
 
-    private var validNames: [String] {
-        playerNames.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
+    // MARK: Players section
+
+    @ViewBuilder
+    private var playersSection: some View {
+        Section {
+            Toggle(isOn: $fixedPartners) {
+                Text("Fixed partners")
+            }
+        } footer: {
+            Text("Turn on to sign up as fixed pairs — partners stay together all session and only opponents rotate. Points still count per player.")
+        }
+
+        Section {
+            if fixedPartners {
+                pairsBuilder
+            } else {
+                freeRoster
+            }
+        } header: {
+            Text(fixedPartners ? "Pairs (min. 2)" : "Players (min. 4, multiples of 4 work best)")
+        }
+
+        Section {
+            HStack {
+                TextField("Add a guest player", text: $manualName)
+                    .submitLabel(.done)
+                    .onSubmit(addGuest)
+                Button(action: addGuest) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title3)
+                }
+                .disabled(manualName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                .buttonStyle(.plain)
+            }
+
+            if isSearchingNearby && nearbyPlayerList.isEmpty {
+                HStack(spacing: 10) {
+                    ProgressView()
+                    Text("Looking for players nearby…")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if poolPlayers.isEmpty {
+                if !isSearchingNearby {
+                    Text("Add players above, or save players to quick-pick them here.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            } else {
+                FlowLayout(spacing: 8) {
+                    ForEach(poolPlayers) { player in
+                        PlayerChip(player: player) { assign(player) }
+                    }
+                }
+                .padding(.vertical, 2)
+            }
+        } header: {
+            Text("Tap or drag players to add them")
+        }
     }
 
-    /// Nearby players not already typed into one of the slots.
-    private var availableNearbyPlayers: [NearbyPlayer] {
-        let used = Set(validNames.map { $0.lowercased() })
-        return nearbyPlayers.filter { !used.contains($0.name.lowercased()) }
+    private var freeRoster: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if roster.isEmpty {
+                Text("Tap players below to build your line-up.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+            } else {
+                FlowLayout(spacing: 8) {
+                    ForEach(roster) { player in
+                        PlayerChip(player: player, trailingSystemImage: "xmark.circle.fill") {
+                            withAnimation(.snappy) { roster.removeAll { $0.id == player.id } }
+                        }
+                    }
+                }
+                Text("\(roster.count) players")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
+        .dropDestination(for: String.self) { items, _ in
+            guard let id = items.first else { return false }
+            return dropIntoRoster(id)
+        }
     }
 
-    /// The person setting up the Americano is almost always playing in it.
+    private var pairsBuilder: some View {
+        VStack(spacing: 12) {
+            ForEach(Array(pairSlots.enumerated()), id: \.offset) { index, pair in
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Pair \(index + 1)")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        if pairSlots.count > 2 {
+                            Button {
+                                withAnimation(.snappy) { removePair(index) }
+                            } label: {
+                                Image(systemName: "trash")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    HStack(spacing: 10) {
+                        pairSlot(pair: index, slot: 0)
+                        pairSlot(pair: index, slot: 1)
+                    }
+                }
+            }
+
+            Button {
+                withAnimation(.snappy) { pairSlots.append([nil, nil]) }
+            } label: {
+                Label("Add Pair", systemImage: "plus")
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .listRowBackground(Color.clear)
+    }
+
+    private func pairSlot(pair: Int, slot: Int) -> some View {
+        PlayerSlotView(
+            player: pairSlots[pair][slot],
+            accent: PadelTheme.courtBlue,
+            isSelected: selectedPairSlot == PairSlotID(pair, slot),
+            onTapEmpty: {
+                withAnimation(.snappy) {
+                    let id = PairSlotID(pair, slot)
+                    selectedPairSlot = (selectedPairSlot == id) ? nil : id
+                }
+            },
+            onRemove: {
+                withAnimation(.snappy) {
+                    pairSlots[pair][slot] = nil
+                    selectedPairSlot = PairSlotID(pair, slot)
+                }
+            },
+            onDrop: { id in dropIntoPairSlot(id, pair: pair, slot: slot) }
+        )
+    }
+
+    // MARK: Selection model
+
+    /// Players already chosen, regardless of mode.
+    private var selectedPlayers: [Player] {
+        fixedPartners ? pairSlots.flatMap { $0 }.compactMap { $0 } : roster
+    }
+
+    /// The players a session will actually start with — complete pairs only
+    /// when partners are fixed.
+    private var chosenPlayers: [Player] {
+        guard fixedPartners else { return roster }
+        return pairSlots.filter { $0.allSatisfy { $0 != nil } }.flatMap { $0 }.compactMap { $0 }
+    }
+
+    private var candidatePlayers: [Player] {
+        var seen = Set<String>()
+        var result: [Player] = []
+        func add(_ players: [Player]) {
+            for player in players {
+                let key = player.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                guard !key.isEmpty, !seen.contains(key) else { continue }
+                seen.insert(key)
+                result.append(player)
+            }
+        }
+        add([ownerPlayer].compactMap { $0 })
+        add(savedPlayers.map(\.asPlayer))
+        add(nearbyPlayerList)
+        add(guestPlayers)
+        return result
+    }
+
+    private var poolPlayers: [Player] {
+        let chosen = Set(selectedPlayers.map { $0.name.lowercased() })
+        return candidatePlayers.filter { !chosen.contains($0.name.lowercased()) }
+    }
+
+    private func isChosen(_ player: Player) -> Bool {
+        selectedPlayers.contains { $0.name.lowercased() == player.name.lowercased() }
+    }
+
+    private func assign(_ player: Player) {
+        guard !isChosen(player) else { return }
+        withAnimation(.snappy) {
+            if fixedPartners {
+                guard let target = selectedPairSlot ?? firstEmptyPairSlot() else { return }
+                pairSlots[target.pair][target.slot] = player
+                selectedPairSlot = firstEmptyPairSlot()
+            } else {
+                roster.append(player)
+            }
+        }
+    }
+
+    private func dropIntoRoster(_ id: String) -> Bool {
+        guard let player = candidatePlayers.first(where: { $0.id.uuidString == id }), !isChosen(player) else { return false }
+        withAnimation(.snappy) { roster.append(player) }
+        return true
+    }
+
+    private func dropIntoPairSlot(_ id: String, pair: Int, slot: Int) -> Bool {
+        if let source = findPairSlot(withID: id) {
+            guard source != PairSlotID(pair, slot) else { return false }
+            withAnimation(.snappy) {
+                let displaced = pairSlots[pair][slot]
+                pairSlots[pair][slot] = pairSlots[source.pair][source.slot]
+                pairSlots[source.pair][source.slot] = displaced
+            }
+            return true
+        }
+        guard let player = candidatePlayers.first(where: { $0.id.uuidString == id }), !isChosen(player) else { return false }
+        withAnimation(.snappy) {
+            pairSlots[pair][slot] = player
+            selectedPairSlot = firstEmptyPairSlot()
+        }
+        return true
+    }
+
+    private func firstEmptyPairSlot() -> PairSlotID? {
+        for (p, pair) in pairSlots.enumerated() {
+            for (s, value) in pair.enumerated() where value == nil {
+                return PairSlotID(p, s)
+            }
+        }
+        return nil
+    }
+
+    private func findPairSlot(withID id: String) -> PairSlotID? {
+        for (p, pair) in pairSlots.enumerated() {
+            for (s, value) in pair.enumerated() where value?.id.uuidString == id {
+                return PairSlotID(p, s)
+            }
+        }
+        return nil
+    }
+
+    private func removePair(_ index: Int) {
+        guard pairSlots.count > 2 else { return }
+        pairSlots.remove(at: index)
+        selectedPairSlot = nil
+    }
+
+    /// Keep the picked players when the pairs toggle flips.
+    private func convertSelection(toPairs: Bool) {
+        if toPairs {
+            let players = roster
+            var slots: [[Player?]] = []
+            var index = 0
+            while index < players.count {
+                let second: Player? = index + 1 < players.count ? players[index + 1] : nil
+                slots.append([players[index], second])
+                index += 2
+            }
+            while slots.count < 2 { slots.append([nil, nil]) }
+            pairSlots = slots
+        } else {
+            roster = pairSlots.flatMap { $0 }.compactMap { $0 }
+            pairSlots = [[nil, nil], [nil, nil]]
+        }
+        selectedPairSlot = nil
+    }
+
+    private func addGuest() {
+        let trimmed = manualName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        if let existing = candidatePlayers.first(where: { $0.name.lowercased() == trimmed.lowercased() }) {
+            assign(existing)
+        } else {
+            let player = Player(name: trimmed)
+            guestPlayers.append(player)
+            assign(player)
+        }
+        manualName = ""
+    }
+
+    // MARK: Derived
+
+    private var courtCount: Int { chosenPlayers.count / 4 }
+
+    private var isValid: Bool { chosenPlayers.count >= 4 }
+
+    /// The person setting up the session is almost always playing in it.
     private func prefillOwnName() {
-        guard !UserProfile.name.isEmpty, validNames.isEmpty, !playerNames.isEmpty else { return }
-        playerNames[0] = UserProfile.name
+        guard !UserProfile.name.isEmpty, selectedPlayers.isEmpty else { return }
+        let owner = savedPlayers.first { $0.name.lowercased() == UserProfile.name.lowercased() }?.asPlayer
+            ?? Player(name: UserProfile.name)
+        ownerPlayer = owner
+        if fixedPartners {
+            pairSlots[0][0] = owner
+            selectedPairSlot = PairSlotID(0, 1)
+        } else {
+            roster = [owner]
+        }
     }
 
     /// Looks up who else is at the court right now — and publishes our own
@@ -157,24 +416,19 @@ struct AmericanoSetupView: View {
         defer { isSearchingNearby = false }
         guard let location = await locationProvider.currentLocation() else { return }
         await NearbyPlayersService.publish(name: UserProfile.name, location: location)
-        nearbyPlayers = (try? await NearbyPlayersService.fetchNearby(around: location)) ?? []
-    }
-
-    private var courtCount: Int { validNames.count / 4 }
-
-    private var isValid: Bool { validNames.count >= 4 }
-
-    private func fill(name: String) {
-        if let emptyIndex = playerNames.firstIndex(where: { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
-            playerNames[emptyIndex] = name
-        } else {
-            playerNames.append(name)
-        }
+        let found = (try? await NearbyPlayersService.fetchNearby(around: location)) ?? []
+        nearbyPlayerList = found.map { Player(name: $0.name) }
     }
 
     private func start() {
-        let players = validNames.map { Player(name: $0) }
-        let settings = AmericanoSettings(pointsPerRound: pointsPerRound, numberOfCourts: max(1, courtCount), numberOfRounds: numberOfRounds, format: format)
+        let players = chosenPlayers
+        let settings = AmericanoSettings(
+            pointsPerRound: pointsPerRound,
+            numberOfCourts: max(1, courtCount),
+            numberOfRounds: numberOfRounds,
+            format: format,
+            fixedPartners: fixedPartners
+        )
         let rounds = AmericanoScheduler.generateSchedule(players: players, settings: settings)
         let session = AmericanoSession(name: sessionName.isEmpty ? format.displayName : sessionName, players: players, settings: settings, rounds: rounds)
         let record = AmericanoRecord.create(from: session)

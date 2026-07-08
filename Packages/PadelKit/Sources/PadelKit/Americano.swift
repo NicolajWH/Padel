@@ -27,19 +27,25 @@ public struct AmericanoSettings: Codable, Hashable, Sendable {
     public var numberOfRounds: Int
     /// How matchups are generated each round.
     public var format: AmericanoFormat
+    /// When true, players sign up as fixed pairs — partners stay together all
+    /// session and only opponents rotate. Applies to both formats; individual
+    /// points still accumulate per player.
+    public var fixedPartners: Bool
 
-    public init(pointsPerRound: Int = 21, numberOfCourts: Int = 1, numberOfRounds: Int = 3, format: AmericanoFormat = .americano) {
+    public init(pointsPerRound: Int = 21, numberOfCourts: Int = 1, numberOfRounds: Int = 3, format: AmericanoFormat = .americano, fixedPartners: Bool = false) {
         self.pointsPerRound = pointsPerRound
         self.numberOfCourts = numberOfCourts
         self.numberOfRounds = numberOfRounds
         self.format = format
+        self.fixedPartners = fixedPartners
     }
 
-    // Sessions saved before `format` existed (on-watch UserDefaults, SwiftData
-    // records, in-flight sync payloads) must keep decoding, so the field is
-    // optional on the wire and defaults to classic Americano.
+    // Sessions saved before `format`/`fixedPartners` existed (on-watch
+    // UserDefaults, SwiftData records, in-flight sync payloads) must keep
+    // decoding, so newer fields are optional on the wire and fall back to
+    // classic Americano defaults.
     private enum CodingKeys: String, CodingKey {
-        case pointsPerRound, numberOfCourts, numberOfRounds, format
+        case pointsPerRound, numberOfCourts, numberOfRounds, format, fixedPartners
     }
 
     public init(from decoder: Decoder) throws {
@@ -48,6 +54,7 @@ public struct AmericanoSettings: Codable, Hashable, Sendable {
         numberOfCourts = try container.decode(Int.self, forKey: .numberOfCourts)
         numberOfRounds = try container.decode(Int.self, forKey: .numberOfRounds)
         format = try container.decodeIfPresent(AmericanoFormat.self, forKey: .format) ?? .americano
+        fixedPartners = try container.decodeIfPresent(Bool.self, forKey: .fixedPartners) ?? false
     }
 
     /// A sensible default given a player count: one court per 4 players, enough
