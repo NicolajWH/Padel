@@ -105,7 +105,7 @@ platform :ios do
 
     match(
       type: "appstore",
-      app_identifier: ["com.worsa.padel", "com.worsa.padel.watchapp", "com.worsa.padel.widgets"],
+      app_identifier: ["com.worsa.padel", "com.worsa.padel.watchapp", "com.worsa.padel.widgets", "com.worsa.padel.watchapp.widgets"],
       api_key: api_key,
       storage_mode: "git",
       git_url: "https://github.com/NicolajWH/Padel.git",
@@ -118,6 +118,7 @@ platform :ios do
     ios_profile = ENV["sigh_com.worsa.padel_appstore_profile-name"]
     watch_profile = ENV["sigh_com.worsa.padel.watchapp_appstore_profile-name"]
     widgets_profile = ENV["sigh_com.worsa.padel.widgets_appstore_profile-name"]
+    watch_widgets_profile = ENV["sigh_com.worsa.padel.watchapp.widgets_appstore_profile-name"]
 
     # xcodegen writes CODE_SIGN_STYLE=Automatic; flip both app targets to
     # manual signing with the match distribution identity + profiles so the
@@ -146,6 +147,14 @@ platform :ios do
       targets: ["PadelWidgets"],
       profile_name: widgets_profile
     )
+    update_code_signing_settings(
+      path: "Padel.xcodeproj",
+      use_automatic_signing: false,
+      team_id: team_id,
+      code_sign_identity: "Apple Distribution",
+      targets: ["PadelWatchWidgets"],
+      profile_name: watch_widgets_profile
+    )
 
     build_app(
       scheme: "PadelApp",
@@ -161,7 +170,8 @@ platform :ios do
         provisioningProfiles: {
           "com.worsa.padel" => ios_profile,
           "com.worsa.padel.watchapp" => watch_profile,
-          "com.worsa.padel.widgets" => widgets_profile
+          "com.worsa.padel.widgets" => widgets_profile,
+          "com.worsa.padel.watchapp.widgets" => watch_widgets_profile
         }
       }
     )
