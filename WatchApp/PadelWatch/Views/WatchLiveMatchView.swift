@@ -40,7 +40,7 @@ struct WatchLiveMatchView: View {
                 HStack(spacing: 4) {
                     CalledScoreBadge(snap: snap)
                     if workout.isRunning, workout.heartRate > 0 {
-                        HeartRateBadge(bpm: workout.heartRate)
+                        WatchHeartRateBadge(bpm: workout.heartRate)
                     }
                     if !connectivity.isPhoneReachable {
                         WatchOfflineBadge()
@@ -240,26 +240,6 @@ private struct CalledScoreBadge: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 2)
         .background(Capsule().fill(snap.isTiebreak ? PadelTheme.lime : Color.white.opacity(0.1)))
-    }
-}
-
-/// Live heart rate from the running workout session.
-private struct HeartRateBadge: View {
-    let bpm: Double
-
-    var body: some View {
-        HStack(spacing: 2) {
-            Image(systemName: "heart.fill")
-                .font(.system(size: 8))
-                .foregroundStyle(.red)
-            Text("\(Int(bpm))")
-                .font(.system(size: 12, weight: .bold, design: .rounded))
-                .monospacedDigit()
-                .contentTransition(.numericText())
-        }
-        .padding(.horizontal, 6)
-        .padding(.vertical, 2)
-        .background(Capsule().fill(Color.white.opacity(0.1)))
     }
 }
 
