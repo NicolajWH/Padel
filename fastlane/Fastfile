@@ -103,6 +103,21 @@ platform :ios do
 
     git_basic_authorization = Base64.strict_encode64("x-access-token:#{ENV['GITHUB_TOKEN']}")
 
+    # match only ever creates certificates and provisioning profiles - it can't
+    # register an App ID. When the Watch complication extension was added, its
+    # bundle id had no App ID on the Developer Portal, so match died with
+    # "Could not find App ID 'com.worsa.padel.watchapp.widgets'" and the deploy
+    # never got past signing. produce registers the App ID (and is a no-op when
+    # it already exists), so the lane provisions a newly added extension by
+    # itself instead of depending on a one-time manual portal step.
+    produce(
+      app_identifier: "com.worsa.padel.watchapp.widgets",
+      app_name: "Padel Watch Widgets",
+      skip_itc: true,
+      team_id: team_id,
+      api_key: api_key
+    )
+
     match(
       type: "appstore",
       app_identifier: ["com.worsa.padel", "com.worsa.padel.watchapp", "com.worsa.padel.widgets", "com.worsa.padel.watchapp.widgets"],
