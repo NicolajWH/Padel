@@ -65,8 +65,7 @@ struct PlayHomeView: View {
                     .padding(.horizontal, 4)
 
                 if !matches.isEmpty {
-                    Text("Recent")
-                        .font(.title3.bold())
+                    SectionHeader(title: "Recent", systemImage: "clock.arrow.circlepath")
                         .padding(.top, 8)
 
                     ForEach(matches.prefix(5)) { record in
@@ -86,7 +85,7 @@ struct PlayHomeView: View {
             }
             .padding()
         }
-        .background(Color(uiColor: .systemGroupedBackground))
+        .padelBackground()
         .navigationTitle("Play")
         .sheet(isPresented: $showingJoin) {
             JoinMatchView()
@@ -143,9 +142,9 @@ private struct NearbyGamesBanner: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(PadelTheme.lime)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: PadelTheme.lime.opacity(0.4), radius: 8, y: 4)
+        .background(PadelTheme.limeGradient)
+        .clipShape(RoundedRectangle(cornerRadius: PadelTheme.Radius.medium, style: .continuous))
+        .shadow(color: PadelTheme.lime.opacity(0.45), radius: 12, y: 6)
     }
 }
 
@@ -184,9 +183,9 @@ private struct OngoingMatchCard: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(PadelTheme.courtGradient)
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: PadelTheme.courtDeep.opacity(0.35), radius: 10, y: 6)
+        .background(PadelTheme.heroGradient)
+        .clipShape(RoundedRectangle(cornerRadius: PadelTheme.Radius.large, style: .continuous))
+        .shadow(color: PadelTheme.courtDeep.opacity(0.4), radius: 14, y: 8)
     }
 }
 
@@ -210,11 +209,15 @@ struct ActionCard: View {
         .frame(maxWidth: .infinity, minHeight: 92, alignment: .topLeading)
         .background(
             prominent
-                ? AnyShapeStyle(PadelTheme.courtGradient)
+                ? AnyShapeStyle(PadelTheme.heroGradient)
                 : AnyShapeStyle(Color(uiColor: .secondarySystemGroupedBackground))
         )
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 8, y: 4)
+        .clipShape(RoundedRectangle(cornerRadius: PadelTheme.Radius.medium, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: PadelTheme.Radius.medium, style: .continuous)
+                .strokeBorder(Color.primary.opacity(prominent ? 0 : 0.05), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(prominent ? 0.18 : 0.06), radius: 10, y: 5)
     }
 }
 

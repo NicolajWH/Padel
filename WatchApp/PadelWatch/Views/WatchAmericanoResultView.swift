@@ -62,7 +62,7 @@ private struct StandingRow: View {
                 .foregroundStyle(rankColor)
                 .frame(width: 16)
             Circle()
-                .fill(Color(hex: entry.player.colorHex))
+                .fill(Color(hex: entry.player.displayColorHex))
                 .frame(width: 8, height: 8)
             Text(entry.player.name)
                 .font(.system(size: 13))
