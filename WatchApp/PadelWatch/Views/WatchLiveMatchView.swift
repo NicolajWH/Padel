@@ -9,12 +9,13 @@ struct WatchLiveMatchView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var crownValue: Double = 0
     @State private var crownBaseline: Double = 0
-    @State private var lastUndoAt: Date = .distantPast
+    @State private var lastScoreAt: Date = .distantPast
     @State private var showingFinished = false
 
-    /// How much crown travel counts as one "undo" notch. Coarse enough that a
-    /// normal flick backs out a single point, so a spin can't wipe a whole set.
-    private let undoNotch: Double = 2
+    /// How much crown travel counts as one scoring "notch". Coarse enough that a
+    /// deliberate flick registers a single point, so a spin can't run the score
+    /// away.
+    private let scoreNotch: Double = 2
 
     private var state: MatchState? { store.activeMatch }
 
@@ -48,6 +49,12 @@ struct WatchLiveMatchView: View {
                     }
                 }
                 .animation(.snappy, value: connectivity.isPhoneReachable)
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+                // The two big zones are for adding points, so undo lives on this
+                // neutral centre strip: a long press backs out the last point
+                // without any risk of also triggering a team button.
+                .onLongPressGesture(minimumDuration: 0.5) { undo() }
 
                 TeamTapZone(
                     points: snap.isTiebreak ? "\(snap.tiebreakPointsA)" : snap.gamePointLabelA,
@@ -68,16 +75,24 @@ struct WatchLiveMatchView: View {
             // off: it fired on every tiny step and buried the wrist in buzzes.
             .digitalCrownRotation($crownValue, from: -10_000, through: 10_000, by: 1, sensitivity: .low, isContinuous: false, isHapticFeedbackEnabled: false)
             .onChange(of: crownValue) { _, newValue in
-                // Undo one point per notch of crown travel. We accumulate the
-                // rotation instead of snapping the bound value back to centre, so
-                // the crown never fights the finger and stays fluid. A short
-                // cooldown caps the rate so a fast spin can't wipe a whole set.
-                guard abs(newValue - crownBaseline) >= undoNotch else { return }
+                // Score a point per notch of crown travel — no need to look at the
+                // wrist. Rolling the crown up scores your team, rolling it down
+                // scores the opponents, and the haptic echoes the direction so you
+                // can feel which side got the point. We accumulate the rotation
+                // instead of snapping the bound value back to centre, so the crown
+                // never fights the finger. A short cooldown caps the rate so a fast
+                // spin can't run the score away.
+                let delta = newValue - crownBaseline
+                guard abs(delta) >= scoreNotch else { return }
                 crownBaseline = newValue
                 let now = Date()
-                guard now.timeIntervalSince(lastUndoAt) > 0.2 else { return }
-                lastUndoAt = now
-                undo()
+                guard now.timeIntervalSince(lastScoreAt) > 0.25 else { return }
+                lastScoreAt = now
+                if delta > 0 {
+                    score(.teamA, haptic: .directionUp)
+                } else {
+                    score(.teamB, haptic: .directionDown)
+                }
             }
             .onAppear {
                 workout.startIfNeeded()
@@ -137,13 +152,16 @@ struct WatchLiveMatchView: View {
             }
     }
 
-    private func score(_ side: TeamSide) {
+    /// Adds a point for `side`. Taps on a team zone use the default click; the
+    /// crown passes a directional haptic so a point scored blind still tells you
+    /// which team it went to.
+    private func score(_ side: TeamSide, haptic: WKHapticType = .click) {
         guard var state = state, !state.snapshot.isMatchOver else { return }
         withAnimation(.snappy) {
             state.addPoint(for: side)
             store.activeMatch = state
         }
-        WKInterfaceDevice.current().play(.click)
+        WKInterfaceDevice.current().play(haptic)
         connectivity.send(.match(state))
     }
 
