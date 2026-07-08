@@ -1,0 +1,34 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Padel" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Padel" } }
+      }
+    },
+    "Score" : {
+      "comment" : "Complication label — tap to score a match",
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Point" } }
+      }
+    },
+    "Score Padel" : {
+      "comment" : "Complication name shown in the watch-face gallery",
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Score padel" } }
+      }
+    },
+    "Tap to jump straight into scoring a padel match." : {
+      "comment" : "Complication description shown in the watch-face gallery",
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Tryk for at hoppe direkte ind i en padelkamp." } }
+      }
+    },
+    "Tap to score" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Tryk for at score" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

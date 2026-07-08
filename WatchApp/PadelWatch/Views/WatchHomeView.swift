@@ -133,10 +133,7 @@ struct WatchHomeView: View {
     /// Starts scoring immediately with the standard casual ruleset — no setup
     /// questions on the tiny screen. Advanced rule tweaks live on the iPhone.
     private func startQuickMatch() {
-        let teamA = Team(players: [Player(name: "Team A-1"), Player(name: "Team A-2")])
-        let teamB = Team(players: [Player(name: "Team B-1"), Player(name: "Team B-2")])
-        let settings = MatchSettings(goldenPoint: false, setsToWin: 1)
-        let state = MatchState(teamA: teamA, teamB: teamB, settings: settings)
+        let state = WatchStore.makeQuickMatch()
         store.activeMatch = state
         connectivity.send(.match(state))
         quickMatchStarted = true
