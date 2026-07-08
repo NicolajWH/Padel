@@ -43,7 +43,19 @@ struct PlayerSlotView: View {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .stroke(accent.opacity(0.35), lineWidth: 1)
             )
-            .draggable(player.id.uuidString)
+            // An explicit preview lifts just this player — without it a slot
+            // inside a Form drags a snapshot of the whole row.
+            .draggable(player.id.uuidString) {
+                HStack(spacing: 8) {
+                    PlayerAvatar(player: player, size: 30)
+                    Text(player.name)
+                        .font(.subheadline.weight(.medium))
+                        .lineLimit(1)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 8)
+                .background(accent.opacity(0.14), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            }
         } else {
             VStack(spacing: 3) {
                 Image(systemName: "plus")
@@ -221,6 +233,18 @@ struct PlayerChip: View {
             .overlay(Capsule().stroke(Color(hex: player.colorHex).opacity(0.4), lineWidth: 1))
         }
         .buttonStyle(.plain)
-        .draggable(player.id.uuidString)
+        // An explicit preview lifts just this chip — without it a chip inside a
+        // Form drags a snapshot of the whole row of players.
+        .draggable(player.id.uuidString) {
+            HStack(spacing: 7) {
+                PlayerAvatar(player: player, size: 26)
+                Text(player.name)
+                    .font(.subheadline)
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 6)
+            .background(Color(hex: player.colorHex).opacity(0.15), in: Capsule())
+        }
     }
 }
