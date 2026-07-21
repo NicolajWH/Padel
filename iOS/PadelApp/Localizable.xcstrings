@@ -1760,6 +1760,56 @@
           }
         }
       }
+    },
+    "Appearance": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Udseende"
+          }
+        }
+      }
+    },
+    "Dark": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mørk"
+          }
+        }
+      }
+    },
+    "Light": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lys"
+          }
+        }
+      }
+    },
+    "Profile": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profil"
+          }
+        }
+      }
+    },
+    "System": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "System"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
