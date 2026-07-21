@@ -9,6 +9,7 @@ final class WatchConnectivityManager: NSObject, ObservableObject {
     @Published var isPhoneReachable: Bool = false
     @Published var lastReceivedMatch: MatchState?
     @Published var lastReceivedAmericano: AmericanoSession?
+    @Published private(set) var playerRoster: PlayerRoster
 
     private var session: WCSession?
 
@@ -18,6 +19,12 @@ final class WatchConnectivityManager: NSObject, ObservableObject {
     private var pendingCatchUp: [String: Any]?
 
     private override init() {
+        if let data = UserDefaults.standard.data(forKey: "playerRoster"),
+           let roster = try? JSONDecoder().decode(PlayerRoster.self, from: data) {
+            playerRoster = roster
+        } else {
+            playerRoster = PlayerRoster(players: [])
+        }
         super.init()
         guard WCSession.isSupported() else { return }
         let session = WCSession.default
@@ -65,6 +72,10 @@ final class WatchConnectivityManager: NSObject, ObservableObject {
                 WatchStore.shared.clearActiveSessions()
             case .requestLatest:
                 break
+            case .playerRoster(let roster):
+                self.playerRoster = roster
+                let data = try? JSONEncoder().encode(roster)
+                UserDefaults.standard.set(data, forKey: "playerRoster")
             }
         }
     }
