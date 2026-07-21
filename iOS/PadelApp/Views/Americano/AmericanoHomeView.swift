@@ -60,7 +60,7 @@ struct AmericanoHomeView: View {
             .padding()
         }
         .padelBackground()
-        .navigationTitle("Mix")
+        .screenTitle("Mix")
     }
 }
 

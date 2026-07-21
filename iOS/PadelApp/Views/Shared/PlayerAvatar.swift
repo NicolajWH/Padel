@@ -12,24 +12,15 @@ struct PlayerAvatar: View {
     var body: some View {
         ZStack {
             Circle().fill(base)
-            // A top-down sheen gives the flat circle a little dimension while
-            // keeping the solid base behind the white initials for contrast.
-            Circle().fill(
-                LinearGradient(
-                    colors: [.white.opacity(0.28), .clear],
-                    startPoint: .top,
-                    endPoint: .center
-                )
-            )
             Text(player.initials)
                 .font(.system(size: size * 0.4, weight: .bold, design: .rounded))
                 .foregroundStyle(.white)
         }
         .frame(width: size, height: size)
         .overlay(
-            Circle().strokeBorder(.white.opacity(0.28), lineWidth: max(1, size * 0.035))
+            Circle().strokeBorder(Color(uiColor: .separator).opacity(0.45), lineWidth: 1)
         )
-        .shadow(color: base.opacity(0.3), radius: size * 0.14, y: size * 0.05)
+        .shadow(color: Color.primary.opacity(0.08), radius: 2, y: 1)
     }
 }
 

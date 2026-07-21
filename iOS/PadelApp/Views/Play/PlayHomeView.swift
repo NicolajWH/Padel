@@ -16,7 +16,7 @@ struct PlayHomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.large) {
                 if nearbyGameCount > 0 {
                     Button {
                         showingJoin = true
@@ -83,10 +83,10 @@ struct PlayHomeView: View {
                     }
                 }
             }
-            .padding()
+            .padding(DesignSystem.Spacing.large)
         }
         .padelBackground()
-        .navigationTitle("Play")
+        .screenTitle("Spil")
         .sheet(isPresented: $showingJoin) {
             JoinMatchView()
         }
@@ -223,6 +223,7 @@ struct ActionCard: View {
 
 struct MatchRowView: View {
     let state: MatchState
+    var showsChevron = true
 
     var body: some View {
         let snap = state.snapshot
@@ -249,9 +250,12 @@ struct MatchRowView: View {
 
             Spacer(minLength: 0)
 
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.tertiary)
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+                    .accessibilityHidden(true)
+            }
         }
     }
 }

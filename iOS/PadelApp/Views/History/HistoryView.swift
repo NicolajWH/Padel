@@ -18,7 +18,7 @@ struct HistoryView: View {
                             NavigationLink {
                                 record.isFinished ? AnyView(MatchSummaryView(state: state)) : AnyView(LiveMatchView(record: record, initialState: state))
                             } label: {
-                                MatchRowView(state: state)
+                                MatchRowView(state: state, showsChevron: false)
                             }
                         }
                     }
@@ -43,7 +43,7 @@ struct HistoryView: View {
                 }
             }
         }
-        .navigationTitle("History")
+        .screenTitle("Historik")
     }
 
     private func delete<T: PersistentModel>(_ items: [T], at offsets: IndexSet) {

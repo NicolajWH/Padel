@@ -20,7 +20,7 @@ struct PlayersView: View {
                 playerList
             }
         }
-        .navigationTitle("Players")
+        .screenTitle("Spillere")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -37,6 +37,7 @@ struct PlayersView: View {
                 } label: {
                     Image(systemName: "plus")
                 }
+                .accessibilityLabel("Tilføj spiller")
             }
         }
         .alert("Add Player", isPresented: $showingAdd) {

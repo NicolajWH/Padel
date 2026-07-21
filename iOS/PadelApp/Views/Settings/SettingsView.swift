@@ -7,6 +7,7 @@ struct SettingsView: View {
     @AppStorage("defaultSetsToWin") private var defaultSetsToWin = 2
     @AppStorage("defaultAmericanoPoints") private var defaultAmericanoPoints = 21
     @AppStorage("profileName") private var profileName = ""
+    @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
     @AppStorage(NearbyPlayersService.discoveryEnabledKey) private var nearbyDiscoveryEnabled = true
     @EnvironmentObject private var connectivity: PhoneConnectivityManager
     @Environment(\.openURL) private var openURL
@@ -14,7 +15,7 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section {
-                TextField("Name", text: $profileName)
+                TextField("Dit navn", text: $profileName)
                     .textContentType(.name)
                     .onAppear(perform: fillProfileNameFromIPhoneSettingsIfNeeded)
 
@@ -35,9 +36,19 @@ struct SettingsView: View {
                     }
                 }
             } header: {
-                Text("Your Name")
+                Text("Profil")
             } footer: {
                 Text("Used to suggest who you are when you join a shared Americano. If this is empty, Padel fills it from your iPhone name in Settings when possible.")
+            }
+
+            Section("Udseende") {
+                Picker("Udseende", selection: $appearance) {
+                    ForEach(AppAppearance.allCases) { option in
+                        Text(option.title).tag(option)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .accessibilityLabel("Udseende")
             }
 
             Section {
@@ -116,7 +127,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .navigationTitle("Settings")
+        .screenTitle("Indstillinger")
         .onChange(of: nearbyDiscoveryEnabled) { _, enabled in
             if !enabled {
                 Task { await NearbyPlayersService.unpublish() }

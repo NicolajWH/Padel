@@ -19,16 +19,17 @@ struct PadelApp: App {
     }()
 
     @StateObject private var connectivity = PhoneConnectivityManager.shared
+    @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
 
     init() {
         UserProfile.autofillNameIfNeeded()
-        PadelTheme.configureAppearance()
     }
 
     var body: some Scene {
         WindowGroup {
             RootTabView()
                 .environmentObject(connectivity)
+                .preferredColorScheme(appearance.colorScheme)
         }
         .modelContainer(sharedModelContainer)
     }
