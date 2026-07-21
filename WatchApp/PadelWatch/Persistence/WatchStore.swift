@@ -17,6 +17,9 @@ final class WatchStore: ObservableObject {
     @Published var recentMatches: [MatchState] = [] {
         didSet { save(recentMatches, key: Keys.recentMatches) }
     }
+    @Published var playerRoster: PlayerRoster? {
+        didSet { save(playerRoster, key: Keys.playerRoster) }
+    }
 
     /// A brand-new match that just arrived from the iPhone and should be opened
     /// on the watch automatically. The home view watches this, pushes the live
@@ -28,12 +31,14 @@ final class WatchStore: ObservableObject {
         static let activeMatch = "watch.activeMatch"
         static let activeAmericano = "watch.activeAmericano"
         static let recentMatches = "watch.recentMatches"
+        static let playerRoster = "watch.playerRoster"
     }
 
     private init() {
         activeMatch = load(Keys.activeMatch)
         activeAmericano = load(Keys.activeAmericano)
         recentMatches = load(Keys.recentMatches) ?? []
+        playerRoster = load(Keys.playerRoster)
     }
 
     /// Adopts a match pushed from the iPhone. Live score updates to the match
