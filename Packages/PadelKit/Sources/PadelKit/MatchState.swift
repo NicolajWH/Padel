@@ -52,4 +52,42 @@ public struct MatchState: Codable, Hashable, Sendable, Identifiable {
     public func team(_ side: TeamSide) -> Team {
         side == .teamA ? teamA : teamB
     }
+
+    /// The player currently holding serve, derived from the same game and
+    /// tiebreak rotation as the scoreboard.
+    public var currentServingPlayer: Player? {
+        let snap = snapshot
+        let players = team(snap.servingSide).players
+        guard players.indices.contains(snap.servingPlayerIndex) else { return nil }
+        return players[snap.servingPlayerIndex]
+    }
+
+    /// Corrects the live server without changing the score. This is useful on
+    /// court when the originally selected server was wrong or the players have
+    /// agreed on a different service order.
+    public mutating func setCurrentServer(playerID: UUID) {
+        let desiredSide: TeamSide
+        if teamA.players.contains(where: { $0.id == playerID }) {
+            desiredSide = .teamA
+        } else if teamB.players.contains(where: { $0.id == playerID }) {
+            desiredSide = .teamB
+        } else {
+            return
+        }
+
+        if snapshot.servingSide != desiredSide {
+            firstServer = firstServer.opposite
+        }
+
+        let serverIndex = snapshot.servingPlayerIndex
+        if desiredSide == .teamA,
+           let playerIndex = teamA.players.firstIndex(where: { $0.id == playerID }),
+           teamA.players.indices.contains(serverIndex) {
+            teamA.players.swapAt(playerIndex, serverIndex)
+        } else if desiredSide == .teamB,
+                  let playerIndex = teamB.players.firstIndex(where: { $0.id == playerID }),
+                  teamB.players.indices.contains(serverIndex) {
+            teamB.players.swapAt(playerIndex, serverIndex)
+        }
+    }
 }

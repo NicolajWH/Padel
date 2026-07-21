@@ -139,6 +139,30 @@ final class MatchEngineTests: XCTestCase {
         XCTAssertEqual(match.snapshot.gamePointLabelA, "15")
     }
 
+    func testCurrentServerCanBeChangedWithoutChangingScore() {
+        let (teamA, teamB) = makeTeams()
+        var match = MatchState(teamA: teamA, teamB: teamB)
+        for _ in 0..<4 { match.addPoint(for: .teamA) }
+        let scoreBefore = match.pointLog
+        let selectedServer = teamA.players[1]
+
+        match.setCurrentServer(playerID: selectedServer.id)
+
+        XCTAssertEqual(match.currentServingPlayer?.id, selectedServer.id)
+        XCTAssertEqual(match.pointLog, scoreBefore)
+    }
+
+    func testCurrentServerCanMoveToOtherTeam() {
+        let (teamA, teamB) = makeTeams()
+        var match = MatchState(teamA: teamA, teamB: teamB)
+        let selectedServer = teamB.players[1]
+
+        match.setCurrentServer(playerID: selectedServer.id)
+
+        XCTAssertEqual(match.snapshot.servingSide, .teamB)
+        XCTAssertEqual(match.currentServingPlayer?.id, selectedServer.id)
+    }
+
     func testPointsIgnoredAfterMatchOver() {
         var match = MatchState(teamA: makeTeams().0, teamB: makeTeams().1, settings: .quickSingleSet)
         for _ in 0..<6 {

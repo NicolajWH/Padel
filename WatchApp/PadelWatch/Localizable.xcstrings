@@ -226,6 +226,66 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Start" } }
       }
     },
+    "First Server" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Første server" } }
+      }
+    },
+    "Me" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Mig" } }
+      }
+    },
+    "My Partner" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Min makker" } }
+      }
+    },
+    "Name" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Navn" } }
+      }
+    },
+    "Player 2" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spiller 2" } }
+      }
+    },
+    "Player 3" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spiller 3" } }
+      }
+    },
+    "Player 4" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spiller 4" } }
+      }
+    },
+    "Players" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spillere" } }
+      }
+    },
+    "Server" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Server" } }
+      }
+    },
+    "Setup" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Opsætning" } }
+      }
+    },
+    "Start Match" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Start kamp" } }
+      }
+    },
+    "Who Serves?" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Hvem server?" } }
+      }
+    },
     "Tiebreak" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Tiebreak" } }
