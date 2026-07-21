@@ -11,6 +11,7 @@ struct WatchLiveMatchView: View {
     @State private var crownBaseline: Double = 0
     @State private var lastScoreAt: Date = .distantPast
     @State private var showingFinished = false
+    @State private var showingServerPicker = false
 
     /// How much crown travel counts as one scoring "notch". Coarse enough that a
     /// deliberate flick registers a single point, so a spin can't run the score
@@ -40,6 +41,15 @@ struct WatchLiveMatchView: View {
 
                 HStack(spacing: 4) {
                     CalledScoreBadge(snap: snap)
+                    Button {
+                        showingServerPicker = true
+                    } label: {
+                        Label(state.currentServingPlayer?.name ?? String(localized: "Server"), systemImage: "tennisball.fill")
+                            .font(.system(size: 9, weight: .semibold))
+                            .lineLimit(1)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(PadelTheme.lime)
                     if workout.isRunning, workout.heartRate > 0 {
                         WatchHeartRateBadge(bpm: workout.heartRate)
                     }
@@ -96,6 +106,28 @@ struct WatchLiveMatchView: View {
             }
             .onAppear {
                 workout.startIfNeeded()
+            }
+            .sheet(isPresented: $showingServerPicker) {
+                NavigationStack {
+                    List {
+                        ForEach(state.teamA.players + state.teamB.players) { player in
+                            Button {
+                                changeServer(to: player.id)
+                                showingServerPicker = false
+                            } label: {
+                                HStack {
+                                    Text(player.name)
+                                    Spacer()
+                                    if state.currentServingPlayer?.id == player.id {
+                                        Image(systemName: "checkmark")
+                                            .foregroundStyle(PadelTheme.lime)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .navigationTitle("Who Serves?")
+                }
             }
             .onChange(of: snap.isMatchOver) { _, isOver in
                 if isOver {
@@ -173,6 +205,14 @@ struct WatchLiveMatchView: View {
         }
         WKInterfaceDevice.current().play(.directionUp)
         connectivity.send(.match(state))
+    }
+
+    private func changeServer(to playerID: UUID) {
+        guard var state = state else { return }
+        state.setCurrentServer(playerID: playerID)
+        store.activeMatch = state
+        connectivity.send(.match(state))
+        WKInterfaceDevice.current().play(.click)
     }
 }
 

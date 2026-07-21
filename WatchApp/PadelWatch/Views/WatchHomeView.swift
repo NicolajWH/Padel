@@ -51,8 +51,8 @@ struct WatchHomeView: View {
             }
 
             Section {
-                Button {
-                    startQuickMatch()
+                NavigationLink {
+                    WatchNewMatchView()
                 } label: {
                     Label {
                         Text("New Match")
@@ -127,15 +127,6 @@ struct WatchHomeView: View {
     private func presentIncomingMatch() {
         guard store.matchToPresent != nil else { return }
         store.matchToPresent = nil
-        quickMatchStarted = true
-    }
-
-    /// Starts scoring immediately with the standard casual ruleset — no setup
-    /// questions on the tiny screen. Advanced rule tweaks live on the iPhone.
-    private func startQuickMatch() {
-        let state = WatchStore.makeQuickMatch()
-        store.activeMatch = state
-        connectivity.send(.match(state))
         quickMatchStarted = true
     }
 

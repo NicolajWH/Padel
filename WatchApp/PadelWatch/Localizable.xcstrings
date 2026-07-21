@@ -226,6 +226,61 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Start" } }
       }
     },
+    "First Server" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Første server" } }
+      }
+    },
+    "My Partner" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Min makker" } }
+      }
+    },
+    "Players" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spillere" } }
+      }
+    },
+    "Server" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Server" } }
+      }
+    },
+    "Start Match" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Start kamp" } }
+      }
+    },
+    "Who Serves?" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Hvem server?" } }
+      }
+    },
+    "Add your name and players in Settings on iPhone, then open this screen again." : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Tilføj dit navn og spillere i Indstillinger på iPhone, og åbn derefter denne skærm igen." } }
+      }
+    },
+    "Choose 3 Players" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Vælg 3 spillere" } }
+      }
+    },
+    "No Player Profile" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ingen spillerprofil" } }
+      }
+    },
+    "Selected: %lld of 3" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Valgt: %lld af 3" } }
+      }
+    },
+    "You" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Dig" } }
+      }
+    },
     "Tiebreak" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Tiebreak" } }
