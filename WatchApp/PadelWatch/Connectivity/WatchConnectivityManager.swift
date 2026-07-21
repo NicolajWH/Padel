@@ -65,6 +65,8 @@ final class WatchConnectivityManager: NSObject, ObservableObject {
                 WatchStore.shared.clearActiveSessions()
             case .requestLatest:
                 break
+            case .playerRoster(let roster):
+                WatchStore.shared.playerRoster = roster
             }
         }
     }
