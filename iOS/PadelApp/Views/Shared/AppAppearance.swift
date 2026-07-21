@@ -12,8 +12,8 @@ enum AppAppearance: String, CaseIterable, Codable, Identifiable {
     var title: LocalizedStringKey {
         switch self {
         case .system: "System"
-        case .light: "Lys"
-        case .dark: "Mørk"
+        case .light: "Light"
+        case .dark: "Dark"
         }
     }
 

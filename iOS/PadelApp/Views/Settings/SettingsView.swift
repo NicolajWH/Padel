@@ -15,7 +15,7 @@ struct SettingsView: View {
     var body: some View {
         Form {
             Section {
-                TextField("Dit navn", text: $profileName)
+                TextField("Your Name", text: $profileName)
                     .textContentType(.name)
                     .onAppear(perform: fillProfileNameFromIPhoneSettingsIfNeeded)
 
@@ -36,19 +36,19 @@ struct SettingsView: View {
                     }
                 }
             } header: {
-                Text("Profil")
+                Text("Profile")
             } footer: {
                 Text("Used to suggest who you are when you join a shared Americano. If this is empty, Padel fills it from your iPhone name in Settings when possible.")
             }
 
-            Section("Udseende") {
-                Picker("Udseende", selection: $appearance) {
+            Section("Appearance") {
+                Picker("Appearance", selection: $appearance) {
                     ForEach(AppAppearance.allCases) { option in
                         Text(option.title).tag(option)
                     }
                 }
                 .pickerStyle(.segmented)
-                .accessibilityLabel("Udseende")
+                .accessibilityLabel("Appearance")
             }
 
             Section {
@@ -127,7 +127,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .screenTitle("Indstillinger")
+        .screenTitle("Settings")
         .onChange(of: nearbyDiscoveryEnabled) { _, enabled in
             if !enabled {
                 Task { await NearbyPlayersService.unpublish() }

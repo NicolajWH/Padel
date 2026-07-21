@@ -43,7 +43,7 @@ struct HistoryView: View {
                 }
             }
         }
-        .screenTitle("Historik")
+        .screenTitle("History")
     }
 
     private func delete<T: PersistentModel>(_ items: [T], at offsets: IndexSet) {

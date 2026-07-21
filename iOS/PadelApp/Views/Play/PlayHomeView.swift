@@ -86,7 +86,7 @@ struct PlayHomeView: View {
             .padding(DesignSystem.Spacing.large)
         }
         .padelBackground()
-        .screenTitle("Spil")
+        .screenTitle("Play")
         .sheet(isPresented: $showingJoin) {
             JoinMatchView()
         }
