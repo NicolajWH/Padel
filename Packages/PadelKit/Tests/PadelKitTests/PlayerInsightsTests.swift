@@ -2,6 +2,18 @@ import XCTest
 @testable import PadelKit
 
 final class PlayerInsightsTests: XCTestCase {
+    func testPlayerRosterSyncPayloadRoundTripsOwnerAndPlayers() throws {
+        let owner = Player(name: "Nicolaj Worsa")
+        let friend = Player(name: "Anna Berg")
+        let payload = SyncPayload.playerRoster(PlayerRoster(players: [owner, friend], ownerID: owner.id))
+
+        guard case .playerRoster(let decoded) = SyncPayload.decode(payload.encoded()) else {
+            return XCTFail("Expected a player roster payload")
+        }
+        XCTAssertEqual(decoded.players, [owner, friend])
+        XCTAssertEqual(decoded.ownerID, owner.id)
+    }
+
 
     /// Builds a finished best-of-1 match won by team A.
     private func finishedMatch(teamA: [String], teamB: [String], createdAt: Date = Date()) -> MatchState {

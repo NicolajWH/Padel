@@ -11,6 +11,20 @@ public enum SyncPayload: Codable, Sendable {
     case americanoFinished(AmericanoSession)
     case requestLatest
     case clearActiveSession
+    case playerRoster(PlayerRoster)
+}
+
+/// The players configured on the companion iPhone. Keeping this in PadelKit
+/// lets the phone send the exact same `Player` values that the Watch uses when
+/// it creates a match, including stable ids and colours.
+public struct PlayerRoster: Codable, Hashable, Sendable {
+    public var players: [Player]
+    public var ownerID: UUID?
+
+    public init(players: [Player], ownerID: UUID? = nil) {
+        self.players = players
+        self.ownerID = ownerID
+    }
 }
 
 public extension SyncPayload {

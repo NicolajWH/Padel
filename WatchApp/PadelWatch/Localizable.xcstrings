@@ -36,6 +36,11 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Fortsæt Americano" } }
       }
     },
+    "Create at least 4 players in the iPhone app" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Opret mindst 4 spillere i iPhone-appen" } }
+      }
+    },
     "Continue Match" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Fortsæt kamp" } }

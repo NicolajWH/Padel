@@ -6,6 +6,15 @@ import PadelKit
 /// "profileName" key that Settings edits through @AppStorage.
 enum UserProfile {
     static let nameKey = "profileName"
+    private static let watchPlayerIDKey = "watchPlayerID"
+
+    static var watchPlayerID: UUID {
+        if let value = UserDefaults.standard.string(forKey: watchPlayerIDKey),
+           let id = UUID(uuidString: value) { return id }
+        let id = UUID()
+        UserDefaults.standard.set(id.uuidString, forKey: watchPlayerIDKey)
+        return id
+    }
 
     static var name: String {
         (UserDefaults.standard.string(forKey: nameKey) ?? "")
