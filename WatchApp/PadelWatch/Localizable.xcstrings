@@ -226,6 +226,91 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Start" } }
       }
     },
+    "First Server" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Første server" } }
+      }
+    },
+    "Me" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Mig" } }
+      }
+    },
+    "My Partner" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Min makker" } }
+      }
+    },
+    "Name" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Navn" } }
+      }
+    },
+    "Player 2" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spiller 2" } }
+      }
+    },
+    "Player 3" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spiller 3" } }
+      }
+    },
+    "Player 4" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spiller 4" } }
+      }
+    },
+    "Players" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spillere" } }
+      }
+    },
+    "Server" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Server" } }
+      }
+    },
+    "Setup" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Opsætning" } }
+      }
+    },
+    "Start Match" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Start kamp" } }
+      }
+    },
+    "Who Serves?" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Hvem server?" } }
+      }
+    },
+    "Add your name and players in Settings on iPhone, then open this screen again." : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Tilføj dit navn og spillere i Indstillinger på iPhone, og åbn derefter denne skærm igen." } }
+      }
+    },
+    "Choose 3 Players" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Vælg 3 spillere" } }
+      }
+    },
+    "No Player Profile" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ingen spillerprofil" } }
+      }
+    },
+    "Selected: %lld of 3" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Valgt: %lld af 3" } }
+      }
+    },
+    "You" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Dig" } }
+      }
+    },
     "Tiebreak" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Tiebreak" } }

@@ -12,6 +12,7 @@ final class PhoneConnectivityManager: NSObject, ObservableObject {
     @Published var lastReceivedAmericano: AmericanoSession?
 
     private var session: WCSession?
+    private var latestPlayerRoster: PlayerRoster?
 
     private override init() {
         super.init()
@@ -34,6 +35,11 @@ final class PhoneConnectivityManager: NSObject, ObservableObject {
         }
     }
 
+    func sendPlayerRoster(_ roster: PlayerRoster) {
+        latestPlayerRoster = roster
+        send(.playerRoster(roster))
+    }
+
     private func updateContext(_ dict: [String: Any]) {
         guard let session else { return }
         try? session.updateApplicationContext(dict)
@@ -47,7 +53,9 @@ final class PhoneConnectivityManager: NSObject, ObservableObject {
                 self.lastReceivedMatch = state
             case .americano(let session), .americanoFinished(let session):
                 self.lastReceivedAmericano = session
-            case .requestLatest, .clearActiveSession:
+            case .requestLatest:
+                if let roster = self.latestPlayerRoster { self.send(.playerRoster(roster)) }
+            case .clearActiveSession, .playerRoster:
                 break
             }
         }
