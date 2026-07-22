@@ -8,19 +8,19 @@ struct AmericanoHomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 14) {
                 if let ongoing, let session = ongoing.session {
                     NavigationLink { AmericanoRoundScoringView(record: ongoing, session: session) } label: { OngoingAmericanoCard(session: session) }.buttonStyle(PremiumPressStyle())
                 }
                 NavigationLink { AmericanoSetupView(initialFormat: .americano) } label: {
-                    PremiumImageCard(assetName: "AmericanoHero", category: "AMERICANO", title: "New Americano", subtitle: "Partners rotate every round, so you play with — and against — everyone in the group.", icon: "arrow.triangle.2.circlepath", showsArrow: true, height: 270)
+                    PremiumImageCard(assetName: "AmericanoHero", category: "AMERICANO", title: "Ny Americano", subtitle: "Makkere roterer hver runde, så du spiller med og mod alle i gruppen.", icon: "arrow.triangle.2.circlepath", showsArrow: true, height: 228)
                 }.buttonStyle(PremiumPressStyle())
                 NavigationLink { AmericanoSetupView(initialFormat: .mexicano) } label: {
-                    PremiumImageCard(assetName: "MexicanoHero", category: "MEXICANO", title: "New Mexicano", subtitle: "Each round is based on the current standings, so you meet players at your level.", icon: "chart.line.uptrend.xyaxis", showsArrow: true, height: 270)
+                    PremiumImageCard(assetName: "MexicanoHero", category: "MEXICANO", title: "Ny Mexicano", subtitle: "Hver runde baseres på stillingen, så du møder spillere på dit niveau.", icon: "chart.line.uptrend.xyaxis", showsArrow: true, height: 228)
                 }.buttonStyle(PremiumPressStyle())
                 FormatExplainer()
                 if !sessions.isEmpty {
-                    SectionHeader(title: "Recent", systemImage: "clock.arrow.circlepath")
+                    SectionHeader(title: "Seneste", systemImage: "clock.arrow.circlepath")
                     ForEach(sessions.prefix(5)) { record in
                         if let session = record.session {
                             NavigationLink { AmericanoStandingsView(record: record, session: session) } label: { AmericanoRowView(session: session) }.buttonStyle(PremiumPressStyle())
@@ -28,7 +28,7 @@ struct AmericanoHomeView: View {
                     }
                 }
             }.padding()
-        }.padelBackground().screenTitle("Mix")
+        }.contentMargins(.bottom, DesignSystem.Spacing.large, for: .scrollContent).padelBackground().screenTitle("Mix")
     }
 }
 
@@ -36,9 +36,9 @@ private struct FormatExplainer: View {
     var body: some View {
         PremiumCard {
             VStack(alignment: .leading, spacing: 15) {
-                row(icon: "arrow.triangle.2.circlepath", title: "Americano", text: "Rotating partners make it social and varied.")
+                row(icon: "arrow.triangle.2.circlepath", title: "Americano", text: "Skiftende makkere gør spillet socialt og varieret.")
                 Divider().overlay(DesignSystem.separatorSubtle)
-                row(icon: "chart.line.uptrend.xyaxis", title: "Mexicano", text: "Live standings create increasingly even matches.")
+                row(icon: "chart.line.uptrend.xyaxis", title: "Mexicano", text: "Den aktuelle stilling giver stadig mere jævnbyrdige kampe.")
             }
         }
     }
@@ -55,9 +55,9 @@ private struct OngoingAmericanoCard: View {
     var body: some View {
         PremiumCard(background: DesignSystem.padelBlueDeep) {
             VStack(alignment: .leading, spacing: 10) {
-                HStack { StatusPill(text: "In progress", color: DesignSystem.accentLime); Text(session.settings.format.displayName).font(.caption).foregroundStyle(.white.opacity(0.7)); Spacer(); Image(systemName: "chevron.right").foregroundStyle(.white.opacity(0.7)) }
+                HStack { StatusPill(text: "I gang", color: DesignSystem.accentLime); Text(session.settings.format.displayName).font(.caption).foregroundStyle(.white.opacity(0.7)); Spacer(); Image(systemName: "chevron.right").foregroundStyle(.white.opacity(0.7)) }
                 Text(session.name).font(.headline).foregroundStyle(.white)
-                Label("Round \(session.currentRoundIndex + 1) of \(session.plannedRoundCount)", systemImage: "arrow.triangle.2.circlepath").font(.subheadline.bold()).foregroundStyle(DesignSystem.accentLime)
+                Label("Runde \(session.currentRoundIndex + 1) af \(session.plannedRoundCount)", systemImage: "arrow.triangle.2.circlepath").font(.subheadline.bold()).foregroundStyle(DesignSystem.accentLime)
             }
         }
     }

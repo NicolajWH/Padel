@@ -11,19 +11,19 @@ struct PlayersView: View {
 
     var body: some View {
         Group { if players.isEmpty { PlayersEmptyStateView(onImport: { showingImport = true }, onAddManually: { showingAdd = true }) } else { playerList } }
-            .padelBackground().screenTitle("Players")
+            .padelBackground().screenTitle("Spillere")
             .toolbar { ToolbarItem(placement: .primaryAction) { addMenu } }
-            .alert("Add Player", isPresented: $showingAdd) {
-                TextField("Name", text: $newPlayerName); Button("Cancel", role: .cancel) { newPlayerName = "" }; Button("Add") { addPlayer() }
+            .alert("Tilføj spiller", isPresented: $showingAdd) {
+                TextField("Navn", text: $newPlayerName); Button("Annuller", role: .cancel) { newPlayerName = "" }; Button("Tilføj") { addPlayer() }
             }
             .sheet(isPresented: $showingImport) { ImportPlayersView(existingNames: players.map(\.name)) }
     }
 
     private var addMenu: some View {
         Menu {
-            Button { showingAdd = true } label: { Label("Add Player", systemImage: "person.badge.plus") }
-            Button { showingImport = true } label: { Label("Import from list", systemImage: "square.and.arrow.down") }
-        } label: { Image(systemName: "plus") }.accessibilityLabel("Add Player")
+            Button { showingAdd = true } label: { Label("Tilføj spiller", systemImage: "person.badge.plus") }
+            Button { showingImport = true } label: { Label("Importér fra liste", systemImage: "square.and.arrow.down") }
+        } label: { Image(systemName: "plus") }.accessibilityLabel("Tilføj spiller")
     }
 
     private var playerList: some View {
@@ -40,11 +40,12 @@ struct PlayersView: View {
                     }
                     .buttonStyle(PremiumPressStyle())
                     .contextMenu {
-                        Button("Delete Player", systemImage: "trash", role: .destructive) { modelContext.delete(record) }
+                        Button("Slet spiller", systemImage: "trash", role: .destructive) { modelContext.delete(record) }
                     }
                 }
             }.padding()
         }
+        .contentMargins(.bottom, DesignSystem.Spacing.large, for: .scrollContent)
     }
 
     private func seedRatings() -> [String: Double] {
@@ -69,11 +70,11 @@ struct PlayerRowCard: View {
     let wins: Int
     let rating: String
     var body: some View {
-        PremiumCard(cornerRadius: DesignSystem.Radius.compact, padding: 13) {
+        PremiumCard(cornerRadius: DesignSystem.Radius.compact, padding: 10) {
             HStack(spacing: 12) {
                 Text("\(position)").font(.subheadline.bold().monospacedDigit()).foregroundStyle(position <= 3 ? DesignSystem.accentLime : DesignSystem.textSecondary).frame(width: 24)
-                CartoonAvatarView(playerName: player.name, size: 42, accent: position <= 3 ? DesignSystem.accentLime : DesignSystem.padelBlue)
-                VStack(alignment: .leading, spacing: 3) { Text(player.name).font(.headline).foregroundStyle(DesignSystem.textPrimary); Text("\(matches) matches · \(wins) wins").font(.caption).foregroundStyle(DesignSystem.textSecondary) }
+                CartoonAvatarView(playerName: player.name, size: 38, accent: position <= 3 ? DesignSystem.accentLime : DesignSystem.padelBlue)
+                VStack(alignment: .leading, spacing: 3) { Text(player.name).font(.subheadline.bold()).foregroundStyle(DesignSystem.textPrimary); Text("\(matches) kampe · \(wins) sejre").font(.caption).foregroundStyle(DesignSystem.textSecondary) }
                 Spacer(minLength: 6)
                 Text(rating).font(.subheadline.bold().monospacedDigit()).foregroundStyle(DesignSystem.padelBlue).padding(.horizontal, 9).padding(.vertical, 6).background(DesignSystem.padelBlue.opacity(0.12)).clipShape(Capsule())
                 Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(DesignSystem.textSecondary)
