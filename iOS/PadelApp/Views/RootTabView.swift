@@ -12,19 +12,19 @@ struct RootTabView: View {
     var body: some View {
         TabView {
             NavigationStack { PlayHomeView() }
-                .tabItem { Label("Play", systemImage: "tennis.racket") }
+                .tabItem { Label("Spil", systemImage: "tennis.racket") }
 
             NavigationStack { AmericanoHomeView() }
                 .tabItem { Label("Mix", systemImage: "person.3.fill") }
 
             NavigationStack { HistoryView() }
-                .tabItem { Label("History", systemImage: "clock.arrow.circlepath") }
+                .tabItem { Label("Historik", systemImage: "clock.arrow.circlepath") }
 
             NavigationStack { PlayersView() }
-                .tabItem { Label("Players", systemImage: "person.crop.circle") }
+                .tabItem { Label("Spillere", systemImage: "person.crop.circle") }
 
             NavigationStack { SettingsView() }
-                .tabItem { Label("Settings", systemImage: "gearshape") }
+                .tabItem { Label("Indstillinger", systemImage: "gearshape") }
         }
         .tint(DesignSystem.tabBarTint)
         .toolbarBackground(DesignSystem.surfacePrimary, for: .tabBar)

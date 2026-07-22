@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import PadelKit
 
 struct PremiumImageCard: View {
@@ -12,19 +13,30 @@ struct PremiumImageCard: View {
     var height: CGFloat = 300
 
     var body: some View {
+        let hasImage = UIImage(named: assetName) != nil
         ZStack(alignment: .bottomLeading) {
-            LinearGradient(colors: [DesignSystem.padelBlue, DesignSystem.padelBlueDeep], startPoint: .topLeading, endPoint: .bottomTrailing)
-            Image(assetName)
-                .resizable().scaledToFill()
-                .contrast(1.06).saturation(0.92)
-                .frame(maxWidth: .infinity, maxHeight: .infinity).clipped()
-            LinearGradient(colors: [.clear, DesignSystem.padelBlueDeep.opacity(0.48), DesignSystem.appBackground.opacity(0.96)], startPoint: .top, endPoint: .bottom)
+            DesignSystem.surfaceElevated
+            if hasImage {
+                Image(assetName)
+                    .resizable().scaledToFill()
+                    .contrast(1.06).saturation(0.92)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity).clipped()
+                LinearGradient(colors: [.clear, DesignSystem.appBackground.opacity(0.55), DesignSystem.appBackground.opacity(0.97)], startPoint: .top, endPoint: .bottom)
+            }
 
             VStack(alignment: .leading, spacing: 9) {
                 HStack {
                     Text(category).font(.caption.weight(.semibold)).tracking(1.2).foregroundStyle(DesignSystem.accentLime)
                     Spacer()
                     if let icon { Image(systemName: icon).foregroundStyle(DesignSystem.accentLime) }
+                }
+                if !hasImage {
+                    Label(assetName, systemImage: "photo")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(DesignSystem.textSecondary)
+                        .padding(.horizontal, 10).padding(.vertical, 7)
+                        .background(DesignSystem.surfacePrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
                 Spacer(minLength: 24)
                 Text(title).font(.system(.title2, design: .default, weight: .bold)).foregroundStyle(.white)
@@ -59,7 +71,7 @@ struct ScoreRowCard: View {
     var body: some View {
         let snapshot = state.snapshot
         let winner = snapshot.winner
-        PremiumCard(cornerRadius: DesignSystem.Radius.compact, padding: 14) {
+        PremiumCard(cornerRadius: DesignSystem.Radius.compact, padding: 12) {
             HStack(spacing: 12) {
                 VStack(spacing: 5) {
                     teamLine(initials: state.teamA.players.map(\.initials).joined(separator: "/"), score: snapshot.setsWonA, won: winner == .teamA)
@@ -67,7 +79,7 @@ struct ScoreRowCard: View {
                 }
                 Spacer(minLength: 8)
                 VStack(alignment: .trailing, spacing: 4) {
-                    Text(state.isFinished ? "Final" : "In progress").font(.caption.weight(.semibold)).foregroundStyle(state.isFinished ? DesignSystem.textSecondary : DesignSystem.accentLime)
+                    Text(state.isFinished ? "Afsluttet" : "I gang").font(.caption.weight(.semibold)).foregroundStyle(state.isFinished ? DesignSystem.textSecondary : DesignSystem.accentLime)
                     if let date { Text(date, style: .relative).font(.caption2).foregroundStyle(DesignSystem.textSecondary) }
                     Text("Padel").font(.caption2).foregroundStyle(DesignSystem.padelBlue)
                 }
@@ -81,7 +93,6 @@ struct ScoreRowCard: View {
     private func teamLine(initials: String, score: Int, won: Bool) -> some View {
         HStack(spacing: 8) {
             Text(initials).font(.subheadline.weight(.semibold)).foregroundStyle(won ? DesignSystem.accentLime : DesignSystem.textPrimary).frame(maxWidth: .infinity, alignment: .leading)
-            if won { Image(systemName: "checkmark.circle.fill").font(.caption).foregroundStyle(DesignSystem.accentLime) }
             Text("\(score)").font(.title3.bold().monospacedDigit()).foregroundStyle(won ? DesignSystem.accentLime : DesignSystem.textPrimary).contentTransition(.numericText())
         }
     }

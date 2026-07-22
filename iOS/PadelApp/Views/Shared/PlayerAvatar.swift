@@ -32,7 +32,10 @@ struct CartoonAvatarView: View {
 struct PlayerAvatar: View {
     let player: Player
     var size: CGFloat = 36
-    var body: some View { CartoonAvatarView(playerName: player.name, size: size) }
+    /// Optional catalog name for an original, bundled cartoon avatar. Initials
+    /// remain the offline fallback while those local assets are being prepared.
+    var assetName: String? = nil
+    var body: some View { CartoonAvatarView(playerName: player.name, assetName: assetName, size: size) }
 }
 
 struct PlayerRow: View {

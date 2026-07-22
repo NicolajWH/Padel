@@ -17,7 +17,7 @@ struct PremiumCard<Content: View>: View {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .strokeBorder(DesignSystem.borderSubtle, lineWidth: 1)
             }
-            .shadow(color: .black.opacity(0.34), radius: 18, y: 8)
+            .shadow(color: .black.opacity(0.24), radius: 8, y: 3)
     }
 }
 

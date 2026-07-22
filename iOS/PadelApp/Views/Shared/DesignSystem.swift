@@ -20,16 +20,17 @@ enum DesignSystem {
 
     // Semantic tokens keep the visual language in one place and leave room for
     // a more extensive light appearance without changing individual screens.
-    static let appBackground = Color(light: 0xF1F5F8, dark: 0x05090D)
-    static let backgroundElevated = Color(light: 0xE8EFF4, dark: 0x081019)
-    static let surfacePrimary = Color(light: 0xFFFFFF, dark: 0x0D151D)
-    static let surfaceElevated = Color(light: 0xF7FAFC, dark: 0x121D27)
-    static let padelBlue = Color(hex: "65B5F6")
-    static let padelBlueDeep = Color(hex: "173F5F")
+    static let appBackground = Color(hex: "050A0E")
+    static let backgroundElevated = Color(hex: "081119")
+    static let surfacePrimary = Color(hex: "0C161E")
+    static let surfaceElevated = Color(hex: "11202A")
+    static let padelBlue = Color(hex: "238FC4")
+    static let padelBlueLight = Color(hex: "54B7E3")
+    static let padelBlueDeep = Color(hex: "0C567D")
     static let accentLime = Color(hex: "DFFF3F")
     static let tabBarTint = Color(light: 0x526000, dark: 0xDFFF3F)
-    static let textPrimary = Color(light: 0x101820, dark: 0xF6F8FA)
-    static let textSecondary = Color(light: 0x52616D, dark: 0x9DA8B3)
+    static let textPrimary = Color(hex: "F7F8F9")
+    static let textSecondary = Color(hex: "A1ACB5")
     static let borderSubtle = Color.primary.opacity(0.12)
     static let separatorSubtle = Color.primary.opacity(0.09)
     static let live = Color.orange
