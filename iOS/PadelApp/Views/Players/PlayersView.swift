@@ -47,7 +47,14 @@ struct PlayersView: View {
         }
     }
 
-    private func seedRatings() -> [String: Double] { Dictionary(uniqueKeysWithValues: players.compactMap { record in record.ratingSeed.map { (PlayerKey.normalize(record.name), $0) } }) }
+    private func seedRatings() -> [String: Double] {
+        Dictionary(
+            players.compactMap { record in
+                record.ratingSeed.map { (PlayerKey.normalize(record.name), $0) }
+            },
+            uniquingKeysWith: { _, latestSeed in latestSeed }
+        )
+    }
     private func rating(for record: SavedPlayerRecord, ratings: [PlayerRatingEntry]) -> Double { ratings.first(where: { $0.key == PlayerKey.normalize(record.name) })?.rating ?? record.ratingSeed ?? PlayerRatingEntry.defaultRating }
     private func ratingText(for record: SavedPlayerRecord, ratings: [PlayerRatingEntry]) -> String { rating(for: record, ratings: ratings).formatted(.number.precision(.fractionLength(1))) }
     private func addPlayer() { let name = newPlayerName.trimmingCharacters(in: .whitespacesAndNewlines); guard !name.isEmpty else { return }; modelContext.insert(SavedPlayerRecord(name: name)); newPlayerName = "" }
