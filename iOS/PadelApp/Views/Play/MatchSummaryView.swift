@@ -3,6 +3,7 @@ import PadelKit
 
 struct MatchSummaryView: View {
     let state: MatchState
+    var onDone: (() -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -54,7 +55,11 @@ struct MatchSummaryView: View {
                     Spacer()
 
                     Button {
-                        dismiss()
+                        if let onDone {
+                            onDone()
+                        } else {
+                            dismiss()
+                        }
                     } label: {
                         Text("Done")
                             .font(.headline)

@@ -5,9 +5,11 @@ import PadelKit
 struct LiveMatchView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var connectivity: PhoneConnectivityManager
+    @Environment(\.dismiss) private var dismiss
     let record: MatchRecord
     @State private var state: MatchState
     @State private var showingFinishedSheet = false
+    @State private var closeAfterFinishedSheet = false
     @State private var showingShareSheet = false
     @StateObject private var share = SharedMatchController()
     @StateObject private var liveActivity = MatchLiveActivityController()
@@ -132,8 +134,15 @@ struct LiveMatchView: View {
                 showingFinishedSheet = true
             }
         }
-        .sheet(isPresented: $showingFinishedSheet) {
-            MatchSummaryView(state: state)
+        .sheet(isPresented: $showingFinishedSheet, onDismiss: {
+            if closeAfterFinishedSheet {
+                dismiss()
+            }
+        }) {
+            MatchSummaryView(state: state) {
+                closeAfterFinishedSheet = true
+                showingFinishedSheet = false
+            }
         }
         .sheet(isPresented: $showingShareSheet) {
             ShareMatchSheet(share: share, state: state)
