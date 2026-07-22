@@ -26,7 +26,7 @@ struct RootTabView: View {
             NavigationStack { SettingsView() }
                 .tabItem { Label("Settings", systemImage: "gearshape") }
         }
-        .tint(DesignSystem.accentLime)
+        .tint(DesignSystem.tabBarTint)
         .toolbarBackground(DesignSystem.surfacePrimary, for: .tabBar)
         .toolbarBackground(.visible, for: .tabBar)
         .task {
