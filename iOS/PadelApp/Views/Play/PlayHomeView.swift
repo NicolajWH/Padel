@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 import SwiftData
 import PadelKit
 
@@ -10,104 +9,70 @@ struct PlayHomeView: View {
     @StateObject private var locationProvider = LocationProvider()
     @State private var nearbyGameCount = 0
 
-    private var ongoingMatch: MatchRecord? {
-        matches.first { !$0.isFinished }
-    }
+    private var ongoingMatch: MatchRecord? { matches.first { !$0.isFinished } }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: DesignSystem.Spacing.large) {
                 if nearbyGameCount > 0 {
-                    Button {
-                        showingJoin = true
-                    } label: {
-                        NearbyGamesBanner(count: nearbyGameCount)
-                    }
-                    .buttonStyle(.plain)
+                    Button { showingJoin = true } label: { NearbyGamesBanner(count: nearbyGameCount) }
+                        .buttonStyle(PremiumPressStyle())
                 }
 
                 if let ongoingMatch, let state = ongoingMatch.state {
-                    NavigationLink {
-                        LiveMatchView(record: ongoingMatch, initialState: state)
-                    } label: {
-                        OngoingMatchCard(state: state)
-                    }
-                    .buttonStyle(.plain)
+                    NavigationLink { LiveMatchView(record: ongoingMatch, initialState: state) } label: { OngoingMatchCard(state: state) }
+                        .buttonStyle(PremiumPressStyle())
                 }
 
-                HStack(spacing: 12) {
-                    NavigationLink {
-                        NewMatchSetupView()
-                    } label: {
-                        ActionCard(
-                            title: "New Match",
-                            systemImage: "plus.circle.fill",
-                            prominent: true
-                        )
-                    }
-                    .buttonStyle(.plain)
-
-                    Button {
-                        showingJoin = true
-                    } label: {
-                        ActionCard(
-                            title: "Join Match",
-                            systemImage: "person.2.wave.2.fill",
-                            prominent: false
-                        )
-                    }
-                    .buttonStyle(.plain)
+                NavigationLink { NewMatchSetupView() } label: {
+                    PremiumImageCard(
+                        assetName: "CourtHero", category: "MATCH", title: "New Match",
+                        subtitle: "Create a match, invite players, and get started.", icon: "tennis.racket", cta: "Start Match"
+                    )
                 }
+                .buttonStyle(PremiumPressStyle())
 
-                Text("Score a padel match with real scoring rules — deuce or golden point, sets and tiebreaks. Share it live with everyone on court and on Apple Watch.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 4)
-
-                if !matches.isEmpty {
-                    SectionHeader(title: "Recent", systemImage: "clock.arrow.circlepath")
-                        .padding(.top, 8)
-
-                    ForEach(matches.prefix(5)) { record in
-                        if let state = record.state {
-                            NavigationLink {
-                                record.isFinished
-                                    ? AnyView(MatchSummaryView(state: state))
-                                    : AnyView(LiveMatchView(record: record, initialState: state))
-                            } label: {
-                                MatchRowView(state: state)
-                                    .padelCard()
+                Button { showingJoin = true } label: {
+                    PremiumCard(cornerRadius: DesignSystem.Radius.card) {
+                        HStack(spacing: 14) {
+                            Image(systemName: "person.2.wave.2.fill").font(.title3).foregroundStyle(DesignSystem.padelBlue).frame(width: 36)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Join Match").font(.headline).foregroundStyle(DesignSystem.textPrimary)
+                                Text("Find a shared match nearby and join the court.").font(.subheadline).foregroundStyle(DesignSystem.textSecondary).fixedSize(horizontal: false, vertical: true)
                             }
-                            .buttonStyle(.plain)
+                            Spacer(minLength: 4)
+                            Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(DesignSystem.textSecondary)
                         }
                     }
                 }
-            }
-            .padding(DesignSystem.Spacing.large)
+                .buttonStyle(PremiumPressStyle())
+
+                if !matches.isEmpty {
+                    HStack {
+                        SectionHeader(title: "Recent Matches", systemImage: "clock.arrow.circlepath")
+                        Spacer()
+                        NavigationLink("See All") { HistoryView() }.font(.subheadline.weight(.semibold)).foregroundStyle(DesignSystem.padelBlue)
+                    }.padding(.top, 6)
+                    ForEach(matches.prefix(5)) { record in
+                        if let state = record.state {
+                            NavigationLink {
+                                record.isFinished ? AnyView(MatchSummaryView(state: state)) : AnyView(LiveMatchView(record: record, initialState: state))
+                            } label: { ScoreRowCard(state: state, date: record.createdAt) }
+                            .buttonStyle(PremiumPressStyle())
+                        }
+                    }
+                }
+            }.padding(DesignSystem.Spacing.large)
         }
-        .padelBackground()
-        .screenTitle("Play")
-        .sheet(isPresented: $showingJoin) {
-            JoinMatchView()
-        }
-        .task {
-            await checkForNearbyGames()
-        }
-        .refreshable {
-            await checkForNearbyGames()
-        }
+        .padelBackground().screenTitle("Play")
+        .sheet(isPresented: $showingJoin) { JoinMatchView() }
+        .task { await checkForNearbyGames() }.refreshable { await checkForNearbyGames() }
     }
 
-    /// Quietly looks for shared games at the user's location when the tab
-    /// appears — never prompts for permission, and hides games we already
-    /// joined. This is the "you're at the court, want in?" nudge.
     private func checkForNearbyGames() async {
         guard let location = await locationProvider.currentLocationIfAuthorized(),
-              let games = try? await SharedMatchController.fetchNearby(around: location) else {
-            return
-        }
-        var knownIDs = Set(matches.map(\.id))
-        knownIDs.formUnion(americanos.map(\.id))
+              let games = try? await SharedMatchController.fetchNearby(around: location) else { return }
+        var knownIDs = Set(matches.map(\.id)); knownIDs.formUnion(americanos.map(\.id))
         nearbyGameCount = games.filter { game in
             switch game.content {
             case .match(let state): return !knownIDs.contains(state.id)
@@ -117,164 +82,41 @@ struct PlayHomeView: View {
     }
 }
 
-/// Lime nudge shown when there are shared games at the user's location
-/// that they haven't joined yet.
 private struct NearbyGamesBanner: View {
     let count: Int
-
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: "person.2.wave.2.fill")
-                .font(.title3)
-                .foregroundStyle(PadelTheme.night)
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Live games nearby!")
-                    .font(.headline)
-                    .foregroundStyle(PadelTheme.night)
-                Text("Tap to see who's playing and join in.")
-                    .font(.caption)
-                    .foregroundStyle(PadelTheme.night.opacity(0.75))
-            }
-            Spacer()
-            Text("\(count)")
-                .font(.system(.title3, design: .rounded).bold())
-                .foregroundStyle(PadelTheme.night)
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(PadelTheme.limeGradient)
-        .clipShape(RoundedRectangle(cornerRadius: PadelTheme.Radius.medium, style: .continuous))
-        .shadow(color: PadelTheme.lime.opacity(0.45), radius: 12, y: 6)
+            Image(systemName: "person.2.wave.2.fill").font(.title3)
+            VStack(alignment: .leading, spacing: 2) { Text("Live games nearby!").font(.headline); Text("Tap to see who's playing and join in.").font(.caption).opacity(0.75) }
+            Spacer(); Text("\(count)").font(.title3.bold().monospacedDigit())
+        }.foregroundStyle(DesignSystem.appBackground).padding(16).frame(maxWidth: .infinity).background(DesignSystem.accentLime).clipShape(RoundedRectangle(cornerRadius: 15))
     }
 }
 
-/// Hero card for the match currently in progress.
 private struct OngoingMatchCard: View {
     let state: MatchState
-
     var body: some View {
         let snap = state.snapshot
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                StatusPill(text: "In progress", color: PadelTheme.lime)
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.white.opacity(0.7))
+        PremiumCard(background: DesignSystem.padelBlueDeep) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack { StatusPill(text: "In progress", color: DesignSystem.accentLime); Spacer(); Image(systemName: "chevron.right").foregroundStyle(.white.opacity(0.7)) }
+                Text("\(state.teamA.displayName) vs \(state.teamB.displayName)").font(.headline).foregroundStyle(.white).lineLimit(2)
+                Text("\(snap.setsWonA)–\(snap.setsWonB)").font(.system(size: 30, weight: .heavy).monospacedDigit()).foregroundStyle(DesignSystem.accentLime)
+                Label("Continue Match", systemImage: "play.fill").font(.subheadline.weight(.semibold)).foregroundStyle(DesignSystem.padelBlue)
             }
-
-            Text("\(state.teamA.displayName) vs \(state.teamB.displayName)")
-                .font(.headline)
-                .foregroundStyle(.white)
-                .lineLimit(2)
-
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                Text("Sets \(snap.setsWonA)-\(snap.setsWonB)")
-                    .font(.system(size: 30, weight: .heavy, design: .rounded))
-                    .foregroundStyle(PadelTheme.lime)
-                Text(snap.isTiebreak ? "\(snap.tiebreakPointsA)-\(snap.tiebreakPointsB)" : "\(snap.gamePointLabelA)-\(snap.gamePointLabelB)")
-                    .font(.title3.weight(.bold))
-                    .foregroundStyle(.white.opacity(0.85))
-            }
-
-            Label("Continue Match", systemImage: "play.fill")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(PadelTheme.lime)
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(PadelTheme.heroGradient)
-        .clipShape(RoundedRectangle(cornerRadius: PadelTheme.Radius.large, style: .continuous))
-        .shadow(color: PadelTheme.courtDeep.opacity(0.4), radius: 14, y: 8)
-    }
-}
-
-/// Square-ish tappable card for primary actions on home screens.
-struct ActionCard: View {
-    let title: LocalizedStringKey
-    let systemImage: String
-    let prominent: Bool
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Image(systemName: systemImage)
-                .font(.title2)
-                .foregroundStyle(prominent ? PadelTheme.lime : Color.accentColor)
-            Text(title)
-                .font(.headline)
-                .foregroundStyle(prominent ? .white : .primary)
-                .multilineTextAlignment(.leading)
-        }
-        .padding(16)
-        .frame(maxWidth: .infinity, minHeight: 92, alignment: .topLeading)
-        .background(
-            prominent
-                ? AnyShapeStyle(PadelTheme.heroGradient)
-                : AnyShapeStyle(Color(uiColor: .secondarySystemGroupedBackground))
-        )
-        .clipShape(RoundedRectangle(cornerRadius: PadelTheme.Radius.medium, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: PadelTheme.Radius.medium, style: .continuous)
-                .strokeBorder(Color.primary.opacity(prominent ? 0 : 0.05), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(prominent ? 0.18 : 0.06), radius: 10, y: 5)
     }
 }
 
 struct MatchRowView: View {
     let state: MatchState
     var showsChevron = true
-
-    var body: some View {
-        let snap = state.snapshot
-        HStack(spacing: 12) {
-            TeamAvatarStack(players: state.teamA.players + state.teamB.players)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text("\(state.teamA.displayName) vs \(state.teamB.displayName)")
-                    .font(.subheadline).bold()
-                    .lineLimit(1)
-                HStack(spacing: 6) {
-                    Text("Sets \(snap.setsWonA)-\(snap.setsWonB)")
-                    if !state.isFinished {
-                        StatusPill(text: "In progress", color: .orange)
-                    } else if let winner = snap.winner {
-                        Text("\(state.team(winner).displayName) won")
-                            .foregroundStyle(.green)
-                            .lineLimit(1)
-                    }
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            }
-
-            Spacer(minLength: 0)
-
-            if showsChevron {
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.tertiary)
-                    .accessibilityHidden(true)
-            }
-        }
-    }
+    var body: some View { ScoreRowCard(state: state, showsChevron: showsChevron) }
 }
 
-/// Overlapping avatar bubbles for up to four players.
 struct TeamAvatarStack: View {
     let players: [Player]
-
-    var body: some View {
-        HStack(spacing: -10) {
-            ForEach(players.prefix(4)) { player in
-                PlayerAvatar(player: player, size: 28)
-                    .overlay(Circle().strokeBorder(Color(uiColor: .secondarySystemGroupedBackground), lineWidth: 2))
-            }
-        }
-    }
+    var body: some View { HStack(spacing: -10) { ForEach(players.prefix(4)) { PlayerAvatar(player: $0, size: 28) } } }
 }
 
-#Preview {
-    NavigationStack { PlayHomeView() }
-        .modelContainer(for: [SavedPlayerRecord.self, MatchRecord.self, AmericanoRecord.self], inMemory: true)
-}
+#Preview { NavigationStack { PlayHomeView() }.modelContainer(for: [SavedPlayerRecord.self, MatchRecord.self, AmericanoRecord.self], inMemory: true) }
