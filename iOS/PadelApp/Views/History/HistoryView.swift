@@ -8,72 +8,49 @@ struct HistoryView: View {
     @Query(sort: \AmericanoRecord.createdAt, order: .reverse) private var americanos: [AmericanoRecord]
 
     var body: some View {
-        List {
-            Section("Matches") {
-                if matches.isEmpty {
-                    Text("No matches yet").foregroundStyle(.secondary)
-                } else {
-                    ForEach(matches) { record in
-                        if let state = record.state {
-                            NavigationLink {
-                                record.isFinished ? AnyView(MatchSummaryView(state: state)) : AnyView(LiveMatchView(record: record, initialState: state))
-                            } label: {
-                                MatchRowView(state: state, showsChevron: false)
-                            }
-                        }
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 12) {
+                SectionHeader(title: "Matches", systemImage: "list.number")
+                if matches.isEmpty { EmptyHistoryCard(icon: "tennis.racket", text: "No matches yet") }
+                ForEach(matches) { record in
+                    if let state = record.state {
+                        NavigationLink { record.isFinished ? AnyView(MatchSummaryView(state: state)) : AnyView(LiveMatchView(record: record, initialState: state)) } label: { ScoreRowCard(state: state, date: record.createdAt) }
+                            .buttonStyle(PremiumPressStyle())
+                            .contextMenu { Button("Delete Match", systemImage: "trash", role: .destructive) { modelContext.delete(record) } }
                     }
-                    .onDelete { offsets in delete(matches, at: offsets) }
                 }
-            }
-
-            Section("Americano Sessions") {
-                if americanos.isEmpty {
-                    Text("No Americano sessions yet").foregroundStyle(.secondary)
-                } else {
-                    ForEach(americanos) { record in
-                        if let session = record.session {
-                            NavigationLink {
-                                AmericanoStandingsView(record: record, session: session)
-                            } label: {
-                                AmericanoRowView(session: session)
-                            }
-                        }
+                SectionHeader(title: "Americano Sessions", systemImage: "person.3.fill").padding(.top, 12)
+                if americanos.isEmpty { EmptyHistoryCard(icon: "arrow.triangle.2.circlepath", text: "Your Americano and Mexicano sessions will appear here.") }
+                ForEach(americanos) { record in
+                    if let session = record.session {
+                        NavigationLink { AmericanoStandingsView(record: record, session: session) } label: { AmericanoRowView(session: session) }
+                            .buttonStyle(PremiumPressStyle())
+                            .contextMenu { Button("Delete Session", systemImage: "trash", role: .destructive) { modelContext.delete(record) } }
                     }
-                    .onDelete { offsets in delete(americanos, at: offsets) }
                 }
-            }
-        }
-        .screenTitle("History")
+            }.padding()
+        }.padelBackground().screenTitle("History")
     }
+}
 
-    private func delete<T: PersistentModel>(_ items: [T], at offsets: IndexSet) {
-        for index in offsets {
-            modelContext.delete(items[index])
-        }
-    }
+private struct EmptyHistoryCard: View {
+    let icon: String; let text: LocalizedStringKey
+    var body: some View { PremiumCard { HStack(spacing: 12) { Image(systemName: icon).foregroundStyle(DesignSystem.padelBlue); Text(text).font(.subheadline).foregroundStyle(DesignSystem.textSecondary) } } }
 }
 
 struct AmericanoRowView: View {
     let session: AmericanoSession
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(session.name).font(.subheadline).bold()
-            HStack(spacing: 6) {
-                Text("\(session.settings.format.displayName) · \(session.players.count) players · \(session.plannedRoundCount) rounds")
-                if session.isComplete, let leader = session.standings.first {
-                    Text("\(leader.player.name) won").foregroundStyle(.green)
-                } else if !session.rounds.isEmpty {
-                    StatusPill(text: "In progress", color: .orange)
-                }
+        PremiumCard(cornerRadius: DesignSystem.Radius.compact, padding: 14) {
+            HStack(spacing: 12) {
+                Image(systemName: session.settings.format == .americano ? "arrow.triangle.2.circlepath" : "chart.line.uptrend.xyaxis").foregroundStyle(DesignSystem.padelBlue).frame(width: 34, height: 34).background(DesignSystem.padelBlue.opacity(0.12)).clipShape(RoundedRectangle(cornerRadius: 9))
+                VStack(alignment: .leading, spacing: 4) { Text(session.name).font(.subheadline.bold()).foregroundStyle(DesignSystem.textPrimary); Text("\(session.players.count) players · \(session.plannedRoundCount) rounds").font(.caption).foregroundStyle(DesignSystem.textSecondary) }
+                Spacer()
+                if session.isComplete { Image(systemName: "checkmark.circle.fill").foregroundStyle(DesignSystem.accentLime) } else { StatusPill(text: "In progress", color: DesignSystem.accentLime) }
+                Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(DesignSystem.textSecondary)
             }
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
+        }.accessibilityElement(children: .combine)
     }
 }
 
-#Preview {
-    NavigationStack { HistoryView() }
-        .modelContainer(for: [SavedPlayerRecord.self, MatchRecord.self, AmericanoRecord.self], inMemory: true)
-}
+#Preview { NavigationStack { HistoryView() }.modelContainer(for: [SavedPlayerRecord.self, MatchRecord.self, AmericanoRecord.self], inMemory: true) }

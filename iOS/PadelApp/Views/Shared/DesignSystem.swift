@@ -12,74 +12,89 @@ enum DesignSystem {
     }
 
     enum Radius {
-        static let control: CGFloat = 16
-        static let card: CGFloat = 22
+        static let compact: CGFloat = 13
+        static let control: CGFloat = 15
+        static let card: CGFloat = 16
+        static let hero: CGFloat = 21
     }
 
-    /// A restrained ink-and-tennis palette. The near-black violet gives the
-    /// app a premium feel without competing with the fluorescent court accent.
-    static let heroGreen = Color(red: 0.16, green: 0.13, blue: 0.31)
-    static let heroGreenDeep = Color(red: 0.055, green: 0.045, blue: 0.12)
-    static let heroHighlight = Color(red: 0.86, green: 1.00, blue: 0.24)
-    static let softLavender = Color(red: 0.93, green: 0.92, blue: 0.99)
+    // Semantic tokens keep the visual language in one place and leave room for
+    // a more extensive light appearance without changing individual screens.
+    static let appBackground = Color(light: 0xF1F5F8, dark: 0x05090D)
+    static let backgroundElevated = Color(light: 0xE8EFF4, dark: 0x081019)
+    static let surfacePrimary = Color(light: 0xFFFFFF, dark: 0x0D151D)
+    static let surfaceElevated = Color(light: 0xF7FAFC, dark: 0x121D27)
+    static let padelBlue = Color(hex: "65B5F6")
+    static let padelBlueDeep = Color(hex: "173F5F")
+    static let accentLime = Color(hex: "DFFF3F")
+    static let textPrimary = Color(light: 0x101820, dark: 0xF6F8FA)
+    static let textSecondary = Color(light: 0x52616D, dark: 0x9DA8B3)
+    static let borderSubtle = Color.primary.opacity(0.12)
+    static let separatorSubtle = Color.primary.opacity(0.09)
     static let live = Color.orange
 
-    static var groupedBackground: Color { Color(uiColor: .systemGroupedBackground) }
-    static var cardBackground: Color { Color(uiColor: .secondarySystemGroupedBackground) }
+    // Compatibility aliases used by focused scoring views.
+    static let heroGreen = padelBlue
+    static let heroGreenDeep = padelBlueDeep
+    static let heroHighlight = accentLime
+    static var groupedBackground: Color { appBackground }
+    static var cardBackground: Color { surfacePrimary }
 }
 
-/// Compatibility palette for focused scoring screens. New general UI should
-/// prefer semantic colors and `Color.accentColor`.
+private extension Color {
+    init(light: UInt, dark: UInt) {
+        self.init(uiColor: UIColor { traits in
+            UIColor(hex: traits.userInterfaceStyle == .dark ? dark : light)
+        })
+    }
+}
+
+private extension UIColor {
+    convenience init(hex: UInt) {
+        self.init(
+            red: CGFloat((hex >> 16) & 0xff) / 255,
+            green: CGFloat((hex >> 8) & 0xff) / 255,
+            blue: CGFloat(hex & 0xff) / 255,
+            alpha: 1
+        )
+    }
+}
+
 enum PadelTheme {
-    static let courtBlue = DesignSystem.heroGreen
-    static let courtDeep = DesignSystem.heroGreenDeep
-    static let night = DesignSystem.heroGreenDeep
-    static let lime = DesignSystem.heroHighlight
-    static let sky = Color(red: 0.44, green: 0.71, blue: 0.60)
+    static let courtBlue = DesignSystem.padelBlue
+    static let courtDeep = DesignSystem.padelBlueDeep
+    static let night = DesignSystem.appBackground
+    static let lime = DesignSystem.accentLime
+    static let sky = DesignSystem.padelBlue
     static var emerald: Color { courtBlue }
     static var pine: Color { courtDeep }
     static var onyx: Color { night }
     static var gold: Color { lime }
     static var sage: Color { sky }
-    static let teamA = Color(red: 0.36, green: 0.58, blue: 0.84)
+    static let teamA = DesignSystem.padelBlue
     static let teamB = Color(red: 0.88, green: 0.54, blue: 0.36)
 
     static func teamColor(_ side: TeamSide) -> Color { side == .teamA ? teamA : teamB }
 
     enum Radius {
-        static let small: CGFloat = 14
+        static let small = DesignSystem.Radius.compact
         static let medium = DesignSystem.Radius.control
-        static let large = DesignSystem.Radius.card
+        static let large = DesignSystem.Radius.hero
     }
 
-    static var courtGradient: LinearGradient {
-        LinearGradient(colors: [courtBlue, courtDeep], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
-    static var scoreboardGradient: LinearGradient {
-        LinearGradient(colors: [courtDeep, night], startPoint: .top, endPoint: .bottom)
-    }
-    static var heroGradient: LinearGradient {
-        LinearGradient(colors: [courtBlue, courtDeep], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
-    static var limeGradient: LinearGradient {
-        LinearGradient(colors: [Color.accentColor.opacity(0.82), Color.accentColor], startPoint: .topLeading, endPoint: .bottomTrailing)
-    }
+    static var courtGradient: LinearGradient { LinearGradient(colors: [courtBlue, courtDeep], startPoint: .topLeading, endPoint: .bottomTrailing) }
+    static var scoreboardGradient: LinearGradient { LinearGradient(colors: [courtDeep, night], startPoint: .top, endPoint: .bottom) }
+    static var heroGradient: LinearGradient { LinearGradient(colors: [courtBlue.opacity(0.72), courtDeep], startPoint: .topLeading, endPoint: .bottomTrailing) }
+    static var limeGradient: LinearGradient { LinearGradient(colors: [lime.opacity(0.88), lime], startPoint: .topLeading, endPoint: .bottomTrailing) }
 }
 
 struct PadelBackground: View {
-    @Environment(\.colorScheme) private var colorScheme
-
     var body: some View {
-        ZStack {
-            DesignSystem.groupedBackground
-            if colorScheme == .light {
-                LinearGradient(
-                    colors: [DesignSystem.softLavender.opacity(0.72), .white.opacity(0.12), .clear],
-                    startPoint: .topLeading,
-                    endPoint: .center
-                )
-            }
-        }
+        LinearGradient(
+            colors: [DesignSystem.backgroundElevated.opacity(0.8), DesignSystem.appBackground],
+            startPoint: .top,
+            endPoint: .center
+        )
         .ignoresSafeArea()
     }
 }
@@ -94,6 +109,7 @@ struct ScreenTitle: View {
     var body: some View {
         Text(title)
             .font(.system(.title2, design: .serif, weight: .bold))
+            .foregroundStyle(DesignSystem.textPrimary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .accessibilityAddTraits(.isHeader)
     }
@@ -108,12 +124,13 @@ struct SectionHeader: View {
             if let systemImage {
                 Image(systemName: systemImage)
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(DesignSystem.padelBlue)
                     .accessibilityHidden(true)
             }
             Text(title).font(.title3.weight(.semibold))
             Spacer(minLength: 0)
         }
+        .foregroundStyle(DesignSystem.textPrimary)
         .accessibilityAddTraits(.isHeader)
     }
 }
@@ -127,29 +144,20 @@ struct StatusPill: View {
             Circle().fill(color).frame(width: 6, height: 6).accessibilityHidden(true)
             Text(text).font(.caption2.weight(.semibold))
         }
-        .padding(.horizontal, 9)
-        .padding(.vertical, 5)
-        .background(color.opacity(0.16))
-        .foregroundStyle(color)
-        .clipShape(Capsule())
+        .padding(.horizontal, 9).padding(.vertical, 5)
+        .background(color.opacity(0.16)).foregroundStyle(color).clipShape(Capsule())
     }
 }
 
 private struct ScreenTitleModifier: ViewModifier {
     let title: LocalizedStringKey
-
     func body(content: Content) -> some View {
-        content
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) { ScreenTitle(title: title) }
-            }
+        content.navigationTitle("").navigationBarTitleDisplayMode(.inline).toolbar {
+            ToolbarItem(placement: .principal) { ScreenTitle(title: title) }
+        }
     }
 }
 
 extension View {
-    func screenTitle(_ title: LocalizedStringKey) -> some View {
-        modifier(ScreenTitleModifier(title: title))
-    }
+    func screenTitle(_ title: LocalizedStringKey) -> some View { modifier(ScreenTitleModifier(title: title)) }
 }

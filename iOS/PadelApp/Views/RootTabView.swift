@@ -26,7 +26,9 @@ struct RootTabView: View {
             NavigationStack { SettingsView() }
                 .tabItem { Label("Settings", systemImage: "gearshape") }
         }
-        .tint(.accentColor)
+        .tint(DesignSystem.accentLime)
+        .toolbarBackground(DesignSystem.surfacePrimary, for: .tabBar)
+        .toolbarBackground(.visible, for: .tabBar)
         .task {
             syncPlayerRoster()
             await refreshPresence()
