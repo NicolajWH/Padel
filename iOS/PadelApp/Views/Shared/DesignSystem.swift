@@ -16,9 +16,12 @@ enum DesignSystem {
         static let card: CGFloat = 22
     }
 
-    static let heroGreen = Color(red: 0.07, green: 0.28, blue: 0.20)
-    static let heroGreenDeep = Color(red: 0.035, green: 0.16, blue: 0.12)
-    static let heroHighlight = Color(red: 0.55, green: 0.90, blue: 0.67)
+    /// A restrained ink-and-tennis palette. The near-black violet gives the
+    /// app a premium feel without competing with the fluorescent court accent.
+    static let heroGreen = Color(red: 0.16, green: 0.13, blue: 0.31)
+    static let heroGreenDeep = Color(red: 0.055, green: 0.045, blue: 0.12)
+    static let heroHighlight = Color(red: 0.86, green: 1.00, blue: 0.24)
+    static let softLavender = Color(red: 0.93, green: 0.92, blue: 0.99)
     static let live = Color.orange
 
     static var groupedBackground: Color { Color(uiColor: .systemGroupedBackground) }
@@ -64,8 +67,20 @@ enum PadelTheme {
 }
 
 struct PadelBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
-        DesignSystem.groupedBackground.ignoresSafeArea()
+        ZStack {
+            DesignSystem.groupedBackground
+            if colorScheme == .light {
+                LinearGradient(
+                    colors: [DesignSystem.softLavender.opacity(0.72), .white.opacity(0.12), .clear],
+                    startPoint: .topLeading,
+                    endPoint: .center
+                )
+            }
+        }
+        .ignoresSafeArea()
     }
 }
 
