@@ -98,42 +98,52 @@ private struct FormatExplainer: View {
     }
 }
 
-/// Tappable format card on the Mix home screen, fronted by its poster
-/// mascot — an American theme for Americano, a Mexican theme for
-/// Mexicano — with the action label over a soft gradient at the bottom.
+/// Tappable format card using the same ink-and-tennis visual language as
+/// the rest of the app. Purposeful symbols distinguish the formats without
+/// introducing a separate illustration style on the Mix tab.
 private struct FormatCard: View {
     let title: LocalizedStringKey
     let format: AmericanoFormat
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            Image(format.mascotAssetName)
-                .resizable()
-                .scaledToFill()
-
-            LinearGradient(
-                colors: [.clear, .black.opacity(0.65)],
-                startPoint: .init(x: 0.5, y: 0.5),
-                endPoint: .bottom
-            )
-
-            HStack(spacing: 6) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.subheadline)
-                Text(title)
-                    .font(.subheadline.bold())
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                Spacer(minLength: 0)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: format == .americano ? "arrow.triangle.2.circlepath" : "chart.line.uptrend.xyaxis")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundStyle(PadelTheme.night)
+                    .frame(width: 38, height: 38)
+                    .background(PadelTheme.lime)
+                    .clipShape(Circle())
+                    .shadow(color: PadelTheme.lime.opacity(0.35), radius: 8, y: 4)
+                Spacer()
+                Image(systemName: "arrow.up.right")
+                    .font(.caption.bold())
+                    .foregroundStyle(.white.opacity(0.65))
             }
-            .foregroundStyle(.white)
-            .padding(.horizontal, 12)
-            .padding(.bottom, 12)
+
+            Spacer(minLength: 4)
+
+            Text(format.displayName)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(PadelTheme.lime)
+                .textCase(.uppercase)
+                .tracking(0.8)
+            Text(title)
+                .font(.headline)
+                .foregroundStyle(.white)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
+        .padding(16)
         .frame(maxWidth: .infinity)
-        .frame(height: 176)
+        .frame(height: 164)
+        .background(PadelTheme.heroGradient)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.12), radius: 8, y: 4)
+        .overlay {
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .strokeBorder(.white.opacity(0.12), lineWidth: 1)
+        }
+        .shadow(color: PadelTheme.night.opacity(0.25), radius: 14, y: 8)
     }
 }
 

@@ -7,6 +7,11 @@ struct AppCard: ViewModifier {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(DesignSystem.cardBackground)
             .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.card, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: DesignSystem.Radius.card, style: .continuous)
+                    .strokeBorder(Color.white.opacity(0.55), lineWidth: 0.75)
+            }
+            .shadow(color: DesignSystem.heroGreenDeep.opacity(0.08), radius: 18, y: 8)
     }
 }
 
