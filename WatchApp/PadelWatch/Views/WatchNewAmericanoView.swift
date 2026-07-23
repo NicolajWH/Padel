@@ -4,13 +4,15 @@ import PadelKit
 struct WatchNewAmericanoView: View {
     @EnvironmentObject private var store: WatchStore
     @EnvironmentObject private var connectivity: WatchConnectivityManager
-    @State private var selectedPlayerIDs: Set<UUID> = []
+    @State private var selectedPlayerIDs: [UUID] = []
     @State private var pointsPerRound = 21
     @State private var format: AmericanoFormat = .americano
     @State private var fixedPartners = false
     @State private var navigate = false
     private var roster: [Player] { connectivity.playerRoster.players }
-    private var selectedPlayers: [Player] { roster.filter { selectedPlayerIDs.contains($0.id) } }
+    private var selectedPlayers: [Player] {
+        selectedPlayerIDs.compactMap { id in roster.first { $0.id == id } }
+    }
     private var playerCount: Int { selectedPlayers.count }
 
     /// One court per four players — the same rule the phone uses. Shown so the
@@ -19,38 +21,16 @@ struct WatchNewAmericanoView: View {
 
     var body: some View {
         Form {
-            // Format first, as a plain segmented choice: the old toggle buried
-            // "Mexicano" behind a parenthetical nobody reads on a tiny screen.
-            Section {
-                Picker("Format", selection: $format) {
-                    ForEach(AmericanoFormat.allCases, id: \.self) { fmt in
-                        Text(fmt.displayName).tag(fmt)
-                    }
-                }
-                .font(.footnote)
-                .pickerStyle(.navigationLink)
-            }
-
-            // Only the two knobs that actually change how it plays. Rounds and
-            // courts are derived so setup is "pick players, pick points, start".
-            Section {
-                Stepper(value: $pointsPerRound, in: 8...40, step: 1) {
-                    Text("Points/round: \(pointsPerRound)").font(.footnote)
-                }
-                Toggle(isOn: $fixedPartners) {
-                    Text("Fixed partners").font(.footnote)
-                }
-            } footer: {
-                Text(summary).font(.caption2)
-            }
-
-            Section {
+            Section("Players") {
                 NavigationLink {
-                    WatchMixPlayersView(players: roster, selection: $selectedPlayerIDs)
+                    WatchPlayerSelectionView(
+                        players: roster,
+                        selection: $selectedPlayerIDs,
+                        maximumSelection: 16
+                    )
                 } label: {
-                    HStack {
-                        Text("Players").font(.footnote)
-                        Spacer()
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Choose players").font(.footnote)
                         Text(selectedPlayers.prefix(4).map(\.initials).joined(separator: " · "))
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -62,6 +42,26 @@ struct WatchNewAmericanoView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
+            }
+
+            Section {
+                Picker("Format", selection: $format) {
+                    ForEach(AmericanoFormat.allCases, id: \.self) { fmt in
+                        Text(fmt.displayName).tag(fmt)
+                    }
+                }
+                .font(.footnote)
+                .pickerStyle(.navigationLink)
+                Stepper(value: $pointsPerRound, in: 8...40, step: 1) {
+                    Text("Points/round: \(pointsPerRound)").font(.footnote)
+                }
+                Toggle(isOn: $fixedPartners) {
+                    Text("Fixed partners").font(.footnote)
+                }
+            } header: {
+                Text("Setup")
+            } footer: {
+                Text(summary).font(.caption2)
             }
 
             Section {
@@ -95,9 +95,14 @@ struct WatchNewAmericanoView: View {
     }
 
     private func selectDefaults() {
-        selectedPlayerIDs = selectedPlayerIDs.intersection(Set(roster.map(\.id)))
+        var seen = Set<UUID>()
+        selectedPlayerIDs = selectedPlayerIDs.filter { id in
+            roster.contains { $0.id == id } && seen.insert(id).inserted
+        }
         if selectedPlayerIDs.count < 4 {
-            for player in roster where selectedPlayerIDs.count < 4 { selectedPlayerIDs.insert(player.id) }
+            for player in roster where selectedPlayerIDs.count < 4 && !selectedPlayerIDs.contains(player.id) {
+                selectedPlayerIDs.append(player.id)
+            }
         }
     }
 
@@ -114,37 +119,6 @@ struct WatchNewAmericanoView: View {
         store.activeAmericano = session
         connectivity.send(.americano(session))
         navigate = true
-    }
-}
-
-struct WatchMixPlayersView: View {
-    let players: [Player]
-    @Binding var selection: Set<UUID>
-
-    var body: some View {
-        List {
-            ForEach(players) { player in
-                Button {
-                    if selection.contains(player.id) {
-                        selection.remove(player.id)
-                    } else if selection.count < 16 {
-                        selection.insert(player.id)
-                    }
-                } label: {
-                    HStack {
-                        Text(player.initials)
-                            .font(.headline.monospaced())
-                            .frame(width: 34)
-                        Text(player.name).font(.caption2).lineLimit(1)
-                        Spacer()
-                        if selection.contains(player.id) { Image(systemName: "checkmark") }
-                    }
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .navigationTitle("Players")
-        .navigationBarTitleDisplayMode(.inline)
     }
 }
 

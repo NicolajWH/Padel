@@ -51,6 +51,11 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Fortsæt Mix" } }
       }
     },
+    "Choose players" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Vælg spillere" } }
+      }
+    },
     "Court %lld" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Bane %lld" } }
@@ -214,6 +219,11 @@
     "Sets" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Sæt" } }
+      }
+    },
+    "Selected %lld of %lld" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "%1$lld af %2$lld valgt" } }
       }
     },
     "Single Set" : {
