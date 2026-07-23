@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title description">
+  <title id="title">Floodlit padel court at dusk</title>
+  <desc id="description">An empty blue padel court beneath a deep navy evening sky and bright floodlights.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#06152d"/>
+      <stop offset="0.58" stop-color="#12345b"/>
+      <stop offset="1" stop-color="#80665c"/>
+    </linearGradient>
+    <linearGradient id="court" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3188bd"/>
+      <stop offset="1" stop-color="#0a3c71"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#b8dded" stop-opacity=".14"/>
+      <stop offset="1" stop-color="#06111e" stop-opacity=".42"/>
+    </linearGradient>
+    <radialGradient id="lampGlow">
+      <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
+      <stop offset=".12" stop-color="#fff8cf" stop-opacity=".8"/>
+      <stop offset="1" stop-color="#dcecff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="mesh" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M0 0H20M0 0V20" fill="none" stroke="#8fa8b8" stroke-opacity=".24" stroke-width="1"/>
+    </pattern>
+    <filter id="blur"><feGaussianBlur stdDeviation="15"/></filter>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <path d="M0 335C180 290 310 365 460 330s260 24 402 0c176-30 283 33 438-3 122-29 213 6 300-18v186H0Z" fill="#071425" opacity=".88"/>
+  <path d="M0 410c185-46 316 18 479-20 190-44 301 27 470-5 198-37 408 23 651-35v182H0Z" fill="#0a1720"/>
+  <g fill="#14281f">
+    <path d="m50 500 45-151 40 151m-6 0 54-116 49 116m115-3 43-142 45 142m151 0 50-169 53 169m122 0 47-135 43 135m122 0 54-167 52 167m109 0 47-123 47 123"/>
+  </g>
+
+  <path d="M76 500 1452 488 1600 900H0Z" fill="url(#court)"/>
+  <path d="M76 500 1452 488 1600 900H0Z" fill="#8ccdf0" opacity=".08"/>
+
+  <!-- Glass walls and wire cages -->
+  <path d="M76 500 15 328V169l61 23m0 308 1376-12 111-141V82" fill="url(#glass)" stroke="#07111d" stroke-width="12"/>
+  <path d="M76 500 15 328V169l61 23v308Zm1376-12 111-141V82l37-18v836l-148-412Z" fill="url(#mesh)" stroke="#0b1723" stroke-width="8"/>
+  <path d="M76 500V192m130 307V217m150 281V242m178 254V268m206 226V289m240 203V287m230 203V257m242 231V213" stroke="#0b1723" stroke-width="8"/>
+  <path d="M15 328 1452 300M76 407l1376-19" stroke="#192b3b" stroke-width="5"/>
+
+  <!-- Court markings in perspective -->
+  <g fill="none" stroke="#e6f5f8" stroke-width="8" opacity=".9">
+    <path d="M113 523 1432 511 1551 851 38 858Z"/>
+    <path d="m766 517-9 337"/>
+    <path d="M333 676h1018"/>
+  </g>
+
+  <!-- Net -->
+  <path d="m79 615 1375-10v75L78 690Z" fill="#07121d" opacity=".7"/>
+  <path d="m79 615 1375-10v75L78 690Z" fill="url(#mesh)"/>
+  <path d="m78 610 1377-11" stroke="#f4f3e9" stroke-width="10"/>
+  <path d="M78 603v101m1377-111v104" stroke="#0c1720" stroke-width="15"/>
+  <path d="m765 604-2 84" stroke="#e3e0d5" stroke-width="4"/>
+
+  <!-- Floodlight poles -->
+  <g stroke="#101923" stroke-width="13" fill="#fffbea">
+    <path d="M193 472V173m-38-8 76 17" fill="none"/>
+    <rect x="143" y="143" width="42" height="27" rx="3" transform="rotate(13 164 156)"/>
+    <rect x="204" y="157" width="42" height="27" rx="3" transform="rotate(13 225 170)"/>
+    <path d="M1338 491V100m-35-2h70" fill="none"/>
+    <rect x="1292" y="74" width="42" height="28" rx="3"/>
+    <rect x="1344" y="74" width="42" height="28" rx="3"/>
+    <path d="M794 493V310m-22-2h45" fill="none"/>
+    <rect x="762" y="290" width="30" height="21" rx="2"/>
+    <rect x="801" y="290" width="30" height="21" rx="2"/>
+  </g>
+  <g filter="url(#blur)" opacity=".72">
+    <circle cx="193" cy="168" r="105" fill="url(#lampGlow)"/>
+    <circle cx="1339" cy="91" r="115" fill="url(#lampGlow)"/>
+    <circle cx="797" cy="304" r="72" fill="url(#lampGlow)"/>
+  </g>
+
+  <!-- Padel balls -->
+  <g>
+    <ellipse cx="1374" cy="813" rx="27" ry="10" fill="#03111d" opacity=".7"/>
+    <circle cx="1371" cy="793" r="17" fill="#b9e41f"/>
+    <path d="M1360 780c10 8 17 18 21 29" fill="none" stroke="#f1ff8b" stroke-width="3"/>
+    <ellipse cx="1432" cy="761" rx="22" ry="8" fill="#03111d" opacity=".62"/>
+    <circle cx="1430" cy="744" r="14" fill="#aeda19"/>
+    <path d="M1420 735c8 5 14 13 19 23" fill="none" stroke="#f1ff8b" stroke-width="3"/>
+  </g>
+  <rect width="1600" height="900" fill="#03101f" opacity=".08"/>
+</svg>
