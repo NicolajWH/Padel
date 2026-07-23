@@ -11,8 +11,9 @@ to TestFlight via GitHub Actions.
   "golden point" sudden death, games, sets, tiebreaks (regular and
   10-point match tiebreak for the decider), configurable best-of-1/best-of-3.
 - **Apple Watch scoring** — score a full match entirely on the Watch:
-  big left/right tap zones, Digital Crown to undo, haptic feedback on every
-  point and on match win. Works standalone (no phone nearby needed) and
+  big tap zones, swipe right or use the compact undo button to take back a
+  point, and get haptic feedback on every point and on match win. Works
+  standalone (no phone nearby needed) and
   live-syncs to the iPhone app over WatchConnectivity when it's around.
 - **Americano mode** — set up a group of players (4, 8, 12, 16…), auto-generate
   a round schedule that rotates partners/opponents to minimise repeats, score

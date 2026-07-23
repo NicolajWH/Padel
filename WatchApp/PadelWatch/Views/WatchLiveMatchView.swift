@@ -42,6 +42,18 @@ struct WatchLiveMatchView: View {
                 HStack(spacing: 4) {
                     CalledScoreBadge(snap: snap)
                     Button {
+                        undo()
+                    } label: {
+                        Image(systemName: "arrow.uturn.backward")
+                            .font(.system(size: 10, weight: .semibold))
+                            .frame(width: 22, height: 22)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(state.pointLog.isEmpty ? Color.secondary : PadelTheme.lime)
+                    .disabled(state.pointLog.isEmpty)
+                    .accessibilityLabel("Undo Last Point")
+                    Button {
                         showingServerPicker = true
                     } label: {
                         Label(state.currentServingPlayer?.name ?? String(localized: "Server"), systemImage: "tennisball.fill")
@@ -78,7 +90,7 @@ struct WatchLiveMatchView: View {
             }
             .navigationBarBackButtonHidden(true)
             .toolbar(.hidden, for: .navigationBar)
-            .gesture(backSwipe)
+            .gesture(horizontalSwipe)
             .focusable(true)
             // A wide, non-continuous range that the crown never runs out of, so
             // it spins freely in either direction. The built-in detent haptic is
@@ -147,6 +159,11 @@ struct WatchLiveMatchView: View {
             .sheet(isPresented: $showingFinished) {
                 WatchMatchResultView(
                     state: state,
+                    onUndo: {
+                        showingFinished = false
+                        undo()
+                        workout.startIfNeeded()
+                    },
                     onClose: {
                         // Close the finished match and return to the start menu.
                         showingFinished = false
@@ -173,12 +190,15 @@ struct WatchLiveMatchView: View {
         }
     }
 
-    /// The navigation bar is hidden for a full-screen scoreboard, so leaving the
-    /// match is done by swiping right-to-left anywhere on the screen instead.
-    private var backSwipe: some Gesture {
+    /// Swipe right to take back the most recent point. The opposite direction
+    /// keeps the full-screen scoreboard's existing exit gesture available.
+    private var horizontalSwipe: some Gesture {
         DragGesture(minimumDistance: 20)
             .onEnded { value in
-                if value.translation.width < -50, abs(value.translation.height) < abs(value.translation.width) {
+                guard abs(value.translation.height) < abs(value.translation.width) else { return }
+                if value.translation.width > 50 {
+                    undo()
+                } else if value.translation.width < -50 {
                     dismiss()
                 }
             }
@@ -198,11 +218,12 @@ struct WatchLiveMatchView: View {
     }
 
     private func undo() {
-        guard var state = state else { return }
+        guard var state = state, !state.pointLog.isEmpty else { return }
         withAnimation(.snappy) {
             state.undoLastPoint()
             store.activeMatch = state
         }
+        store.removeArchivedMatch(id: state.id)
         WKInterfaceDevice.current().play(.directionUp)
         connectivity.send(.match(state))
     }

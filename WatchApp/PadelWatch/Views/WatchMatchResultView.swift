@@ -3,6 +3,8 @@ import PadelKit
 
 struct WatchMatchResultView: View {
     let state: MatchState
+    /// Remove an accidentally entered match-winning point and resume scoring.
+    var onUndo: () -> Void = {}
     /// Close the match and go back to the start menu.
     var onClose: () -> Void = {}
     /// Start a fresh match with the same teams and rules.
@@ -26,6 +28,13 @@ struct WatchMatchResultView: View {
                     .foregroundStyle(.secondary)
 
                 VStack(spacing: 6) {
+                    Button(action: onUndo) {
+                        Label("Undo Last Point", systemImage: "arrow.uturn.backward")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(PadelTheme.lime)
+
                     Button(action: onRematch) {
                         Label("Rematch", systemImage: "arrow.counterclockwise")
                             .frame(maxWidth: .infinity)
