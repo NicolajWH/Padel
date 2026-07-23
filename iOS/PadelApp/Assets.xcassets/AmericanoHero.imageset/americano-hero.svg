@@ -1,0 +1,156 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title description">
+  <title id="title">Americano padel rotation at dusk</title>
+  <desc id="description">Four padel players on a floodlit blue court, with numbered markers and lime arrows showing the Americano rotation.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#06152d"/>
+      <stop offset="0.58" stop-color="#12345b"/>
+      <stop offset="1" stop-color="#80665c"/>
+    </linearGradient>
+    <linearGradient id="court" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3188bd"/>
+      <stop offset="1" stop-color="#0a3c71"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#b8dded" stop-opacity=".14"/>
+      <stop offset="1" stop-color="#06111e" stop-opacity=".42"/>
+    </linearGradient>
+    <radialGradient id="lampGlow">
+      <stop offset="0" stop-color="#fff" stop-opacity=".95"/>
+      <stop offset=".12" stop-color="#fff8cf" stop-opacity=".8"/>
+      <stop offset="1" stop-color="#dcecff" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="mesh" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M0 0H20M0 0V20" fill="none" stroke="#8fa8b8" stroke-opacity=".24" stroke-width="1"/>
+    </pattern>
+    <filter id="blur"><feGaussianBlur stdDeviation="15"/></filter>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <path d="M0 335C180 290 310 365 460 330s260 24 402 0c176-30 283 33 438-3 122-29 213 6 300-18v186H0Z" fill="#071425" opacity=".88"/>
+  <path d="M0 410c185-46 316 18 479-20 190-44 301 27 470-5 198-37 408 23 651-35v182H0Z" fill="#0a1720"/>
+  <g fill="#14281f">
+    <path d="m50 500 45-151 40 151m-6 0 54-116 49 116m115-3 43-142 45 142m151 0 50-169 53 169m122 0 47-135 43 135m122 0 54-167 52 167m109 0 47-123 47 123"/>
+  </g>
+
+  <path d="M76 500 1452 488 1600 900H0Z" fill="url(#court)"/>
+  <path d="M76 500 1452 488 1600 900H0Z" fill="#8ccdf0" opacity=".08"/>
+
+  <!-- Glass walls and wire cages -->
+  <path d="M76 500 15 328V169l61 23m0 308 1376-12 111-141V82" fill="url(#glass)" stroke="#07111d" stroke-width="12"/>
+  <path d="M76 500 15 328V169l61 23v308Zm1376-12 111-141V82l37-18v836l-148-412Z" fill="url(#mesh)" stroke="#0b1723" stroke-width="8"/>
+  <path d="M76 500V192m130 307V217m150 281V242m178 254V268m206 226V289m240 203V287m230 203V257m242 231V213" stroke="#0b1723" stroke-width="8"/>
+  <path d="M15 328 1452 300M76 407l1376-19" stroke="#192b3b" stroke-width="5"/>
+
+  <!-- Court markings in perspective -->
+  <g fill="none" stroke="#e6f5f8" stroke-width="8" opacity=".9">
+    <path d="M113 523 1432 511 1551 851 38 858Z"/>
+    <path d="m766 517-9 337"/>
+    <path d="M333 676h1018"/>
+  </g>
+
+  <!-- Net -->
+  <path d="m79 615 1375-10v75L78 690Z" fill="#07121d" opacity=".7"/>
+  <path d="m79 615 1375-10v75L78 690Z" fill="url(#mesh)"/>
+  <path d="m78 610 1377-11" stroke="#f4f3e9" stroke-width="10"/>
+  <path d="M78 603v101m1377-111v104" stroke="#0c1720" stroke-width="15"/>
+  <path d="m765 604-2 84" stroke="#e3e0d5" stroke-width="4"/>
+
+  <!-- Floodlight poles -->
+  <g stroke="#101923" stroke-width="13" fill="#fffbea">
+    <path d="M193 472V173m-38-8 76 17" fill="none"/>
+    <rect x="143" y="143" width="42" height="27" rx="3" transform="rotate(13 164 156)"/>
+    <rect x="204" y="157" width="42" height="27" rx="3" transform="rotate(13 225 170)"/>
+    <path d="M1338 491V100m-35-2h70" fill="none"/>
+    <rect x="1292" y="74" width="42" height="28" rx="3"/>
+    <rect x="1344" y="74" width="42" height="28" rx="3"/>
+    <path d="M794 493V310m-22-2h45" fill="none"/>
+    <rect x="762" y="290" width="30" height="21" rx="2"/>
+    <rect x="801" y="290" width="30" height="21" rx="2"/>
+  </g>
+  <g filter="url(#blur)" opacity=".72">
+    <circle cx="193" cy="168" r="105" fill="url(#lampGlow)"/>
+    <circle cx="1339" cy="91" r="115" fill="url(#lampGlow)"/>
+    <circle cx="797" cy="304" r="72" fill="url(#lampGlow)"/>
+  </g>
+
+
+  <!-- Americano rotation route -->
+  <g fill="none" stroke="#c9e63b" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity=".88">
+    <path d="M420 793C555 845 765 834 902 772"/>
+    <path d="m873 760 36 8-22 29" fill="#c9e63b" stroke="none"/>
+    <path d="M1050 746c142 43 302 14 370-76"/>
+    <path d="m1396 680 26-16 2 32" fill="#c9e63b" stroke="none"/>
+  </g>
+
+  <!-- Four players: simplified editorial silhouettes for a scalable, Git-friendly asset -->
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <!-- player 1, near left -->
+    <g>
+      <ellipse cx="505" cy="797" rx="72" ry="15" fill="#06111c" opacity=".45"/>
+      <circle cx="520" cy="491" r="31" fill="#c98c68"/>
+      <path d="M491 482q31-45 61 2l-8 14q-31-18-54 4Z" fill="#17212a"/>
+      <path d="M499 525q40-23 72 14l-5 154-89-3 5-122Z" fill="#3b9ab6"/>
+      <path d="m487 552-44 101 21 10 49-90m49-25 37 91 22-9-30-104" fill="none" stroke="#c98c68" stroke-width="24"/>
+      <path d="m486 688-17 87m78-84 25 81" fill="none" stroke="#18212c" stroke-width="35"/>
+      <path d="m468 774-28 18m133-18 32 12" stroke="#eef1ed" stroke-width="18"/>
+      <path d="m613 626 50 32" stroke="#20262b" stroke-width="9"/>
+      <ellipse cx="679" cy="670" rx="25" ry="34" transform="rotate(-34 679 670)" fill="#182327" stroke="#b7d62d" stroke-width="5"/>
+      <path d="m664 650 25 39m-34-17 47-5" stroke="#76911e" stroke-width="2"/>
+    </g>
+    <!-- player 2, near right -->
+    <g>
+      <ellipse cx="1115" cy="805" rx="77" ry="16" fill="#06111c" opacity=".45"/>
+      <circle cx="1080" cy="489" r="30" fill="#b97958"/>
+      <path d="M1070 463q36-8 43 25l-16 13q-4-22-32-20Z" fill="#211b1b"/>
+      <path d="M1100 478q28 10 22 51" fill="none" stroke="#211b1b" stroke-width="13"/>
+      <path d="M1043 526q44-24 78 9l19 153-98 7-17-113Z" fill="#182839"/>
+      <path d="m1035 554-55 98 20 12 66-83m48-38 35 103 23-7-29-113" fill="none" stroke="#b97958" stroke-width="23"/>
+      <path d="m1047 691-12 88m72-91 33 89" fill="none" stroke="#b97958" stroke-width="32"/>
+      <path d="m1035 779-30 18m136-18 32 14" stroke="#eff0e9" stroke-width="18"/>
+      <path d="m986 646-43 26" stroke="#20262b" stroke-width="9"/>
+      <ellipse cx="927" cy="681" rx="27" ry="35" transform="rotate(39 927 681)" fill="#182327" stroke="#b7d62d" stroke-width="5"/>
+    </g>
+    <!-- player 3, far center-left -->
+    <g>
+      <ellipse cx="807" cy="590" rx="43" ry="8" fill="#06111c" opacity=".45"/>
+      <circle cx="807" cy="442" r="18" fill="#be7c5d"/>
+      <path d="M793 438q14-28 30 0" fill="#1c1d22"/>
+      <path d="m790 468 37-2 15 68-66 2Z" fill="#172533"/>
+      <path d="m789 477-30 52m64-52 35 43" fill="none" stroke="#be7c5d" stroke-width="13"/>
+      <path d="m790 533-18 47m45-46 25 45" fill="none" stroke="#e7ebeb" stroke-width="14"/>
+      <path d="m857 519 26 8" stroke="#20262b" stroke-width="6"/>
+      <ellipse cx="891" cy="531" rx="14" ry="19" transform="rotate(-70 891 531)" fill="#182327" stroke="#b7d62d" stroke-width="3"/>
+    </g>
+    <!-- player 4, far right -->
+    <g>
+      <ellipse cx="1262" cy="589" rx="44" ry="8" fill="#06111c" opacity=".45"/>
+      <circle cx="1260" cy="436" r="18" fill="#a96b4c"/>
+      <path d="M1245 432q17-27 32 3" fill="#191c20"/>
+      <path d="m1242 461 38 1 15 69-68 1Z" fill="#67a493"/>
+      <path d="m1240 474-30 49m65-49 32 48" fill="none" stroke="#a96b4c" stroke-width="13"/>
+      <path d="m1241 530-16 49m45-48 22 47" fill="none" stroke="#17212b" stroke-width="14"/>
+      <path d="m1212 519-26 13" stroke="#20262b" stroke-width="6"/>
+      <ellipse cx="1178" cy="537" rx="14" ry="19" transform="rotate(64 1178 537)" fill="#182327" stroke="#b7d62d" stroke-width="3"/>
+    </g>
+  </g>
+
+  <!-- Numbered player markers -->
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="34" font-weight="800" text-anchor="middle">
+    <g><circle cx="510" cy="424" r="34" fill="#09213a" fill-opacity=".84" stroke="#c9e63b" stroke-width="4"/><text x="510" y="436" fill="#dff24c">1</text></g>
+    <g><circle cx="1090" cy="421" r="34" fill="#09213a" fill-opacity=".84" stroke="#c9e63b" stroke-width="4"/><text x="1090" y="433" fill="#dff24c">2</text></g>
+    <g><circle cx="807" cy="389" r="28" fill="#09213a" fill-opacity=".84" stroke="#c9e63b" stroke-width="4"/><text x="807" y="401" fill="#dff24c">3</text></g>
+    <g><circle cx="1260" cy="383" r="28" fill="#09213a" fill-opacity=".84" stroke="#c9e63b" stroke-width="4"/><text x="1260" y="395" fill="#dff24c">4</text></g>
+  </g>
+
+  <!-- Padel balls -->
+  <g>
+    <ellipse cx="1374" cy="813" rx="27" ry="10" fill="#03111d" opacity=".7"/>
+    <circle cx="1371" cy="793" r="17" fill="#b9e41f"/>
+    <path d="M1360 780c10 8 17 18 21 29" fill="none" stroke="#f1ff8b" stroke-width="3"/>
+    <ellipse cx="1432" cy="761" rx="22" ry="8" fill="#03111d" opacity=".62"/>
+    <circle cx="1430" cy="744" r="14" fill="#aeda19"/>
+    <path d="M1420 735c8 5 14 13 19 23" fill="none" stroke="#f1ff8b" stroke-width="3"/>
+  </g>
+  <rect width="1600" height="900" fill="#03101f" opacity=".08"/>
+</svg>
