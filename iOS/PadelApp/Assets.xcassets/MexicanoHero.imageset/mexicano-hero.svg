@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title description">
+  <title id="title">Mexicano padel under floodlights</title>
+  <desc id="description">Four padel players compete on a blue court at night, with ranking markers showing the dynamic Mexicano format.</desc>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1">
+      <stop stop-color="#020817"/>
+      <stop offset=".58" stop-color="#081a33"/>
+      <stop offset="1" stop-color="#102948"/>
+    </linearGradient>
+    <linearGradient id="court" x2="0" y2="1">
+      <stop stop-color="#0879ca"/>
+      <stop offset="1" stop-color="#03254f"/>
+    </linearGradient>
+    <radialGradient id="lamp">
+      <stop stop-color="#fff" stop-opacity=".9"/>
+      <stop offset=".2" stop-color="#d9edff" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#8fc5ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x2="1">
+      <stop stop-color="#ffe268"/>
+      <stop offset="1" stop-color="#d69716"/>
+    </linearGradient>
+    <pattern id="mesh" width="16" height="16" patternUnits="userSpaceOnUse">
+      <path d="M0 0H16M0 0V16" stroke="#9ab1c8" stroke-opacity=".17" stroke-width="1"/>
+    </pattern>
+    <filter id="glow"><feGaussianBlur stdDeviation="13"/></filter>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#sky)"/>
+  <circle cx="270" cy="100" r="145" fill="url(#lamp)"/>
+  <circle cx="1370" cy="88" r="145" fill="url(#lamp)"/>
+  <g fill="#eff7ff" filter="url(#glow)" opacity=".8">
+    <rect x="241" y="64" width="70" height="26"/><rect x="1328" y="51" width="70" height="26"/>
+  </g>
+  <g fill="#fff">
+    <rect x="246" y="67" width="29" height="20" transform="rotate(12 260 77)"/>
+    <rect x="281" y="73" width="29" height="20" transform="rotate(12 295 83)"/>
+    <rect x="1335" y="52" width="29" height="20" transform="rotate(12 1350 62)"/>
+    <rect x="1370" y="59" width="29" height="20" transform="rotate(12 1385 69)"/>
+  </g>
+  <path d="M270 84V400M1370 70V400" stroke="#5b718a" stroke-width="8"/>
+
+  <!-- glass enclosure and wire mesh -->
+  <path d="M45 125L470 242L1542 207V621L45 586Z" fill="url(#mesh)" stroke="#49627d" stroke-width="5"/>
+  <g stroke="#49627d" stroke-width="5" opacity=".8">
+    <path d="M45 125V586M265 185V591M470 242V596M700 235V601M930 227V606M1160 220V612M1380 212V617M1542 207V621"/>
+  </g>
+  <path d="M0 510L1600 477V900H0Z" fill="url(#court)"/>
+  <g fill="none" stroke="#d8efff" stroke-width="4" opacity=".72">
+    <path d="M0 557L1600 520M175 900L486 500M1425 900L1116 489M625 900L676 496M975 900L924 493"/>
+    <path d="M75 757L1528 722"/>
+  </g>
+
+  <!-- net -->
+  <path d="M270 476L1338 458L1340 582L272 606Z" fill="#020711" fill-opacity=".68" stroke="#aebdcb" stroke-width="5"/>
+  <path d="M272 496L1338 478" stroke="#fff" stroke-width="7"/>
+  <path d="M286 505L1325 488M285 524L1328 507M282 544L1331 526M279 565L1334 546M276 586L1337 566" stroke="#8da0b2" stroke-opacity=".38"/>
+
+  <!-- far-side players -->
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(844 327)">
+      <circle cx="30" cy="31" r="17" fill="#b97b59"/>
+      <path d="M14 52Q31 42 48 53L57 130H3Z" fill="#08111e" stroke="#132a43" stroke-width="5"/>
+      <path d="M12 68L-8 111M48 68L75 105M17 130L6 184M44 130L55 184" stroke="#a75e43" stroke-width="16"/>
+      <path d="M-1 184H21M45 184H70" stroke="#c8e6f6" stroke-width="9"/>
+      <ellipse cx="86" cy="106" rx="10" ry="24" fill="#07101b" stroke="#d4ad32" stroke-width="4" transform="rotate(-33 86 106)"/>
+    </g>
+    <g transform="translate(1050 313)">
+      <circle cx="30" cy="31" r="17" fill="#a96647"/>
+      <path d="M14 52Q31 42 48 53L57 130H3Z" fill="#08111e" stroke="#132a43" stroke-width="5"/>
+      <path d="M12 68L-8 111M48 68L75 105M17 130L6 184M44 130L55 184" stroke="#995137" stroke-width="16"/>
+      <path d="M-1 184H21M45 184H70" stroke="#c8e6f6" stroke-width="9"/>
+      <ellipse cx="86" cy="106" rx="10" ry="24" fill="#07101b" stroke="#d4ad32" stroke-width="4" transform="rotate(-33 86 106)"/>
+    </g>
+  </g>
+
+  <!-- near-side players -->
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(450 402)">
+      <circle cx="112" cy="17" r="25" fill="#bd8060"/>
+      <path d="M89 7Q110-15 137 5L130 20H90Z" fill="#050b12"/>
+      <path d="M85 43Q113 25 143 47L173 155L73 160Z" fill="#070d17" stroke="#142b44" stroke-width="7"/>
+      <path d="M89 62L28 125M138 60L212 104" stroke="#ad684d" stroke-width="24"/>
+      <path d="M91 155L39 245M147 155L155 250" stroke="#b87554" stroke-width="31"/>
+      <path d="M23 250L61 250M142 255L183 255" stroke="#d7ebf5" stroke-width="17"/>
+      <ellipse cx="238" cy="113" rx="28" ry="47" fill="#07111c" stroke="#d3ae32" stroke-width="7" transform="rotate(-65 238 113)"/>
+      <path d="M208 105L172 98" stroke="#d3ae32" stroke-width="9"/>
+    </g>
+    <g transform="translate(1084 322)">
+      <circle cx="142" cy="21" r="29" fill="#aa684b"/>
+      <path d="M103 59Q141 34 178 65L205 211L87 214Z" fill="#070d17" stroke="#142b44" stroke-width="8"/>
+      <path d="M112 81L55 171M172 83L221 157" stroke="#a15b42" stroke-width="27"/>
+      <path d="M109 208L70 359M174 209L218 352" stroke="#a96045" stroke-width="39"/>
+      <path d="M44 368L100 368M200 360L253 360" stroke="#101a28" stroke-width="25"/>
+      <ellipse cx="40" cy="189" rx="37" ry="58" fill="#06101b" stroke="#d3ae32" stroke-width="8" transform="rotate(24 40 189)"/>
+      <path d="M59 148L86 112" stroke="#d3ae32" stroke-width="11"/>
+    </g>
+  </g>
+
+  <!-- ball and dynamic ranking markers -->
+  <circle cx="934" cy="526" r="10" fill="#d8ef36" filter="url(#glow)"/>
+  <circle cx="934" cy="526" r="8" fill="#d8ef36"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="28" font-weight="700" text-anchor="middle">
+    <g transform="translate(1180 207)"><path d="M0-31L31 0L0 31L-31 0Z" fill="#091629" stroke="#f5c63e" stroke-width="3"/><text y="10" fill="#f5c63e">1</text></g>
+    <g transform="translate(860 303)"><path d="M0-31L31 0L0 31L-31 0Z" fill="#091629" stroke="#e9f4ff" stroke-width="3"/><text y="10" fill="#e9f4ff">2</text></g>
+    <g transform="translate(577 296)"><path d="M0-31L31 0L0 31L-31 0Z" fill="#091629" stroke="#e47b34" stroke-width="3"/><text y="10" fill="#e47b34">3</text></g>
+    <g transform="translate(1092 286)"><path d="M0-31L31 0L0 31L-31 0Z" fill="#091629" stroke="#9ba8b5" stroke-width="3"/><text y="10" fill="#d0d7de">4</text></g>
+  </g>
+
+  <!-- vignette leaves space for card copy -->
+  <rect width="1600" height="900" fill="none" stroke="#000" stroke-opacity=".28" stroke-width="70"/>
+  <path d="M0 0H570L390 900H0Z" fill="#010817" fill-opacity=".36"/>
+  <rect x="70" y="805" width="320" height="8" rx="4" fill="url(#gold)"/>
+</svg>
