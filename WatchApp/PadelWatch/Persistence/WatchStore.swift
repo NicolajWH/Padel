@@ -96,6 +96,12 @@ final class WatchStore: ObservableObject {
         if recentMatches.count > 10 { recentMatches.removeLast() }
     }
 
+    /// A corrected match is no longer final, so discard the stale result that
+    /// was archived when its (accidental) winning point was first entered.
+    func removeArchivedMatch(id: UUID) {
+        recentMatches.removeAll { $0.id == id }
+    }
+
     private func save<T: Codable>(_ value: T?, key: String) {
         guard let value else {
             UserDefaults.standard.removeObject(forKey: key)

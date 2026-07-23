@@ -286,6 +286,11 @@
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Start kamp" } }
       }
     },
+    "Undo Last Point" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Fortryd seneste point" } }
+      }
+    },
     "Who Serves?" : {
       "localizations" : {
         "da" : { "stringUnit" : { "state" : "translated", "value" : "Hvem server?" } }
