@@ -8,6 +8,7 @@ struct WatchNewMatchView: View {
 
     @State private var selectedIDs: [UUID] = []
     @State private var firstServerID: UUID?
+    @State private var goldenPoint = false
     @State private var matchStarted = false
 
     private var roster: [Player] { connectivity.playerRoster.players }
@@ -23,13 +24,21 @@ struct WatchNewMatchView: View {
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(0..<4, id: \.self) { index in
-                        Picker("Player \(index + 1)", selection: selection(for: index)) {
-                            ForEach(roster) { player in
-                                Text(player.initials).tag(player.id as UUID?)
-                            }
+                    NavigationLink {
+                        WatchPlayerSelectionView(
+                            players: roster,
+                            selection: $selectedIDs,
+                            maximumSelection: 4
+                        )
+                    } label: {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Choose players")
+                                .font(.footnote)
+                            Text(selectedPlayers.map(\.initials).joined(separator: " · "))
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
                         }
-                        .pickerStyle(.navigationLink)
                     }
                 }
             }
@@ -40,33 +49,30 @@ struct WatchNewMatchView: View {
                         Text(player.initials).tag(player.id as UUID?)
                     }
                 }
+                Toggle("Golden Point", isOn: $goldenPoint)
             }
 
             Button("Start Match") { startMatch() }
                 .disabled(Set(selectedIDs).count != 4 || firstServerID == nil)
+                .tint(PadelTheme.lime)
         }
         .navigationTitle("New Match")
+        .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(isPresented: $matchStarted) {
             WatchLiveMatchView()
         }
         .onAppear(perform: selectDefaults)
         .onChange(of: roster) { _, _ in selectDefaults() }
-    }
-
-    private func selection(for index: Int) -> Binding<UUID?> {
-        Binding(
-            get: { selectedIDs.indices.contains(index) ? selectedIDs[index] : nil },
-            set: { newID in
-                guard let newID else { return }
-                while selectedIDs.count <= index { selectedIDs.append(newID) }
-                selectedIDs[index] = newID
-                if index == 0 { firstServerID = newID }
-            }
-        )
+        .onChange(of: selectedIDs) { _, ids in
+            if !ids.contains(firstServerID ?? UUID()) { firstServerID = ids.first }
+        }
     }
 
     private func selectDefaults() {
-        let valid = selectedIDs.filter { id in roster.contains { $0.id == id } }
+        var seen = Set<UUID>()
+        let valid = selectedIDs.filter { id in
+            roster.contains { $0.id == id } && seen.insert(id).inserted
+        }
         selectedIDs = Array((valid + roster.map(\.id).filter { !valid.contains($0) }).prefix(4))
         if !selectedIDs.contains(firstServerID ?? UUID()) { firstServerID = selectedIDs.first }
     }
@@ -77,7 +83,7 @@ struct WatchNewMatchView: View {
         var state = MatchState(
             teamA: Team(players: Array(selectedPlayers.prefix(2))),
             teamB: Team(players: Array(selectedPlayers.suffix(2))),
-            settings: MatchSettings(goldenPoint: false, setsToWin: 1)
+            settings: MatchSettings(goldenPoint: goldenPoint, setsToWin: 1)
         )
         state.setCurrentServer(playerID: firstServerID)
         store.activeMatch = state
