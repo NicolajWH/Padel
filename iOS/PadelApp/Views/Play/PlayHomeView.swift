@@ -26,7 +26,7 @@ struct PlayHomeView: View {
 
                 NavigationLink { NewMatchSetupView() } label: {
                     PremiumImageCard(
-                        assetName: "CourtHero", category: "KAMP", title: "Ny kamp",
+                        assetName: "NewMatchHero", category: "KAMP", title: "Ny kamp",
                         subtitle: "Opret en kamp, inviter spillere og kom i gang.", icon: "tennis.racket", cta: "Start kamp",
                         height: 300
                     )
