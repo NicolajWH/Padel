@@ -1,15 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "americano-hero.svg",
+      "filename" : "9436C403-4BE5-470D-BB57-769D56C5DC85.png",
       "idiom" : "universal"
     }
   ],
   "info" : {
     "author" : "xcode",
     "version" : 1
-  },
-  "properties" : {
-    "preserves-vector-representation" : true
   }
 }

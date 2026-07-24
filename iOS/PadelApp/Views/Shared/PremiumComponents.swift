@@ -17,10 +17,15 @@ struct PremiumImageCard: View {
         ZStack(alignment: .bottomLeading) {
             DesignSystem.surfaceElevated
             if hasImage {
-                Image(assetName)
-                    .resizable().scaledToFill()
-                    .contrast(1.06).saturation(0.92)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity).clipped()
+                GeometryReader { geometry in
+                    Image(assetName)
+                        .resizable()
+                        .scaledToFill()
+                        .contrast(1.06)
+                        .saturation(0.92)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .clipped()
+                }
                 LinearGradient(colors: [.clear, DesignSystem.appBackground.opacity(0.55), DesignSystem.appBackground.opacity(0.97)], startPoint: .top, endPoint: .bottom)
             }
 
