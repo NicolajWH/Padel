@@ -160,9 +160,11 @@ struct NewMatchSetupView: View {
     private func assignByID(_ idString: String, to target: Int) -> Bool {
         guard let player = candidatePlayers.first(where: { $0.id.uuidString == idString }) else { return false }
         let playerName = normalizedName(player.name)
-        guard !slots.enumerated().contains(where: { entry in
-            entry.offset != target && entry.element.map { normalizedName($0.name) == playerName } == true
-        }) else { return false }
+        let isAlreadyAssigned = slots.enumerated().contains { index, assignedPlayer in
+            guard index != target, let assignedPlayer else { return false }
+            return normalizedName(assignedPlayer.name) == playerName
+        }
+        guard !isAlreadyAssigned else { return false }
         withAnimation(.snappy) {
             slots[target] = player
             selectedSlot = slots.firstIndex(where: { $0 == nil })
