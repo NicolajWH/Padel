@@ -12,6 +12,19 @@ public enum SyncPayload: Codable, Sendable {
     case requestLatest
     case clearActiveSession
     case playerRoster(PlayerRoster)
+    case workoutAutoEnd(WorkoutAutoEndSettings)
+}
+
+/// Safety settings shared by the phone and Watch. The Watch owns the HealthKit
+/// workout, while the larger phone screen is the natural place to configure it.
+public struct WorkoutAutoEndSettings: Codable, Hashable, Sendable {
+    public var isEnabled: Bool
+    public var durationMinutes: Int
+
+    public init(isEnabled: Bool = true, durationMinutes: Int = 360) {
+        self.isEnabled = isEnabled
+        self.durationMinutes = durationMinutes
+    }
 }
 
 /// The players configured on the companion iPhone. Keeping this in PadelKit

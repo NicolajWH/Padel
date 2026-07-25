@@ -9,6 +9,8 @@ struct SettingsView: View {
     @AppStorage("profileName") private var profileName = ""
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
     @AppStorage(NearbyPlayersService.discoveryEnabledKey) private var nearbyDiscoveryEnabled = true
+    @AppStorage("workoutAutoEndEnabled") private var workoutAutoEndEnabled = true
+    @AppStorage("workoutAutoEndMinutes") private var workoutAutoEndMinutes = 360
     @EnvironmentObject private var connectivity: PhoneConnectivityManager
     @StateObject private var healthSummary = HealthWorkoutSummaryStore()
     @Environment(\.openURL) private var openURL
@@ -54,6 +56,7 @@ struct SettingsView: View {
 
             Section {
                 Toggle("Visible to Players Nearby", isOn: $nearbyDiscoveryEnabled)
+                    .toggleStyle(TennisBallToggleStyle())
             } header: {
                 Text("Players Nearby")
             } footer: {
@@ -76,6 +79,23 @@ struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+            }
+
+            Section {
+                Toggle("Afslut træning automatisk", isOn: $workoutAutoEndEnabled)
+                    .toggleStyle(TennisBallToggleStyle())
+                if workoutAutoEndEnabled {
+                    Picker("Efter", selection: $workoutAutoEndMinutes) {
+                        Text("2 timer").tag(120)
+                        Text("4 timer").tag(240)
+                        Text("6 timer").tag(360)
+                        Text("8 timer").tag(480)
+                    }
+                }
+            } header: {
+                Text("Autosluk kamp")
+            } footer: {
+                Text("Apple Watch stopper automatisk Sundhed-træningen efter den valgte tid og giver dig besked. Det forhindrer, at en glemt kamp fortsætter med at registrere timer.")
             }
 
             Section {
@@ -118,6 +138,7 @@ struct SettingsView: View {
 
             Section {
                 Toggle("Golden Point", isOn: $defaultGoldenPoint)
+                    .toggleStyle(TennisBallToggleStyle())
                 Picker("Match Format", selection: $defaultSetsToWin) {
                     Text("Single Set").tag(1)
                     Text("Best of 3 Sets").tag(2)
@@ -142,6 +163,9 @@ struct SettingsView: View {
         .screenTitle("Settings")
         .tint(DesignSystem.accentLime)
         .task { await healthSummary.load() }
+        .task { syncWorkoutAutoEndSettings() }
+        .onChange(of: workoutAutoEndEnabled) { _, _ in syncWorkoutAutoEndSettings() }
+        .onChange(of: workoutAutoEndMinutes) { _, _ in syncWorkoutAutoEndSettings() }
         .onChange(of: nearbyDiscoveryEnabled) { _, enabled in
             if !enabled {
                 Task { await NearbyPlayersService.unpublish() }
@@ -165,6 +189,38 @@ struct SettingsView: View {
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
         return "\(version) (\(build))"
+    }
+
+    private func syncWorkoutAutoEndSettings() {
+        connectivity.send(.workoutAutoEnd(.init(
+            isEnabled: workoutAutoEndEnabled,
+            durationMinutes: workoutAutoEndMinutes
+        )))
+    }
+}
+
+private struct TennisBallToggleStyle: ToggleStyle {
+    @Environment(\.colorScheme) private var colorScheme
+
+    func makeBody(configuration: Configuration) -> some View {
+        HStack {
+            configuration.label
+            Spacer()
+            Capsule()
+                .fill(configuration.isOn ? DesignSystem.accentLime : Color.secondary.opacity(0.25))
+                .frame(width: 51, height: 31)
+                .overlay(alignment: configuration.isOn ? .trailing : .leading) {
+                    Circle()
+                        .fill(configuration.isOn && colorScheme == .light ? Color.black : Color.white)
+                        .padding(2)
+                }
+                .animation(.snappy, value: configuration.isOn)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { configuration.isOn.toggle() }
+        .accessibilityElement(children: .combine)
+        .accessibilityValue(configuration.isOn ? "Slået til" : "Slået fra")
+        .accessibilityAddTraits(.isButton)
     }
 }
 

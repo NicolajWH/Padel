@@ -2,6 +2,16 @@ import XCTest
 @testable import PadelKit
 
 final class PlayerInsightsTests: XCTestCase {
+    func testWorkoutAutoEndSettingsSyncPayloadRoundTrips() throws {
+        let expected = WorkoutAutoEndSettings(isEnabled: true, durationMinutes: 240)
+        let decoded = SyncPayload.decode(SyncPayload.workoutAutoEnd(expected).encoded())
+
+        guard case .workoutAutoEnd(let actual) = decoded else {
+            return XCTFail("Expected workout auto-end settings")
+        }
+        XCTAssertEqual(actual, expected)
+    }
+
     func testPlayerRosterSyncPayloadRoundTripsOwnerAndPlayers() throws {
         let owner = Player(name: "Nicolaj Worsa")
         let friend = Player(name: "Anna Berg")

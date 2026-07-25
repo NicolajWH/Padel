@@ -9,6 +9,7 @@ struct PlayersView: View {
     @State private var showingAdd = false
     @State private var showingImport = false
     @State private var showingContacts = false
+    @State private var playerPendingDeletion: SavedPlayerRecord?
 
     var body: some View {
         Group {
@@ -30,6 +31,22 @@ struct PlayersView: View {
             .sheet(isPresented: $showingImport) { ImportPlayersView(existingNames: players.map(\.name)) }
             .sheet(isPresented: $showingContacts) {
                 ContactPicker { names in addPlayers(names) }
+            }
+            .confirmationDialog(
+                "Slet spiller?",
+                isPresented: Binding(
+                    get: { playerPendingDeletion != nil },
+                    set: { if !$0 { playerPendingDeletion = nil } }
+                ),
+                titleVisibility: .visible
+            ) {
+                Button("Slet spiller", role: .destructive) {
+                    if let playerPendingDeletion { modelContext.delete(playerPendingDeletion) }
+                    playerPendingDeletion = nil
+                }
+                Button("Annuller", role: .cancel) { playerPendingDeletion = nil }
+            } message: {
+                Text("Spilleren fjernes fra din spillerliste. Tidligere kampresultater ændres ikke.")
             }
             .tint(DesignSystem.accentLime)
     }
@@ -56,7 +73,10 @@ struct PlayersView: View {
                     }
                     .buttonStyle(PremiumPressStyle())
                     .contextMenu {
-                        Button("Slet spiller", systemImage: "trash", role: .destructive) { modelContext.delete(record) }
+                        Button("Slet spiller", systemImage: "trash", role: .destructive) { playerPendingDeletion = record }
+                    }
+                    .swipeActions(edge: .trailing) {
+                        Button("Slet", systemImage: "trash", role: .destructive) { playerPendingDeletion = record }
                     }
                 }
             }.padding()
