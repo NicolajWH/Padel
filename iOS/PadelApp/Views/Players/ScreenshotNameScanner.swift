@@ -31,7 +31,7 @@ enum ScreenshotNameScanner {
                 let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
                 do {
                     try handler.perform([request])
-                    let observations = (request.results as? [VNRecognizedTextObservation]) ?? []
+                    let observations = request.results ?? []
                     // Vision's origin is bottom-left, so a larger y sits higher
                     // on screen — sort descending to read the list top to bottom.
                     let lines = observations

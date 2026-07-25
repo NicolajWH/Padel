@@ -238,7 +238,9 @@ struct PlayerChip: View {
         .onTapGesture(perform: onTap)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityAction(perform: onTap)
+        .accessibilityAction {
+            onTap()
+        }
         // An explicit preview lifts just this chip — without it a chip inside a
         // Form drags a snapshot of the whole row of players.
         .draggable(player.id.uuidString) {
