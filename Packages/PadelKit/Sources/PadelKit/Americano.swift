@@ -19,7 +19,7 @@ public enum AmericanoFormat: String, Codable, Hashable, Sendable, CaseIterable {
 /// Configurable rules for an Americano tournament: everyone rotates partners
 /// and opponents, and individual points accumulate across rounds.
 public struct AmericanoSettings: Codable, Hashable, Sendable {
-    /// Points a court race to in each round (classic Americano is a straight race, no deuce).
+    /// Total points shared by both teams in each round (classic Americano has no deuce).
     public var pointsPerRound: Int
     /// How many courts play simultaneously each round.
     public var numberOfCourts: Int
@@ -32,7 +32,7 @@ public struct AmericanoSettings: Codable, Hashable, Sendable {
     /// points still accumulate per player.
     public var fixedPartners: Bool
 
-    public init(pointsPerRound: Int = 21, numberOfCourts: Int = 1, numberOfRounds: Int = 3, format: AmericanoFormat = .americano, fixedPartners: Bool = false) {
+    public init(pointsPerRound: Int = 16, numberOfCourts: Int = 1, numberOfRounds: Int = 3, format: AmericanoFormat = .americano, fixedPartners: Bool = false) {
         self.pointsPerRound = pointsPerRound
         self.numberOfCourts = numberOfCourts
         self.numberOfRounds = numberOfRounds
@@ -62,7 +62,7 @@ public struct AmericanoSettings: Codable, Hashable, Sendable {
     public static func standard(playerCount: Int) -> AmericanoSettings {
         let courts = max(1, playerCount / 4)
         let rounds = max(3, min(playerCount - 1, 10))
-        return AmericanoSettings(pointsPerRound: 21, numberOfCourts: courts, numberOfRounds: rounds)
+        return AmericanoSettings(pointsPerRound: 16, numberOfCourts: courts, numberOfRounds: rounds)
     }
 }
 
@@ -85,10 +85,10 @@ public struct AmericanoMatchup: Codable, Hashable, Sendable, Identifiable {
     public func score(target: Int) -> (a: Int, b: Int, isComplete: Bool) {
         var a = 0, b = 0
         for point in pointLog {
-            if a >= target || b >= target { break }
+            if a + b >= target { break }
             if point == .teamA { a += 1 } else { b += 1 }
         }
-        return (a, b, a >= target || b >= target)
+        return (a, b, a + b >= target)
     }
 
     public mutating func addPoint(to side: TeamSide, target: Int) {
@@ -128,6 +128,9 @@ public struct AmericanoSession: Codable, Hashable, Sendable, Identifiable {
     public var settings: AmericanoSettings
     public var rounds: [AmericanoRound]
     public var createdAt: Date
+    /// Set when the organizer explicitly ends a session before every planned
+    /// round has been played.
+    public var endedAt: Date?
 
     public init(
         id: UUID = UUID(),
@@ -135,7 +138,8 @@ public struct AmericanoSession: Codable, Hashable, Sendable, Identifiable {
         players: [Player],
         settings: AmericanoSettings,
         rounds: [AmericanoRound] = [],
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        endedAt: Date? = nil
     ) {
         self.id = id
         self.name = name
@@ -143,6 +147,7 @@ public struct AmericanoSession: Codable, Hashable, Sendable, Identifiable {
         self.settings = settings
         self.rounds = rounds
         self.createdAt = createdAt
+        self.endedAt = endedAt
     }
 
     public func isRoundComplete(_ round: AmericanoRound) -> Bool {
@@ -153,7 +158,14 @@ public struct AmericanoSession: Codable, Hashable, Sendable, Identifiable {
     /// until every *planned* round exists and is finished — not just the
     /// rounds generated so far.
     public var isComplete: Bool {
-        !rounds.isEmpty && rounds.count >= settings.numberOfRounds && rounds.allSatisfy { isRoundComplete($0) }
+        endedAt != nil || (!rounds.isEmpty && rounds.count >= settings.numberOfRounds && rounds.allSatisfy { isRoundComplete($0) })
+    }
+
+    /// Ends the tournament at its current standings. This is intentionally
+    /// separate from completing every scheduled round so an organizer can
+    /// stop a real-world event early and still retain its results.
+    public mutating func end(at date: Date = Date()) {
+        endedAt = date
     }
 
     /// Total rounds this session will have once fully played.
@@ -178,6 +190,7 @@ public struct AmericanoSession: Codable, Hashable, Sendable, Identifiable {
     /// independently produce byte-identical rounds and stay in sync.
     @discardableResult
     public mutating func appendNextRoundIfNeeded() -> Bool {
+        guard endedAt == nil else { return false }
         guard rounds.count < settings.numberOfRounds else { return false }
         guard rounds.allSatisfy({ isRoundComplete($0) }) else { return false }
         guard let next = AmericanoScheduler.nextRound(for: self) else { return false }

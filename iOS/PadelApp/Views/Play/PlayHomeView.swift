@@ -63,7 +63,9 @@ struct PlayHomeView: View {
                         }
                     }
                 }
-            }.padding(DesignSystem.Spacing.large)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(DesignSystem.Spacing.large)
         }
         .contentMargins(.bottom, DesignSystem.Spacing.large, for: .scrollContent)
         .padelBackground().screenTitle("Spil")
@@ -102,10 +104,15 @@ private struct OngoingMatchCard: View {
         PremiumCard(background: DesignSystem.padelBlueDeep) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack { StatusPill(text: "I gang", color: DesignSystem.accentLime); Spacer(); Image(systemName: "chevron.right").foregroundStyle(.white.opacity(0.7)) }
-                Text("\(state.teamA.displayName) vs \(state.teamB.displayName)").font(.headline).foregroundStyle(.white).lineLimit(2)
+                Text("\(state.teamA.displayName) vs \(state.teamB.displayName)")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text("\(snap.setsWonA)–\(snap.setsWonB)").font(.system(size: 30, weight: .heavy).monospacedDigit()).foregroundStyle(DesignSystem.accentLime)
                 Label("Fortsæt kamp", systemImage: "play.fill").font(.subheadline.weight(.semibold)).foregroundStyle(DesignSystem.padelBlueLight)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

@@ -3,6 +3,11 @@ import XCTest
 
 final class AmericanoTests: XCTestCase {
 
+    func testStandardRoundUsesSixteenTotalPoints() {
+        XCTAssertEqual(AmericanoSettings().pointsPerRound, 16)
+        XCTAssertEqual(AmericanoSettings.standard(playerCount: 4).pointsPerRound, 16)
+    }
+
     func testScheduleCoversAllPlayersEachRound() {
         let players = (1...8).map { Player(name: "P\($0)") }
         let settings = AmericanoSettings.standard(playerCount: players.count)
@@ -36,28 +41,43 @@ final class AmericanoTests: XCTestCase {
         let teamA = Team(players: [p1, p2])
         let teamB = Team(players: [p3, p4])
         var matchup = AmericanoMatchup(court: 1, teamA: teamA, teamB: teamB)
-        // Once a side reaches the target the round is decided and further points are ignored,
-        // so interleave realistically: get team A to 20, team B to its final 15, then let team
-        // A score the 21st and deciding point last.
-        for _ in 0..<20 { matchup.addPoint(to: .teamA, target: 21) }
-        for _ in 0..<15 { matchup.addPoint(to: .teamB, target: 21) }
-        matchup.addPoint(to: .teamA, target: 21)
+        // A round contains a fixed total number of points shared by both teams.
+        for _ in 0..<11 { matchup.addPoint(to: .teamA, target: 16) }
+        for _ in 0..<5 { matchup.addPoint(to: .teamB, target: 16) }
 
         let round = AmericanoRound(index: 0, matchups: [matchup])
-        let session = AmericanoSession(players: [p1, p2, p3, p4], settings: AmericanoSettings(pointsPerRound: 21, numberOfCourts: 1, numberOfRounds: 1), rounds: [round])
+        let session = AmericanoSession(players: [p1, p2, p3, p4], settings: AmericanoSettings(pointsPerRound: 16, numberOfCourts: 1, numberOfRounds: 1), rounds: [round])
 
         let standings = session.standings
-        XCTAssertEqual(standings.first(where: { $0.player.id == p1.id })?.totalPoints, 21)
-        XCTAssertEqual(standings.first(where: { $0.player.id == p3.id })?.totalPoints, 15)
+        XCTAssertEqual(standings.first(where: { $0.player.id == p1.id })?.totalPoints, 11)
+        XCTAssertEqual(standings.first(where: { $0.player.id == p3.id })?.totalPoints, 5)
         XCTAssertTrue(session.isRoundComplete(round))
         XCTAssertTrue(session.isComplete)
     }
 
     func testMatchupDoesNotExceedTargetAfterCompletion() {
         var matchup = AmericanoMatchup(court: 1, teamA: Team(players: [Player(name: "A"), Player(name: "B")]), teamB: Team(players: [Player(name: "C"), Player(name: "D")]))
-        for _ in 0..<25 { matchup.addPoint(to: .teamA, target: 21) }
-        let score = matchup.score(target: 21)
-        XCTAssertEqual(score.a, 21)
+        for _ in 0..<25 { matchup.addPoint(to: .teamA, target: 16) }
+        let score = matchup.score(target: 16)
+        XCTAssertEqual(score.a, 16)
         XCTAssertTrue(score.isComplete)
+    }
+
+    func testRoundStopsWhenCombinedScoreReachesTarget() {
+        var matchup = AmericanoMatchup(court: 1, teamA: Team(players: [Player(name: "A"), Player(name: "B")]), teamB: Team(players: [Player(name: "C"), Player(name: "D")]))
+        for _ in 0..<10 { matchup.addPoint(to: .teamA, target: 16) }
+        for _ in 0..<10 { matchup.addPoint(to: .teamB, target: 16) }
+        let score = matchup.score(target: 16)
+        XCTAssertEqual(score.a + score.b, 16)
+        XCTAssertEqual(score.b, 6)
+        XCTAssertTrue(score.isComplete)
+    }
+
+    func testSessionCanBeEndedBeforeAllRoundsArePlayed() {
+        var session = AmericanoSession(players: [], settings: AmericanoSettings(numberOfRounds: 5))
+        XCTAssertFalse(session.isComplete)
+        session.end()
+        XCTAssertTrue(session.isComplete)
+        XCTAssertFalse(session.appendNextRoundIfNeeded())
     }
 }

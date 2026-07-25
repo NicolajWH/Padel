@@ -5,7 +5,7 @@ struct WatchNewAmericanoView: View {
     @EnvironmentObject private var store: WatchStore
     @EnvironmentObject private var connectivity: WatchConnectivityManager
     @State private var selectedPlayerIDs: [UUID] = []
-    @State private var pointsPerRound = 21
+    @State private var pointsPerRound = 16
     @State private var format: AmericanoFormat = .americano
     @State private var fixedPartners = false
     @State private var navigate = false

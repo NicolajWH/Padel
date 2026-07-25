@@ -146,12 +146,12 @@ private struct MatchupScoringView: View {
         // Mirror the regular match layout: two full-height gradient zones with a
         // big rounded number that auto-scales, so Americano feels like the same
         // scoreboard. A compact header carries the court, target and undo that
-        // the point structure here (a straight race, no games/sets) needs.
+        // the point structure here (a fixed shared total, no games/sets) needs.
         VStack(spacing: 4) {
             HStack(spacing: 6) {
                 Text("Court \(matchup.court)")
                     .font(.system(size: 11, weight: .semibold))
-                Text("to \(session.settings.pointsPerRound)")
+                Text("total \(session.settings.pointsPerRound)")
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
                 if score.isComplete {
