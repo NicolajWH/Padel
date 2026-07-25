@@ -1960,6 +1960,16 @@
           }
         }
       }
+    },
+    "Remove %@": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fjern %@"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
