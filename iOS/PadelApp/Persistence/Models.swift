@@ -47,7 +47,8 @@ public final class MatchRecord {
         self.stateData = (try? JSONEncoder().encode(state)) ?? stateData
         self.isFinished = state.isFinished
         let snap = state.snapshot
-        self.summary = "\(state.teamA.displayName) vs \(state.teamB.displayName) · \(snap.setsWonA)-\(snap.setsWonB)"
+        let rounds = snap.completedSets.map { "\($0.teamAGames)-\($0.teamBGames)" }.joined(separator: ", ")
+        self.summary = "\(state.teamA.displayName) vs \(state.teamB.displayName) · \(rounds.isEmpty ? "0-0" : rounds)"
     }
 
     public static func create(from state: MatchState) -> MatchRecord {
