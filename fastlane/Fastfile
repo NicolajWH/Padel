@@ -112,6 +112,10 @@ platform :ios do
       git_branch: "certificates",
       git_basic_authorization: git_basic_authorization,
       readonly: false,
+      # Recreate profiles instead of reusing a profile whose entitlements may
+      # predate capabilities enabled on the App ID (for example HealthKit).
+      # match commits the refreshed profiles back to the certificates branch.
+      force: true,
       platform: "ios"
     )
 
