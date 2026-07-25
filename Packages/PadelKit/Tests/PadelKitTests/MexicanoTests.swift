@@ -10,13 +10,12 @@ final class MexicanoTests: XCTestCase {
     }
 
     /// Plays out the current round with fixed winners so standings are predictable.
-    private func finishCurrentRound(_ session: inout AmericanoSession, winnerPoints: Int = 16, loserPoints: Int = 5) {
+    private func finishCurrentRound(_ session: inout AmericanoSession, winnerPoints: Int = 11, loserPoints: Int = 5) {
         let index = session.rounds.count - 1
         var round = session.rounds[index]
         for i in round.matchups.indices {
-            for _ in 0..<(winnerPoints - 1) { round.matchups[i].addPoint(to: .teamA, target: winnerPoints) }
-            for _ in 0..<loserPoints { round.matchups[i].addPoint(to: .teamB, target: winnerPoints) }
-            round.matchups[i].addPoint(to: .teamA, target: winnerPoints)
+            for _ in 0..<winnerPoints { round.matchups[i].addPoint(to: .teamA, target: winnerPoints + loserPoints) }
+            for _ in 0..<loserPoints { round.matchups[i].addPoint(to: .teamB, target: winnerPoints + loserPoints) }
         }
         session.rounds[index] = round
     }
@@ -37,7 +36,7 @@ final class MexicanoTests: XCTestCase {
         finishCurrentRound(&session)
         XCTAssertTrue(session.appendNextRoundIfNeeded())
 
-        // After one round two players have 16 points and two have 5. Mexicano
+        // After one round two players have 11 points and two have 5. Mexicano
         // seeds 1st+4th vs 2nd+3rd, so each new team must pair one winner
         // with one loser of the previous round.
         let standings = session.standings

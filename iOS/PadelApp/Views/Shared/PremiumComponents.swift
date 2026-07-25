@@ -4,7 +4,7 @@ import PadelKit
 
 struct PremiumImageCard: View {
     let assetName: String
-    let category: LocalizedStringKey
+    let category: LocalizedStringKey?
     let title: LocalizedStringKey
     let subtitle: LocalizedStringKey
     var icon: String? = nil
@@ -19,14 +19,24 @@ struct PremiumImageCard: View {
             if hasImage {
                 Image(assetName)
                     .resizable().scaledToFill()
-                    .contrast(1.06).saturation(0.92)
+                    .saturation(1.0)
                     .frame(maxWidth: .infinity, maxHeight: .infinity).clipped()
-                LinearGradient(colors: [.clear, DesignSystem.appBackground.opacity(0.55), DesignSystem.appBackground.opacity(0.97)], startPoint: .top, endPoint: .bottom)
+                LinearGradient(
+                    stops: [
+                        .init(color: .clear, location: 0.58),
+                        .init(color: DesignSystem.appBackground.opacity(0.2), location: 0.72),
+                        .init(color: DesignSystem.appBackground.opacity(0.9), location: 1)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
             }
 
             VStack(alignment: .leading, spacing: 9) {
                 HStack {
-                    Text(category).font(.caption.weight(.semibold)).tracking(1.2).foregroundStyle(DesignSystem.accentLime)
+                    if let category {
+                        Text(category).font(.caption.weight(.semibold)).tracking(1.2).foregroundStyle(DesignSystem.accentLime)
+                    }
                     Spacer()
                     if let icon { Image(systemName: icon).foregroundStyle(DesignSystem.accentLime) }
                 }

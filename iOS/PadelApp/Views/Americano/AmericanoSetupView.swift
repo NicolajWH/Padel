@@ -7,7 +7,7 @@ struct AmericanoSetupView: View {
     @Query(sort: \SavedPlayerRecord.name) private var savedPlayers: [SavedPlayerRecord]
 
     @State private var sessionName = ""
-    @AppStorage("defaultAmericanoPoints") private var pointsPerRound = 21
+    @AppStorage("defaultAmericanoPoints") private var pointsPerRound = 16
     @State private var numberOfRounds = 5
     @State private var format: AmericanoFormat
     @State private var fixedPartners = false

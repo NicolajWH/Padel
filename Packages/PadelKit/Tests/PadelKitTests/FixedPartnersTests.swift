@@ -10,13 +10,12 @@ final class FixedPartnersTests: XCTestCase {
         }
     }
 
-    private func finishCurrentRound(_ session: inout AmericanoSession, winnerPoints: Int = 16, loserPoints: Int = 5) {
+    private func finishCurrentRound(_ session: inout AmericanoSession, winnerPoints: Int = 11, loserPoints: Int = 5) {
         let index = session.rounds.count - 1
         var round = session.rounds[index]
         for i in round.matchups.indices {
-            for _ in 0..<(winnerPoints - 1) { round.matchups[i].addPoint(to: .teamA, target: winnerPoints) }
-            for _ in 0..<loserPoints { round.matchups[i].addPoint(to: .teamB, target: winnerPoints) }
-            round.matchups[i].addPoint(to: .teamA, target: winnerPoints)
+            for _ in 0..<winnerPoints { round.matchups[i].addPoint(to: .teamA, target: winnerPoints + loserPoints) }
+            for _ in 0..<loserPoints { round.matchups[i].addPoint(to: .teamB, target: winnerPoints + loserPoints) }
         }
         session.rounds[index] = round
     }

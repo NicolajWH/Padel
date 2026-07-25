@@ -3,6 +3,7 @@ import UIKit
 import PadelKit
 
 struct AmericanoRoundScoringView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var connectivity: PhoneConnectivityManager
     let record: AmericanoRecord
     @State private var session: AmericanoSession
@@ -10,6 +11,7 @@ struct AmericanoRoundScoringView: View {
     @StateObject private var share = SharedMatchController()
     @State private var showingShareSheet = false
     @State private var suppressCloudPush = false
+    @State private var showingEndConfirmation = false
 
     init(record: AmericanoRecord, session: AmericanoSession) {
         self.record = record
@@ -72,6 +74,10 @@ struct AmericanoRoundScoringView: View {
         .navigationTitle(session.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("End") { showingEndConfirmation = true }
+                    .disabled(session.isComplete)
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showingShareSheet = true
@@ -79,6 +85,16 @@ struct AmericanoRoundScoringView: View {
                     Image(systemName: share.isSharing ? "person.2.wave.2.fill" : "square.and.arrow.up")
                 }
             }
+        }
+        .confirmationDialog(
+            "End \(session.settings.format.displayName)?",
+            isPresented: $showingEndConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("End and save standings", role: .destructive) { endSession() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("The current scores are saved as the final standings. Unplayed rounds cannot be scored afterwards.")
         }
         .onChange(of: session) { _, newValue in
             // Mexicano rounds are drawn from the standings one at a time; the
@@ -156,6 +172,16 @@ struct AmericanoRoundScoringView: View {
         guard let matchupIndex = round.matchups.firstIndex(where: { $0.id == matchupID }) else { return }
         round.matchups[matchupIndex].undoLastPoint()
         session.rounds[roundIndex] = round
+    }
+
+    private func endSession() {
+        session.end()
+        record.update(with: session)
+        connectivity.send(.americanoFinished(session))
+        if share.isSharing {
+            Task { await share.pushAmericano(session) }
+        }
+        dismiss()
     }
 }
 
