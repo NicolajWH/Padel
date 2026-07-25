@@ -267,10 +267,10 @@ private struct TeamScoreRow: View {
             .padding(.horizontal, 18)
             .background(
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .fill(color.opacity(0.14))
+                    .fill(color.opacity(0.25))
                     .overlay(
                         RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .strokeBorder(color.opacity(isServing ? 0.65 : 0.25), lineWidth: isServing ? 2 : 1)
+                            .strokeBorder(color.opacity(isServing ? 0.95 : 0.55), lineWidth: isServing ? 2.5 : 1.5)
                     )
             )
         }

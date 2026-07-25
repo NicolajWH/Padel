@@ -1,6 +1,26 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "With Golden Point, 40–40 is decided by one final point. The receiving team chooses which side receives the serve, and the winner of the point wins the game.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Med golden point afgøres 40–40 af én sidste bold. Modtagerholdet vælger, hvilken side der modtager serven, og vinderen af bolden vinder partiet."
+          }
+        }
+      }
+    },
+    "Tap a slot then a player, or drag players onto the court. Everyone can only be picked once.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tryk på en plads og derefter en spiller, eller træk spillerne ind på banen. Hver spiller kan kun vælges én gang."
+          }
+        }
+      }
+    },
     "%@ leads": {
       "localizations": {
         "da": {

@@ -43,6 +43,7 @@ struct PlayerSlotView: View {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
                     .stroke(accent.opacity(0.35), lineWidth: 1)
             )
+            .contentShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             // An explicit preview lifts just this player — without it a slot
             // inside a Form drags a snapshot of the whole row.
             .draggable(player.id.uuidString) {
@@ -215,24 +216,27 @@ struct PlayerChip: View {
     var onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            HStack(spacing: 7) {
-                PlayerAvatar(player: player, size: 26)
-                Text(player.name)
-                    .font(.subheadline)
-                    .lineLimit(1)
-                if let trailingSystemImage {
-                    Image(systemName: trailingSystemImage)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
+        HStack(spacing: 7) {
+            PlayerAvatar(player: player, size: 26)
+            Text(player.name)
+                .font(.subheadline)
+                .lineLimit(1)
+            if let trailingSystemImage {
+                Image(systemName: trailingSystemImage)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(Color(hex: player.displayColorHex).opacity(0.15), in: Capsule())
-            .overlay(Capsule().stroke(Color(hex: player.displayColorHex).opacity(0.4), lineWidth: 1))
         }
-        .buttonStyle(.plain)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Color(hex: player.displayColorHex).opacity(0.15), in: Capsule())
+        .overlay(Capsule().stroke(Color(hex: player.displayColorHex).opacity(0.4), lineWidth: 1))
+        .contentShape(Capsule())
+        // A Button's press recognizer could win over the drag recognizer. A
+        // tap gesture keeps quick assignment while making every chip draggable.
+        .onTapGesture(perform: onTap)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityAction(perform: onTap)
         // An explicit preview lifts just this chip — without it a chip inside a
         // Form drags a snapshot of the whole row of players.
         .draggable(player.id.uuidString) {

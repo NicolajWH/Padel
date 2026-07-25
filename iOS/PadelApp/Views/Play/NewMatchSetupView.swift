@@ -80,8 +80,8 @@ struct NewMatchSetupView: View {
                 Text("Players")
             }
 
-            Section("Scoring") {
-                Toggle("Golden Point (sudden death at 40-40)", isOn: $goldenPoint)
+            Section {
+                Toggle("Golden Point", isOn: $goldenPoint)
                 Picker("Match Format", selection: $setsToWin) {
                     Text("Single Set").tag(1)
                     Text("Best of 3 Sets").tag(2)
@@ -93,6 +93,10 @@ struct NewMatchSetupView: View {
                     Text("Your Team").tag(TeamSide.teamA)
                     Text("Their Team").tag(TeamSide.teamB)
                 }
+            } header: {
+                Text("Scoring")
+            } footer: {
+                Text("With Golden Point, 40–40 is decided by one final point. The receiving team chooses which side receives the serve, and the winner of the point wins the game.")
             }
 
             Section {
