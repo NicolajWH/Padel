@@ -20,17 +20,21 @@ enum DesignSystem {
 
     // Semantic tokens keep the visual language in one place and leave room for
     // a more extensive light appearance without changing individual screens.
-    static let appBackground = Color(hex: "050A0E")
-    static let backgroundElevated = Color(hex: "081119")
-    static let surfacePrimary = Color(hex: "0C161E")
-    static let surfaceElevated = Color(hex: "11202A")
-    static let padelBlue = Color(hex: "238FC4")
-    static let padelBlueLight = Color(hex: "54B7E3")
-    static let padelBlueDeep = Color(hex: "0C567D")
-    static let accentLime = Color(hex: "DFFF3F")
+    // Every surface is adaptive. Previously these were fixed night colours, so
+    // selecting Light in Settings only changed system controls and left the app
+    // itself dark. The light palette is inspired by a blue padel court with the
+    // tennis-ball yellow retained as the high-energy accent.
+    static let appBackground = Color(light: 0xF2F8FB, dark: 0x050A0E)
+    static let backgroundElevated = Color(light: 0xE1F1F8, dark: 0x081119)
+    static let surfacePrimary = Color(light: 0xFFFFFF, dark: 0x0C161E)
+    static let surfaceElevated = Color(light: 0xD7EBF4, dark: 0x11202A)
+    static let padelBlue = Color(light: 0x087EB7, dark: 0x238FC4)
+    static let padelBlueLight = Color(light: 0x096D9D, dark: 0x54B7E3)
+    static let padelBlueDeep = Color(light: 0x07577E, dark: 0x0C567D)
+    static let accentLime = Color(light: 0xC9E900, dark: 0xDFFF3F)
     static let tabBarTint = Color(light: 0x526000, dark: 0xDFFF3F)
-    static let textPrimary = Color(hex: "F7F8F9")
-    static let textSecondary = Color(hex: "A1ACB5")
+    static let textPrimary = Color(light: 0x092534, dark: 0xF7F8F9)
+    static let textSecondary = Color(light: 0x496674, dark: 0xA1ACB5)
     static let borderSubtle = Color.primary.opacity(0.12)
     static let separatorSubtle = Color.primary.opacity(0.09)
     static let live = Color.orange
@@ -74,7 +78,7 @@ enum PadelTheme {
     static var gold: Color { lime }
     static var sage: Color { sky }
     static let teamA = DesignSystem.padelBlue
-    static let teamB = Color(red: 0.88, green: 0.54, blue: 0.36)
+    static let teamB = Color(red: 0.95, green: 0.20, blue: 0.25)
 
     static func teamColor(_ side: TeamSide) -> Color { side == .teamA ? teamA : teamB }
 

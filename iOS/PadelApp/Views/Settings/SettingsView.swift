@@ -108,12 +108,16 @@ struct SettingsView: View {
                 Text("Padel follows your iPhone's language. To use a different language just for this app, change it in Settings. Your Apple Watch follows automatically.")
             }
 
-            Section("Default Match Rules") {
+            Section {
                 Toggle("Golden Point", isOn: $defaultGoldenPoint)
                 Picker("Match Format", selection: $defaultSetsToWin) {
                     Text("Single Set").tag(1)
                     Text("Best of 3 Sets").tag(2)
                 }
+            } header: {
+                Text("Default Match Rules")
+            } footer: {
+                Text("With Golden Point, 40–40 is decided by one final point. The receiving team chooses which side receives the serve, and the winner of the point wins the game.")
             }
 
             Section("Default Americano Rules") {
