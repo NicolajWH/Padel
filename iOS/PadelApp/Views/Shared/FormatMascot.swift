@@ -2,18 +2,17 @@ import SwiftUI
 import PadelKit
 
 extension AmericanoFormat {
-    /// Asset-catalog name of the illustrated poster mascot for this format.
+    /// Uses the same artwork as the corresponding format button on Mix.
     var mascotAssetName: String {
         switch self {
-        case .americano: return "MascotAmericano"
-        case .mexicano: return "MascotMexicano"
+        case .americano: return "AmericanoHero"
+        case .mexicano: return "MexicanoHero"
         }
     }
 }
 
-/// The poster mascot for a tournament format — an American theme for
-/// **Americano**, a Mexican theme for **Mexicano** — shown as a rounded
-/// square thumbnail. Keeps one shared mapping so every screen stays in sync.
+/// A thumbnail of the format artwork used on Mix. Keeping one shared mapping
+/// ensures setup and format selection always use the same visual identity.
 struct FormatMascot: View {
     let format: AmericanoFormat
     var size: CGFloat = 56

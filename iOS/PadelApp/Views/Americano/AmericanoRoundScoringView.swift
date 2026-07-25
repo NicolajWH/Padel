@@ -4,6 +4,7 @@ import PadelKit
 
 struct AmericanoRoundScoringView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var connectivity: PhoneConnectivityManager
     let record: AmericanoRecord
     @State private var session: AmericanoSession
@@ -74,11 +75,10 @@ struct AmericanoRoundScoringView: View {
         .navigationTitle(session.name)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
+            ToolbarItem(placement: .topBarLeading) {
                 Button("End") { showingEndConfirmation = true }
-                    .disabled(session.isComplete)
             }
-            ToolbarItem(placement: .primaryAction) {
+            ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showingShareSheet = true
                 } label: {
@@ -177,10 +177,12 @@ struct AmericanoRoundScoringView: View {
     private func endSession() {
         session.end()
         record.update(with: session)
+        try? modelContext.save()
         connectivity.send(.americanoFinished(session))
         if share.isSharing {
             Task { await share.pushAmericano(session) }
         }
+        share.detach()
         dismiss()
     }
 }

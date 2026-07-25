@@ -1810,6 +1810,136 @@
           }
         }
       }
+    },
+    "MATCH": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KAMP"
+          }
+        }
+      }
+    },
+    "Create a match, invite players, and get started.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opret en kamp, inviter spillere og kom i gang."
+          }
+        }
+      }
+    },
+    "Find a shared match nearby and join.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Find en delt kamp i nærheden, og deltag."
+          }
+        }
+      }
+    },
+    "Recent Matches": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seneste kampe"
+          }
+        }
+      }
+    },
+    "See All": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se alle"
+          }
+        }
+      }
+    },
+    "Live Matches Nearby!": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Livekampe i nærheden!"
+          }
+        }
+      }
+    },
+    "Tap to see who is playing and join.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tryk for at se, hvem der spiller, og deltag."
+          }
+        }
+      }
+    },
+    "AMERICANO": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AMERICANO"
+          }
+        }
+      }
+    },
+    "MEXICANO": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MEXICANO"
+          }
+        }
+      }
+    },
+    "End": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afslut"
+          }
+        }
+      }
+    },
+    "End and save standings": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afslut og gem stillingen"
+          }
+        }
+      }
+    },
+    "End %@?": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afslut %@?"
+          }
+        }
+      }
+    },
+    "The current scores are saved as the final standings. Unplayed rounds cannot be scored afterwards.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De aktuelle point gemmes som den endelige stilling. Uspillede runder kan ikke registreres bagefter."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

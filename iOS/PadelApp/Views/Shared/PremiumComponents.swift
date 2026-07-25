@@ -6,7 +6,7 @@ struct PremiumImageCard: View {
     let assetName: String
     let category: LocalizedStringKey?
     let title: LocalizedStringKey
-    let subtitle: LocalizedStringKey
+    let subtitle: LocalizedStringKey?
     var icon: String? = nil
     var cta: LocalizedStringKey? = nil
     var showsArrow = false
@@ -14,13 +14,15 @@ struct PremiumImageCard: View {
 
     var body: some View {
         let hasImage = UIImage(named: assetName) != nil
+        GeometryReader { geometry in
         ZStack(alignment: .bottomLeading) {
             DesignSystem.surfaceElevated
             if hasImage {
                 Image(assetName)
                     .resizable().scaledToFill()
                     .saturation(1.0)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity).clipped()
+                    .frame(width: geometry.size.width, height: geometry.size.height)
+                    .clipped()
                 LinearGradient(
                     stops: [
                         .init(color: .clear, location: 0.58),
@@ -50,7 +52,9 @@ struct PremiumImageCard: View {
                 }
                 Spacer(minLength: 24)
                 Text(title).font(.system(.title2, design: .default, weight: .bold)).foregroundStyle(.white)
-                Text(subtitle).font(.subheadline).foregroundStyle(.white.opacity(0.82)).fixedSize(horizontal: false, vertical: true)
+                if let subtitle {
+                    Text(subtitle).font(.subheadline).foregroundStyle(.white.opacity(0.82)).fixedSize(horizontal: false, vertical: true)
+                }
                 if cta != nil || showsArrow {
                     HStack {
                         if let cta {
@@ -65,7 +69,8 @@ struct PremiumImageCard: View {
             }
             .padding(20)
         }
-        .frame(maxWidth: .infinity).frame(height: height)
+        }
+        .frame(height: height)
         .clipShape(RoundedRectangle(cornerRadius: DesignSystem.Radius.hero, style: .continuous))
         .overlay { RoundedRectangle(cornerRadius: DesignSystem.Radius.hero, style: .continuous).strokeBorder(.white.opacity(0.13)) }
         .shadow(color: .black.opacity(0.38), radius: 20, y: 9)

@@ -13,10 +13,10 @@ struct AmericanoHomeView: View {
                     NavigationLink { AmericanoRoundScoringView(record: ongoing, session: session) } label: { OngoingAmericanoCard(session: session) }.buttonStyle(PremiumPressStyle())
                 }
                 NavigationLink { AmericanoSetupView(initialFormat: .americano) } label: {
-                    PremiumImageCard(assetName: "AmericanoHero", category: nil, title: "Ny Americano", subtitle: "Makkere roterer hver runde, så du spiller med og mod alle i gruppen.", icon: "arrow.triangle.2.circlepath", showsArrow: true, height: 228)
+                    PremiumImageCard(assetName: "AmericanoHero", category: "AMERICANO", title: "New Americano", subtitle: nil, icon: "arrow.triangle.2.circlepath", showsArrow: true, height: 228)
                 }.buttonStyle(PremiumPressStyle())
                 NavigationLink { AmericanoSetupView(initialFormat: .mexicano) } label: {
-                    PremiumImageCard(assetName: "MexicanoHero", category: nil, title: "Ny Mexicano", subtitle: "Hver runde baseres på stillingen, så du møder spillere på dit niveau.", icon: "chart.line.uptrend.xyaxis", showsArrow: true, height: 228)
+                    PremiumImageCard(assetName: "MexicanoHero", category: "MEXICANO", title: "New Mexicano", subtitle: nil, icon: "chart.line.uptrend.xyaxis", showsArrow: true, height: 228)
                 }.buttonStyle(PremiumPressStyle())
                 FormatExplainer()
                 if !sessions.isEmpty {
