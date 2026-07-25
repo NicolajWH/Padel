@@ -35,7 +35,7 @@ struct PlayerSlotView: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(Text("Remove \(player.name)"))
+                .accessibilityLabel("Remove \(player.name)")
             }
             .padding(.horizontal, 10)
             .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .leading)
