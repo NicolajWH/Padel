@@ -90,6 +90,7 @@ struct ScoreRowCard: View {
     let state: MatchState
     var date: Date? = nil
     var showsChevron = true
+    var isFinished: Bool? = nil
 
     var body: some View {
         let snapshot = state.snapshot
@@ -103,9 +104,9 @@ struct ScoreRowCard: View {
                         .textCase(.uppercase)
                         .tracking(0.7)
                     Spacer()
-                    Text(state.isFinished ? "Afsluttet" : "I gang")
+                    Text((isFinished ?? state.isFinished) ? "Afsluttet" : "I gang")
                         .font(.caption.weight(.semibold))
-                        .foregroundStyle(state.isFinished ? DesignSystem.textSecondary : DesignSystem.accentLime)
+                        .foregroundStyle((isFinished ?? state.isFinished) ? DesignSystem.textSecondary : DesignSystem.accentLime)
                     if showsChevron {
                         Image(systemName: "chevron.right")
                             .font(.caption.bold())

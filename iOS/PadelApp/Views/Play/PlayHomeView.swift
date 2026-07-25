@@ -8,6 +8,7 @@ struct PlayHomeView: View {
     @State private var showingJoin = false
     @StateObject private var locationProvider = LocationProvider()
     @State private var nearbyGameCount = 0
+    @StateObject private var healthSummary = HealthWorkoutSummaryStore()
 
     private var ongoingMatch: MatchRecord? { matches.first { !$0.isFinished } }
 
@@ -48,21 +49,7 @@ struct PlayHomeView: View {
                 }
                 .buttonStyle(PremiumPressStyle())
 
-                if !matches.isEmpty {
-                    HStack {
-                        SectionHeader(title: "Recent Matches", systemImage: "clock.arrow.circlepath")
-                        Spacer()
-                        NavigationLink("See All") { HistoryView() }.font(.subheadline.weight(.semibold)).foregroundStyle(DesignSystem.padelBlueLight)
-                    }.padding(.top, 6)
-                    ForEach(matches.prefix(5)) { record in
-                        if let state = record.state {
-                            NavigationLink {
-                                record.isFinished ? AnyView(MatchSummaryView(state: state)) : AnyView(LiveMatchView(record: record, initialState: state))
-                            } label: { ScoreRowCard(state: state, date: record.createdAt) }
-                            .buttonStyle(PremiumPressStyle())
-                        }
-                    }
-                }
+                HealthSummaryCard(store: healthSummary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(DesignSystem.Spacing.large)

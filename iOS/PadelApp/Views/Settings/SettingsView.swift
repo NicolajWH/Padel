@@ -79,21 +79,17 @@ struct SettingsView: View {
             }
 
             Section {
-                if healthSummary.isLoading {
-                    HStack {
-                        ProgressView()
-                        Text(String(localized: "Loading workouts…", table: "Health"))
-                            .foregroundStyle(.secondary)
-                    }
-                } else if let summary = healthSummary.summary {
+                if let summary = healthSummary.summary {
                     LabeledContent(String(localized: "Tennis workouts", table: "Health"), value: summary.workoutCount.formatted())
                     LabeledContent(String(localized: "Time played", table: "Health"), value: summary.formattedDuration)
                     LabeledContent(String(localized: "Active energy", table: "Health"), value: summary.formattedCalories)
                     LabeledContent(String(localized: "Average heart rate", table: "Health"), value: summary.formattedAverageHeartRate)
                     LabeledContent(String(localized: "Highest heart rate", table: "Health"), value: summary.formattedMaximumHeartRate)
                 } else {
-                    Button(String(localized: "Show Health Data", table: "Health")) {
-                        Task { await healthSummary.load() }
+                    HStack {
+                        if healthSummary.isLoading { ProgressView() }
+                        Text(healthSummary.loadFailed ? "Health data unavailable" : String(localized: "Loading workouts…", table: "Health"))
+                            .foregroundStyle(.secondary)
                     }
                 }
             } header: {

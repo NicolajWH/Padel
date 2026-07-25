@@ -1970,6 +1970,106 @@
           }
         }
       }
+    },
+    "Padel Health": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Padel-sundhed"
+          }
+        }
+      }
+    },
+    "Last 30 days": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seneste 30 dage"
+          }
+        }
+      }
+    },
+    "Loading health data…": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Indlæser sundhedsdata…"
+          }
+        }
+      }
+    },
+    "Time": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tid"
+          }
+        }
+      }
+    },
+    "Energy": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Energi"
+          }
+        }
+      }
+    },
+    "Avg. pulse": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gns. puls"
+          }
+        }
+      }
+    },
+    "Workouts": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Træninger"
+          }
+        }
+      }
+    },
+    "Health data unavailable": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sundhedsdata er ikke tilgængelige"
+          }
+        }
+      }
+    },
+    "Check Padel's Health access in iPhone Settings.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kontrollér Padels adgang til Sundhed i iPhonens Indstillinger."
+          }
+        }
+      }
+    },
+    "Health data is not available on this iPhone.": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sundhedsdata er ikke tilgængelige på denne iPhone."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

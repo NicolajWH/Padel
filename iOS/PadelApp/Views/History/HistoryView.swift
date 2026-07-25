@@ -14,7 +14,7 @@ struct HistoryView: View {
                 if matches.isEmpty { EmptyHistoryCard(icon: "tennis.racket", text: "Ingen kampe endnu") }
                 ForEach(matches) { record in
                     if let state = record.state {
-                        NavigationLink { record.isFinished ? AnyView(MatchSummaryView(state: state)) : AnyView(LiveMatchView(record: record, initialState: state)) } label: { ScoreRowCard(state: state, date: record.createdAt) }
+                        NavigationLink { record.isFinished ? AnyView(MatchSummaryView(state: state)) : AnyView(LiveMatchView(record: record, initialState: state)) } label: { ScoreRowCard(state: state, date: record.createdAt, isFinished: record.isFinished) }
                             .buttonStyle(PremiumPressStyle())
                             .contextMenu { Button("Slet kamp", systemImage: "trash", role: .destructive) { modelContext.delete(record) } }
                     }
