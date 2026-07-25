@@ -20,7 +20,7 @@ struct NewMatchSetupView: View {
     @State private var isSearchingNearby = false
 
     @AppStorage("defaultGoldenPoint") private var goldenPoint = false
-    @AppStorage("defaultSetsToWin") private var setsToWin = 2
+    @AppStorage("defaultSetsToWin") private var setsToWin = 1
     @State private var finalSetMatchTiebreak = false
     @State private var firstServer: TeamSide = .teamA
 

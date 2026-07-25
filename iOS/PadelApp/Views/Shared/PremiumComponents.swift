@@ -82,28 +82,89 @@ struct ScoreRowCard: View {
         let snapshot = state.snapshot
         let winner = snapshot.winner
         PremiumCard(cornerRadius: DesignSystem.Radius.compact, padding: 12) {
-            HStack(spacing: 12) {
-                VStack(spacing: 5) {
-                    teamLine(initials: state.teamA.players.map(\.initials).joined(separator: "/"), score: snapshot.setsWonA, won: winner == .teamA)
-                    teamLine(initials: state.teamB.players.map(\.initials).joined(separator: "/"), score: snapshot.setsWonB, won: winner == .teamB)
+            VStack(spacing: 8) {
+                HStack(spacing: 12) {
+                    Text("Runder")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(DesignSystem.textSecondary)
+                        .textCase(.uppercase)
+                        .tracking(0.7)
+                    Spacer()
+                    Text(state.isFinished ? "Afsluttet" : "I gang")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(state.isFinished ? DesignSystem.textSecondary : DesignSystem.accentLime)
+                    if showsChevron {
+                        Image(systemName: "chevron.right")
+                            .font(.caption.bold())
+                            .foregroundStyle(DesignSystem.textSecondary)
+                            .accessibilityHidden(true)
+                    }
                 }
-                Spacer(minLength: 8)
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text(state.isFinished ? "Afsluttet" : "I gang").font(.caption.weight(.semibold)).foregroundStyle(state.isFinished ? DesignSystem.textSecondary : DesignSystem.accentLime)
-                    if let date { Text(date, style: .relative).font(.caption2).foregroundStyle(DesignSystem.textSecondary) }
-                    Text("Padel").font(.caption2).foregroundStyle(DesignSystem.padelBlue)
+
+                teamLine(
+                    initials: state.teamA.players.map(\.initials).joined(separator: "/"),
+                    scores: roundScores(for: .teamA),
+                    color: PadelTheme.teamA,
+                    won: winner == .teamA
+                )
+                teamLine(
+                    initials: state.teamB.players.map(\.initials).joined(separator: "/"),
+                    scores: roundScores(for: .teamB),
+                    color: PadelTheme.teamB,
+                    won: winner == .teamB
+                )
+
+                if let date {
+                    HStack {
+                        Text(date, style: .relative)
+                        Spacer()
+                        Text("Padel")
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(DesignSystem.textSecondary)
                 }
-                if showsChevron { Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(DesignSystem.textSecondary).accessibilityHidden(true) }
             }
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(state.teamA.displayName), \(snapshot.setsWonA), \(state.teamB.displayName), \(snapshot.setsWonB)")
+        .accessibilityLabel("\(state.teamA.displayName), \(scoreDescription(for: .teamA)), \(state.teamB.displayName), \(scoreDescription(for: .teamB))")
     }
 
-    private func teamLine(initials: String, score: Int, won: Bool) -> some View {
+    /// A match is normally one set. History therefore presents the games in
+    /// each played set (for example 6–4), rather than the unhelpful 1–0 set tally.
+    private func roundScores(for side: TeamSide) -> [Int] {
+        let snapshot = state.snapshot
+        var scores = snapshot.completedSets.map { side == .teamA ? $0.teamAGames : $0.teamBGames }
+        if !snapshot.isMatchOver {
+            scores.append(side == .teamA ? snapshot.currentSetGamesA : snapshot.currentSetGamesB)
+        }
+        return scores.isEmpty ? [0] : scores
+    }
+
+    private func scoreDescription(for side: TeamSide) -> String {
+        roundScores(for: side).map(String.init).joined(separator: ", ")
+    }
+
+    private func teamLine(initials: String, scores: [Int], color: Color, won: Bool) -> some View {
         HStack(spacing: 8) {
-            Text(initials).font(.subheadline.weight(.semibold)).foregroundStyle(won ? DesignSystem.accentLime : DesignSystem.textPrimary).frame(maxWidth: .infinity, alignment: .leading)
-            Text("\(score)").font(.title3.bold().monospacedDigit()).foregroundStyle(won ? DesignSystem.accentLime : DesignSystem.textPrimary).contentTransition(.numericText())
+            Capsule()
+                .fill(color)
+                .frame(width: 4, height: 28)
+                .accessibilityHidden(true)
+            Text(initials)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(DesignSystem.textPrimary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: 5) {
+                ForEach(Array(scores.enumerated()), id: \.offset) { _, score in
+                    Text("\(score)")
+                        .font(.title3.bold().monospacedDigit())
+                        .foregroundStyle(won ? color : DesignSystem.textPrimary)
+                        .frame(minWidth: 30, minHeight: 30)
+                        .background(color.opacity(won ? 0.2 : 0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                        .contentTransition(.numericText())
+                }
+            }
         }
     }
 }

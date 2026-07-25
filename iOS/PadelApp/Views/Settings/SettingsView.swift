@@ -4,7 +4,7 @@ import PadelKit
 
 struct SettingsView: View {
     @AppStorage("defaultGoldenPoint") private var defaultGoldenPoint = false
-    @AppStorage("defaultSetsToWin") private var defaultSetsToWin = 2
+    @AppStorage("defaultSetsToWin") private var defaultSetsToWin = 1
     @AppStorage("defaultAmericanoPoints") private var defaultAmericanoPoints = 16
     @AppStorage("profileName") private var profileName = ""
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
