@@ -35,6 +35,7 @@ struct PlayerSlotView: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Remove \(player.name)")
             }
             .padding(.horizontal, 10)
             .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .leading)
@@ -235,8 +236,11 @@ struct PlayerChip: View {
         // A Button's press recognizer could win over the drag recognizer. A
         // tap gesture keeps quick assignment while making every chip draggable.
         .onTapGesture(perform: onTap)
+        .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityAction(perform: onTap)
+        .accessibilityAction {
+            onTap()
+        }
         // An explicit preview lifts just this chip — without it a chip inside a
         // Form drags a snapshot of the whole row of players.
         .draggable(player.id.uuidString) {

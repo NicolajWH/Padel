@@ -36,6 +36,7 @@ targets:
     entitlements:
       path: Generated/PadelApp.entitlements
       properties:
+        com.apple.developer.healthkit: true
         com.apple.developer.icloud-services: [CloudKit]
         com.apple.developer.icloud-container-identifiers:
           - iCloud.com.worsa.padel
