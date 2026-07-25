@@ -12,9 +12,9 @@
 - Constrain image-backed cards to the width proposed by their container. Never
   let an image's intrinsic size determine a card's width; every screen must fit
   the narrowest supported iPhone in portrait without horizontal scrolling.
-- On Mix format cards, keep the format label in tennis yellow at the top left
-  and the white action title at the bottom. Do not place descriptive copy over
-  the artwork.
+- On Mix format cards, keep the format label in tennis yellow near the top,
+  inset far enough to avoid bright details in the artwork. Show the artwork at
+  full brightness without a gradient or white action title over it.
 
 ## People and image assets
 
