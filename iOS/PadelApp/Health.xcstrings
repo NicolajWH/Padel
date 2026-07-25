@@ -1,0 +1,61 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Active energy" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Aktiv energi" } }
+      }
+    },
+    "Average heart rate" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Gennemsnitspuls" } }
+      }
+    },
+    "Highest heart rate" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Højeste puls" } }
+      }
+    },
+    "Installed" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Installeret" } }
+      }
+    },
+    "Loading workouts…" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Indlæser træninger…" } }
+      }
+    },
+    "No data" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Ingen data" } }
+      }
+    },
+    "No Paired Watch" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Intet parret ur" } }
+      }
+    },
+    "Show Health Data" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Vis sundhedsdata" } }
+      }
+    },
+    "Tennis workouts" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Tennistræninger" } }
+      }
+    },
+    "Tennis workouts from the last 30 days. Padel workouts appear as tennis because Health doesn't have a padel workout type yet. You can manage access under Health in your iPhone's Settings." : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Tennistræninger fra de seneste 30 dage. Padel-træninger vises som tennis, fordi Sundhed endnu ikke har padel som træningstype. Du kan styre adgangen under Sundhed i iPhonens Indstillinger." } }
+      }
+    },
+    "Time played" : {
+      "localizations" : {
+        "da" : { "stringUnit" : { "state" : "translated", "value" : "Spilletid" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

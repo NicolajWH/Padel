@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage(AppAppearance.storageKey) private var appearance = AppAppearance.system
     @AppStorage(NearbyPlayersService.discoveryEnabledKey) private var nearbyDiscoveryEnabled = true
     @EnvironmentObject private var connectivity: PhoneConnectivityManager
+    @StateObject private var healthSummary = HealthWorkoutSummaryStore()
     @Environment(\.openURL) private var openURL
 
     var body: some View {
@@ -63,31 +64,42 @@ struct SettingsView: View {
                 HStack {
                     Text("Status")
                     Spacer()
-                    if !connectivity.isWatchAppInstalled {
+                    if !connectivity.isWatchPaired {
+                        Text(String(localized: "No Paired Watch", table: "Health"))
+                            .foregroundStyle(.secondary)
+                    } else if !connectivity.isWatchAppInstalled {
                         Text("Not Installed").foregroundStyle(.secondary)
                     } else if connectivity.isWatchReachable {
                         Text("Connected").foregroundStyle(.green)
                     } else {
-                        Text("Not Reachable").foregroundStyle(.orange)
+                        Text(String(localized: "Installed", table: "Health"))
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
 
             Section {
-                HStack(spacing: 12) {
-                    Image(systemName: "heart.fill")
-                        .foregroundStyle(.red)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Workouts on Apple Watch")
-                        Text("Heart rate, calories, and duration")
-                            .font(.caption)
+                if healthSummary.isLoading {
+                    HStack {
+                        ProgressView()
+                        Text(String(localized: "Loading workouts…", table: "Health"))
                             .foregroundStyle(.secondary)
+                    }
+                } else if let summary = healthSummary.summary {
+                    LabeledContent(String(localized: "Tennis workouts", table: "Health"), value: summary.workoutCount.formatted())
+                    LabeledContent(String(localized: "Time played", table: "Health"), value: summary.formattedDuration)
+                    LabeledContent(String(localized: "Active energy", table: "Health"), value: summary.formattedCalories)
+                    LabeledContent(String(localized: "Average heart rate", table: "Health"), value: summary.formattedAverageHeartRate)
+                    LabeledContent(String(localized: "Highest heart rate", table: "Health"), value: summary.formattedMaximumHeartRate)
+                } else {
+                    Button(String(localized: "Show Health Data", table: "Health")) {
+                        Task { await healthSummary.load() }
                     }
                 }
             } header: {
                 Text("Apple Health")
             } footer: {
-                Text("When you keep score on your Apple Watch, Padel records the match as a workout in the Health app. It shows up as tennis — Health doesn't have a padel workout type yet. You can manage access under Health in your iPhone's Settings.")
+                Text(String(localized: "Tennis workouts from the last 30 days. Padel workouts appear as tennis because Health doesn't have a padel workout type yet. You can manage access under Health in your iPhone's Settings.", table: "Health"))
             }
 
             Section {
@@ -132,6 +144,7 @@ struct SettingsView: View {
             }
         }
         .screenTitle("Settings")
+        .task { await healthSummary.load() }
         .onChange(of: nearbyDiscoveryEnabled) { _, enabled in
             if !enabled {
                 Task { await NearbyPlayersService.unpublish() }
