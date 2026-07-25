@@ -76,6 +76,8 @@ final class WatchConnectivityManager: NSObject, ObservableObject {
                 self.playerRoster = roster
                 let data = try? JSONEncoder().encode(roster)
                 UserDefaults.standard.set(data, forKey: "playerRoster")
+            case .workoutAutoEnd(let settings):
+                WorkoutManager.shared.apply(settings)
             }
         }
     }

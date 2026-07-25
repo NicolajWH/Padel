@@ -48,7 +48,7 @@ final class PhoneConnectivityManager: NSObject, ObservableObject {
                 self.lastReceivedMatch = state
             case .americano(let session), .americanoFinished(let session):
                 self.lastReceivedAmericano = session
-            case .requestLatest, .clearActiveSession, .playerRoster:
+            case .requestLatest, .clearActiveSession, .playerRoster, .workoutAutoEnd:
                 break
             }
         }

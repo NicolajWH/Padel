@@ -1,5 +1,8 @@
 import Foundation
 import HealthKit
+import PadelKit
+import UserNotifications
+import WatchKit
 
 /// Runs an Apple Watch workout session alongside scoring, so a padel match
 /// records heart rate, active calories, and time in the Health app — and so
@@ -23,6 +26,21 @@ final class WorkoutManager: NSObject, ObservableObject {
     private var session: HKWorkoutSession?
     private var builder: HKLiveWorkoutBuilder?
     private var isStarting = false
+    private var automaticEndTask: Task<Void, Never>?
+    private var autoEndSettings: WorkoutAutoEndSettings
+
+    override private init() {
+        autoEndSettings = Self.loadAutoEndSettings()
+        super.init()
+    }
+
+    func apply(_ settings: WorkoutAutoEndSettings) {
+        autoEndSettings = settings
+        if let data = try? JSONEncoder().encode(settings) {
+            UserDefaults.standard.set(data, forKey: "workoutAutoEndSettings")
+        }
+        scheduleAutomaticEndIfNeeded()
+    }
 
     /// Starts a workout if none is running. Safe to call from every scoring
     /// screen's onAppear — repeat calls while running or starting are no-ops.
@@ -76,6 +94,7 @@ final class WorkoutManager: NSObject, ObservableObject {
             session.startActivity(with: start)
             try await builder.beginCollection(at: start)
             isRunning = true
+            scheduleAutomaticEndIfNeeded()
         } catch {
             reset()
         }
@@ -97,11 +116,41 @@ final class WorkoutManager: NSObject, ObservableObject {
     }
 
     private func reset() {
+        automaticEndTask?.cancel()
+        automaticEndTask = nil
         session = nil
         builder = nil
         isRunning = false
         heartRate = 0
         activeCalories = 0
+    }
+
+    private func scheduleAutomaticEndIfNeeded() {
+        automaticEndTask?.cancel()
+        automaticEndTask = nil
+        guard isRunning, autoEndSettings.isEnabled else { return }
+        let seconds = UInt64(max(1, autoEndSettings.durationMinutes)) * 60
+        automaticEndTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(seconds))
+            guard !Task.isCancelled, let self, self.isRunning else { return }
+            self.end()
+            WKInterfaceDevice.current().play(.notification)
+            let content = UNMutableNotificationContent()
+            content.title = String(localized: "Workout ended automatically")
+            content.body = String(localized: "Padel stopped the Health workout at your configured time limit.")
+            content.sound = .default
+            try? await UNUserNotificationCenter.current().add(
+                UNNotificationRequest(identifier: "padel-workout-auto-ended", content: content, trigger: nil)
+            )
+        }
+        Task { try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) }
+    }
+
+    private static func loadAutoEndSettings() -> WorkoutAutoEndSettings {
+        guard let data = UserDefaults.standard.data(forKey: "workoutAutoEndSettings"),
+              let settings = try? JSONDecoder().decode(WorkoutAutoEndSettings.self, from: data)
+        else { return WorkoutAutoEndSettings() }
+        return settings
     }
 
     private func consume(statistics: HKStatistics?) {

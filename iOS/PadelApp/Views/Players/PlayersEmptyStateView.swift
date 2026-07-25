@@ -64,7 +64,7 @@ struct PlayersEmptyStateView: View {
                 HStack(spacing: 14) {
                     Text("\(step.id)")
                         .font(.subheadline.bold())
-                        .foregroundStyle(.white)
+                        .foregroundStyle(.black)
                         .frame(width: 28, height: 28)
                         .background(Circle().fill(Color.accentColor))
                     Text(step.title)
@@ -94,6 +94,7 @@ struct PlayersEmptyStateView: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+            .foregroundStyle(.black)
 
             Link(destination: matchiURL) {
                 Label("Get MATCHi in the App Store", systemImage: "arrow.up.right.square")

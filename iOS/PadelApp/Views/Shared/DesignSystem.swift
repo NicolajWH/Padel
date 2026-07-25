@@ -32,7 +32,7 @@ enum DesignSystem {
     static let padelBlueLight = Color(light: 0x096D9D, dark: 0x54B7E3)
     static let padelBlueDeep = Color(light: 0x07577E, dark: 0x0C567D)
     static let accentLime = Color(light: 0xC9E900, dark: 0xDFFF3F)
-    static let tabBarTint = Color(light: 0x526000, dark: 0xDFFF3F)
+    static let tabBarTint = Color(light: 0xC9E900, dark: 0xDFFF3F)
     static let textPrimary = Color(light: 0x092534, dark: 0xF7F8F9)
     static let textSecondary = Color(light: 0x496674, dark: 0xA1ACB5)
     static let borderSubtle = Color.primary.opacity(0.12)
