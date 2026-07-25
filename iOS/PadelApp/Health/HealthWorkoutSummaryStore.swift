@@ -32,12 +32,14 @@ struct HealthWorkoutSummary: Sendable {
 final class HealthWorkoutSummaryStore: ObservableObject {
     @Published private(set) var summary: HealthWorkoutSummary?
     @Published private(set) var isLoading = false
+    @Published private(set) var loadFailed = false
 
     private let healthStore = HKHealthStore()
 
     func load() async {
         guard HKHealthStore.isHealthDataAvailable(), !isLoading else { return }
         isLoading = true
+        loadFailed = false
         defer { isLoading = false }
 
         let types: Set<HKObjectType> = [
@@ -80,6 +82,7 @@ final class HealthWorkoutSummaryStore: ObservableObject {
             )
         } catch {
             summary = nil
+            loadFailed = true
         }
     }
 

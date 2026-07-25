@@ -46,7 +46,7 @@ struct AmericanoSetupView: View {
             Section {
                 HStack {
                     Spacer()
-                    FormatMascot(format: format, size: 150, cornerRadius: 22)
+                    FormatMascot(format: format, size: 220, cornerRadius: 26)
                         .padding(.vertical, 4)
                     Spacer()
                 }
@@ -55,12 +55,6 @@ struct AmericanoSetupView: View {
 
             Section {
                 TextField(format.displayName, text: $sessionName)
-                Picker("Format", selection: $format) {
-                    ForEach(AmericanoFormat.allCases, id: \.self) { format in
-                        Text(format.displayName).tag(format)
-                    }
-                }
-                .pickerStyle(.segmented)
             } header: {
                 Text("Session")
             } footer: {

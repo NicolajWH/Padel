@@ -212,6 +212,12 @@ struct NewMatchSetupView: View {
 
     private func startMatch() {
         guard let a1 = slots[0], let a2 = slots[1], let b1 = slots[2], let b2 = slots[3] else { return }
+        // There can only be one live match. Keep the existing score in history,
+        // but close it before inserting the newly started match.
+        let unfinished = FetchDescriptor<MatchRecord>(predicate: #Predicate { !$0.isFinished })
+        for record in (try? modelContext.fetch(unfinished)) ?? [] {
+            record.isFinished = true
+        }
         let teamA = Team(players: [a1, a2])
         let teamB = Team(players: [b1, b2])
         let settings = MatchSettings(
