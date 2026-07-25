@@ -11,6 +11,9 @@ struct PremiumImageCard: View {
     var cta: LocalizedStringKey? = nil
     var showsArrow = false
     var height: CGFloat = 300
+    var showsImageGradient = true
+    var showsTitle = true
+    var topContentInset: CGFloat = 0
 
     var body: some View {
         let hasImage = UIImage(named: assetName) != nil
@@ -23,15 +26,17 @@ struct PremiumImageCard: View {
                     .saturation(1.0)
                     .frame(width: geometry.size.width, height: geometry.size.height)
                     .clipped()
-                LinearGradient(
-                    stops: [
-                        .init(color: .clear, location: 0.58),
-                        .init(color: DesignSystem.appBackground.opacity(0.2), location: 0.72),
-                        .init(color: DesignSystem.appBackground.opacity(0.9), location: 1)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
+                if showsImageGradient {
+                    LinearGradient(
+                        stops: [
+                            .init(color: .clear, location: 0.58),
+                            .init(color: DesignSystem.appBackground.opacity(0.2), location: 0.72),
+                            .init(color: DesignSystem.appBackground.opacity(0.9), location: 1)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                }
             }
 
             VStack(alignment: .leading, spacing: 9) {
@@ -42,6 +47,7 @@ struct PremiumImageCard: View {
                     Spacer()
                     if let icon { Image(systemName: icon).foregroundStyle(DesignSystem.accentLime) }
                 }
+                .padding(.top, topContentInset)
                 if !hasImage {
                     Label(assetName, systemImage: "photo")
                         .font(.caption.weight(.medium))
@@ -51,7 +57,9 @@ struct PremiumImageCard: View {
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
                 Spacer(minLength: 24)
-                Text(title).font(.system(.title2, design: .default, weight: .bold)).foregroundStyle(.white)
+                if showsTitle {
+                    Text(title).font(.system(.title2, design: .default, weight: .bold)).foregroundStyle(.white)
+                }
                 if let subtitle {
                     Text(subtitle).font(.subheadline).foregroundStyle(.white.opacity(0.82)).fixedSize(horizontal: false, vertical: true)
                 }

@@ -8,6 +8,7 @@ final class PhoneConnectivityManager: NSObject, ObservableObject {
 
     @Published var isWatchReachable: Bool = false
     @Published var isWatchAppInstalled: Bool = false
+    @Published var isWatchPaired: Bool = false
     @Published var lastReceivedMatch: MatchState?
     @Published var lastReceivedAmericano: AmericanoSession?
 
@@ -57,6 +58,7 @@ final class PhoneConnectivityManager: NSObject, ObservableObject {
 extension PhoneConnectivityManager: WCSessionDelegate {
     nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
         Task { @MainActor in
+            self.isWatchPaired = session.isPaired
             self.isWatchAppInstalled = session.isWatchAppInstalled
             self.isWatchReachable = session.isReachable
         }
@@ -76,6 +78,7 @@ extension PhoneConnectivityManager: WCSessionDelegate {
 
     nonisolated func sessionWatchStateDidChange(_ session: WCSession) {
         Task { @MainActor in
+            self.isWatchPaired = session.isPaired
             self.isWatchAppInstalled = session.isWatchAppInstalled
         }
     }

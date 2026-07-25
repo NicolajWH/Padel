@@ -128,11 +128,13 @@ these features to `main`** — until they're done, the TestFlight deploy fails
 at the signing step (nothing breaks permanently; it succeeds on re-run once
 the steps are done):
 
-1. **HealthKit on the Watch app**: open the `com.worsa.padel.watchapp`
-   identifier → Capabilities → tick **HealthKit** (no options/entitlement
-   sub-choices needed) → Save. This invalidates the stored provisioning
-   profile for the Watch app; the next deploy detects that and regenerates
-   it automatically (`match` runs with `readonly: false`).
+1. **HealthKit on both apps**: open the `com.worsa.padel` identifier and the
+   `com.worsa.padel.watchapp` identifier → Capabilities → tick **HealthKit**
+   (no options/entitlement sub-choices needed) → Save. The iPhone app needs
+   HealthKit to show the tennis workout summary in Settings, while the Watch
+   app records the workouts. This invalidates the stored provisioning profiles;
+   the next deploy detects that and regenerates them automatically (`match`
+   runs with `readonly: false`).
 2. **Register the widget extension**: Identifiers → **+** → App IDs → App →
    Description `Padel Widgets`, Bundle ID **explicit** `com.worsa.padel.widgets`
    → no capabilities needed (Live Activities don't require one) → Register.

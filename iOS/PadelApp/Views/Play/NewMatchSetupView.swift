@@ -159,11 +159,21 @@ struct NewMatchSetupView: View {
     /// Resolves a dragged pool chip by id and drops it into `target`.
     private func assignByID(_ idString: String, to target: Int) -> Bool {
         guard let player = candidatePlayers.first(where: { $0.id.uuidString == idString }) else { return false }
+        let playerName = normalizedName(player.name)
+        let isAlreadyAssigned = slots.enumerated().contains { index, assignedPlayer in
+            guard index != target, let assignedPlayer else { return false }
+            return normalizedName(assignedPlayer.name) == playerName
+        }
+        guard !isAlreadyAssigned else { return false }
         withAnimation(.snappy) {
             slots[target] = player
             selectedSlot = slots.firstIndex(where: { $0 == nil })
         }
         return true
+    }
+
+    private func normalizedName(_ name: String) -> String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 
     private func addGuest() {
