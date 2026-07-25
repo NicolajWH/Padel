@@ -19,7 +19,7 @@ struct NewMatchSetupView: View {
     @State private var nearbyPlayerList: [Player] = []
     @State private var isSearchingNearby = false
 
-    @AppStorage("defaultGoldenPoint") private var goldenPoint = false
+    @AppStorage("defaultGoldenPoint") private var goldenPoint = true
     @AppStorage("defaultSetsToWin") private var setsToWin = 1
     @State private var finalSetMatchTiebreak = false
     @State private var firstServer: TeamSide = .teamA

@@ -63,7 +63,11 @@ final class HealthWorkoutSummaryStore: ObservableObject {
 
             for workout in workouts {
                 calories += workout.totalEnergyBurned?.doubleValue(for: .kilocalorie()) ?? 0
-                let statistics = try await heartRateStatistics(for: workout)
+                // A workout remains useful even when heart-rate access was not
+                // granted (or an individual sample is temporarily unavailable).
+                // Do not discard the complete summary because an optional
+                // metric could not be read.
+                let statistics = try? await heartRateStatistics(for: workout)
                 if let average = statistics?.averageQuantity()?.doubleValue(for: bpm) {
                     weightedHeartRate += average * workout.duration
                     heartRateDuration += workout.duration

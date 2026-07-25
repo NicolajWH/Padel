@@ -8,20 +8,36 @@ struct PlayersView: View {
     @State private var newPlayerName = ""
     @State private var showingAdd = false
     @State private var showingImport = false
+    @State private var showingContacts = false
 
     var body: some View {
-        Group { if players.isEmpty { PlayersEmptyStateView(onImport: { showingImport = true }, onAddManually: { showingAdd = true }) } else { playerList } }
+        Group {
+            if players.isEmpty {
+                PlayersEmptyStateView(
+                    onImport: { showingImport = true },
+                    onAddManually: { showingAdd = true },
+                    onAddFromContacts: { showingContacts = true }
+                )
+            } else {
+                playerList
+            }
+        }
             .padelBackground().screenTitle("Spillere")
             .toolbar { ToolbarItem(placement: .primaryAction) { addMenu } }
             .alert("Tilføj spiller", isPresented: $showingAdd) {
                 TextField("Navn", text: $newPlayerName); Button("Annuller", role: .cancel) { newPlayerName = "" }; Button("Tilføj") { addPlayer() }
             }
             .sheet(isPresented: $showingImport) { ImportPlayersView(existingNames: players.map(\.name)) }
+            .sheet(isPresented: $showingContacts) {
+                ContactPicker { names in addPlayers(names) }
+            }
+            .tint(DesignSystem.accentLime)
     }
 
     private var addMenu: some View {
         Menu {
             Button { showingAdd = true } label: { Label("Tilføj spiller", systemImage: "person.badge.plus") }
+            Button { showingContacts = true } label: { Label("Tilføj fra kontakter", systemImage: "person.crop.circle.badge.plus") }
             Button { showingImport = true } label: { Label("Importér fra liste", systemImage: "square.and.arrow.down") }
         } label: { Image(systemName: "plus") }.accessibilityLabel("Tilføj spiller")
     }
@@ -59,6 +75,16 @@ struct PlayersView: View {
     private func rating(for record: SavedPlayerRecord, ratings: [PlayerRatingEntry]) -> Double { ratings.first(where: { $0.key == PlayerKey.normalize(record.name) })?.rating ?? record.ratingSeed ?? PlayerRatingEntry.defaultRating }
     private func ratingText(for record: SavedPlayerRecord, ratings: [PlayerRatingEntry]) -> String { rating(for: record, ratings: ratings).formatted(.number.precision(.fractionLength(1))) }
     private func addPlayer() { let name = newPlayerName.trimmingCharacters(in: .whitespacesAndNewlines); guard !name.isEmpty else { return }; modelContext.insert(SavedPlayerRecord(name: name)); newPlayerName = "" }
+    private func addPlayers(_ names: [String]) {
+        let existing = Set(players.map { PlayerKey.normalize($0.name) })
+        var inserted = Set<String>()
+        for name in names {
+            let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            let key = PlayerKey.normalize(trimmed)
+            guard !trimmed.isEmpty, !existing.contains(key), inserted.insert(key).inserted else { continue }
+            modelContext.insert(SavedPlayerRecord(name: trimmed))
+        }
+    }
     private func allFinishedMatches() -> [MatchState] { ((try? modelContext.fetch(FetchDescriptor<MatchRecord>())) ?? []).compactMap(\.state) }
     private func allAmericanoSessions() -> [AmericanoSession] { ((try? modelContext.fetch(FetchDescriptor<AmericanoRecord>())) ?? []).compactMap(\.session) }
 }

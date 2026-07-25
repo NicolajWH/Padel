@@ -3,7 +3,7 @@ import UIKit
 import PadelKit
 
 struct SettingsView: View {
-    @AppStorage("defaultGoldenPoint") private var defaultGoldenPoint = false
+    @AppStorage("defaultGoldenPoint") private var defaultGoldenPoint = true
     @AppStorage("defaultSetsToWin") private var defaultSetsToWin = 1
     @AppStorage("defaultAmericanoPoints") private var defaultAmericanoPoints = 16
     @AppStorage("profileName") private var profileName = ""
@@ -140,6 +140,7 @@ struct SettingsView: View {
             }
         }
         .screenTitle("Settings")
+        .tint(DesignSystem.accentLime)
         .task { await healthSummary.load() }
         .onChange(of: nearbyDiscoveryEnabled) { _, enabled in
             if !enabled {

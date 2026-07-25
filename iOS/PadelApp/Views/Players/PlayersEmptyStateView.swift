@@ -7,6 +7,7 @@ import SwiftUI
 struct PlayersEmptyStateView: View {
     var onImport: () -> Void
     var onAddManually: () -> Void
+    var onAddFromContacts: () -> Void = {}
 
     /// MATCHi on the Danish App Store.
     private let matchiURL = URL(string: "https://apps.apple.com/dk/app/matchi/id720782039?l=da")!
@@ -103,6 +104,10 @@ struct PlayersEmptyStateView: View {
 
             Button("Add players manually", action: onAddManually)
                 .padding(.top, 4)
+
+            Button(action: onAddFromContacts) {
+                Label("Add from Contacts", systemImage: "person.crop.circle.badge.plus")
+            }
         }
     }
 }

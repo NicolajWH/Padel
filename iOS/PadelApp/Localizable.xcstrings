@@ -876,7 +876,7 @@
         "da": {
           "stringUnit": {
             "state": "translated",
-            "value": "Åbn MATCHi"
+            "value": "Åben MATCHi"
           }
         }
       }
@@ -2067,6 +2067,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sundhedsdata er ikke tilgængelige på denne iPhone."
+          }
+        }
+      }
+    },
+    "Add from Contacts": {
+      "localizations": {
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tilføj fra kontakter"
           }
         }
       }
