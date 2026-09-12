@@ -1,0 +1,10 @@
+// App identity. Change these values when using this repository as a template.
+APP_DISPLAY_NAME = Padel
+APP_BUNDLE_IDENTIFIER = com.worsa.padel
+WATCH_APP_BUNDLE_IDENTIFIER = com.worsa.padel.watchapp
+WIDGET_BUNDLE_IDENTIFIER = com.worsa.padel.widgets
+WATCH_WIDGET_BUNDLE_IDENTIFIER = com.worsa.padel.watchapp.widgets
+ICLOUD_CONTAINER_IDENTIFIER = iCloud.com.worsa.padel
+
+// DEVELOPMENT_TEAM is deliberately not stored here. CI supplies it from the
+// APPLE_TEAM_ID GitHub secret; local Xcode development can select a team.

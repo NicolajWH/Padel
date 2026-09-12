@@ -7,12 +7,15 @@ options:
   createIntermediateGroups: true
   developmentLanguage: en
 
+configFiles:
+  Debug: Config/App.xcconfig
+  Release: Config/App.xcconfig
+
 settings:
   base:
     SWIFT_VERSION: "5.9"
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
-    DEVELOPMENT_TEAM: "$(DEVELOPMENT_TEAM)"
     CODE_SIGN_STYLE: Automatic
 
 packages:
@@ -39,11 +42,11 @@ targets:
         com.apple.developer.healthkit: true
         com.apple.developer.icloud-services: [CloudKit]
         com.apple.developer.icloud-container-identifiers:
-          - iCloud.com.worsa.padel
+          - "$(ICLOUD_CONTAINER_IDENTIFIER)"
     info:
       path: Generated/iOS-Info.plist
       properties:
-        CFBundleDisplayName: Padel
+        CFBundleDisplayName: "$(APP_DISPLAY_NAME)"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleLocalizations: [en, da]
@@ -60,7 +63,7 @@ targets:
         NSHumanReadableCopyright: "© 2026 Padel"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.worsa.padel
+        PRODUCT_BUNDLE_IDENTIFIER: "$(APP_BUNDLE_IDENTIFIER)"
         TARGETED_DEVICE_FAMILY: "1"
         SUPPORTS_MACCATALYST: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
@@ -83,12 +86,12 @@ targets:
     info:
       path: Generated/watchOS-Info.plist
       properties:
-        CFBundleDisplayName: Padel
+        CFBundleDisplayName: "$(APP_DISPLAY_NAME)"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleLocalizations: [en, da]
         WKApplication: true
-        WKCompanionAppBundleIdentifier: com.worsa.padel
+        WKCompanionAppBundleIdentifier: "$(APP_BUNDLE_IDENTIFIER)"
         WKRunsIndependentlyOfCompanionApp: true
         WKBackgroundModes: [workout-processing]
         NSHealthShareUsageDescription: "Padel reads your heart rate and active energy to show live workout stats while you play."
@@ -98,7 +101,7 @@ targets:
         NSHumanReadableCopyright: "© 2026 Padel"
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.worsa.padel.watchapp
+        PRODUCT_BUNDLE_IDENTIFIER: "$(WATCH_APP_BUNDLE_IDENTIFIER)"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
 
@@ -112,7 +115,7 @@ targets:
     info:
       path: Generated/PadelWidgets-Info.plist
       properties:
-        CFBundleDisplayName: Padel Widgets
+        CFBundleDisplayName: "$(APP_DISPLAY_NAME) Widgets"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleLocalizations: [en, da]
@@ -120,7 +123,7 @@ targets:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.worsa.padel.widgets
+        PRODUCT_BUNDLE_IDENTIFIER: "$(WIDGET_BUNDLE_IDENTIFIER)"
         TARGETED_DEVICE_FAMILY: "1"
         SKIP_INSTALL: YES
 
@@ -133,7 +136,7 @@ targets:
     info:
       path: Generated/PadelWatchWidgets-Info.plist
       properties:
-        CFBundleDisplayName: Padel
+        CFBundleDisplayName: "$(APP_DISPLAY_NAME)"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleLocalizations: [en, da]
@@ -141,7 +144,7 @@ targets:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.worsa.padel.watchapp.widgets
+        PRODUCT_BUNDLE_IDENTIFIER: "$(WATCH_WIDGET_BUNDLE_IDENTIFIER)"
         SKIP_INSTALL: YES
 
 schemes:
