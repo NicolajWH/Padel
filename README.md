@@ -78,90 +78,87 @@ The project has **no physical `.xcodeproj` committed** — CI generates it from
 `project.yml` with [XcodeGen](https://github.com/yonaskolb/XcodeGen) on every
 build.
 
-## Deploying to TestFlight
+## TestFlight / GitHub Actions setup
 
-**This project is deployed straight from GitHub Actions — no local Xcode or
-Mac is needed.** `.github/workflows/testflight.yml` runs the PadelKit unit
-tests, generates the Xcode project, builds both apps with **Xcode 26**
-(App Store Connect requires the iOS 26 SDK), signs them via cloud signing,
-and uploads to TestFlight:
+The `Deploy to TestFlight` workflow runs on every push to `main` and can also
+be started manually with **Actions → Deploy to TestFlight → Run workflow**. It
+tests PadelKit, generates `Padel.xcodeproj`, imports the existing Apple
+Distribution certificate into a temporary keychain, asks Apple for fresh App
+Store provisioning profiles with `fastlane sigh`, builds the Release archive,
+and uploads it to TestFlight. The API key, certificate file, profiles, and
+keychain exist only on the ephemeral runner.
 
-- automatically on every **push to `main`**
-- or on demand via **Actions → Deploy to TestFlight → Run workflow**
+Build numbers use `GITHUB_RUN_NUMBER`, so TestFlight uploads do not collide.
+The archive uses manual signing and the `app-store` export method; no Apple ID,
+external signing repository, or committed credential is involved.
 
-Every build gets a unique build number from the GitHub Actions run number,
-so uploads never collide. After a green run, Apple processes the build for
-5–15 minutes before it appears under the app's TestFlight tab in App Store
-Connect.
+### Required GitHub Secrets
 
-### Configuration (already set up — reference for changes)
+Create exactly these repository secrets under **Settings → Secrets and
+variables → Actions**:
 
-**GitHub Actions secrets** (Settings → Secrets and variables → Actions).
-Exactly these five; no Apple ID email or password is needed anywhere — the
-API key fully replaces interactive Apple ID login for building, signing,
-and uploading:
+| Secret name | Value | Where to find it | Scope |
+|---|---|---|---|
+| `APP_STORE_CONNECT_KEY_ID` | The 10-character ID of the API key | App Store Connect → Users and Access → Integrations → Team Keys; also appears in `AuthKey_<KEY_ID>.p8` | Shared if the same team API key is used for multiple apps |
+| `APP_STORE_CONNECT_ISSUER_ID` | The team's issuer UUID | App Store Connect → Users and Access → Integrations | Shared across the App Store Connect team |
+| `APP_STORE_CONNECT_API_KEY_BASE64` | Base64 of the complete downloaded `.p8` file | Download the Team API key once when creating it, then encode it as shown below | Shared if the same API key is used for multiple apps; treat as a private credential |
+| `APPLE_TEAM_ID` | The 10-character Developer Program Team ID | Apple Developer → Membership details | Shared across apps belonging to the same developer team |
+| `IOS_DISTRIBUTION_CERTIFICATE_BASE64` | Base64 of an exported `.p12` containing the Apple Distribution certificate **and private key** | Export the existing Apple Distribution identity from Keychain Access, then encode it as shown below | Shared across apps signed by that team while the certificate remains valid |
+| `IOS_DISTRIBUTION_CERTIFICATE_PASSWORD` | Password selected when exporting the `.p12` | The password entered in Keychain Access during export | Shared only with repositories that use that `.p12` |
 
-| Secret | Value |
-|---|---|
-| `APPLE_TEAM_ID` | The 10-character Apple Developer Team ID (Developer Portal → Membership) |
-| `APP_STORE_CONNECT_KEY_ID` | The API key's ID — the `XXXXXXXXXX` in `AuthKey_XXXXXXXXXX.p8` |
-| `APP_STORE_CONNECT_ISSUER_ID` | The Issuer ID shown on the Integrations page (shared by all keys) |
-| `APP_STORE_CONNECT_KEY_CONTENT` | The `.p8` key — raw PEM, base64 of the file, or just its inner base64 body all work |
-| `MATCH_PASSWORD` | Any passphrase you choose — encrypts the signing certificate stored on the `certificates` branch |
+The API key must be a **Team Key with the Admin role**, because CI manages
+Identifiers/provisioning profiles as well as uploading builds. Never commit the
+`.p8`, `.p12`, their decoded contents, or their passwords.
 
-**The API key must be a Team Key with the Admin role** (App Store Connect →
-Users and Access → Integrations → **Team Keys**). Lesser roles can create
-development certificates but fail cloud signing for distribution with
-"Cloud signing permission error", and Individual Keys fail authentication
-outright because they don't use the team Issuer ID.
+On macOS, copy each file as a single-line base64 value suitable for a GitHub
+Secret:
 
-**Apple-side registrations** (already done for this app):
-- App record in App Store Connect with bundle ID `com.worsa.padel`
-- The Watch app's `com.worsa.padel.watchapp` identifier is registered
-  automatically by cloud signing — no manual step
+```bash
+base64 -i AuthKey_XXXXXXXXXX.p8 | tr -d '\n' | pbcopy
+base64 -i AppleDistribution.p12 | tr -d '\n' | pbcopy
+```
 
-### One-time Apple setup for HealthKit & Live Activities
+To verify a copied value locally without writing decoded credentials into the
+repository:
 
-Two manual steps in the [Apple Developer portal](https://developer.apple.com/account/resources/identifiers/list)
-(Certificates, Identifiers & Profiles → Identifiers). **Do them before merging
-these features to `main`** — until they're done, the TestFlight deploy fails
-at the signing step (nothing breaks permanently; it succeeds on re-run once
-the steps are done):
+```bash
+pbpaste | base64 --decode > /tmp/decoded-credential
+```
 
-1. **HealthKit on both apps**: open the `com.worsa.padel` identifier and the
-   `com.worsa.padel.watchapp` identifier → Capabilities → tick **HealthKit**
-   (no options/entitlement sub-choices needed) → Save. The iPhone app needs
-   HealthKit to show the tennis workout summary in Settings, while the Watch
-   app records the workouts. This invalidates the stored provisioning profiles;
-   the next deploy detects that and regenerates them automatically (`match`
-   runs with `readonly: false`).
-2. **Register the widget extension**: Identifiers → **+** → App IDs → App →
-   Description `Padel Widgets`, Bundle ID **explicit** `com.worsa.padel.widgets`
-   → no capabilities needed (Live Activities don't require one) → Register.
-   The next deploy creates its App Store provisioning profile automatically.
-3. **Register the Watch complication extension**: Identifiers → **+** → App IDs
-   → App → Description `Padel Watch Widgets`, Bundle ID **explicit**
-   `com.worsa.padel.watchapp.widgets` → no capabilities needed → Register. As
-   with the iPhone widget, the next deploy creates its provisioning profile
-   automatically and it ships inside the existing app record.
+### Provisioning profiles and signing
 
-No new certificates, no new secrets, and no App Store Connect changes are
-needed — the widget ships inside the existing app record.
+Provisioning profiles are intentionally **not** GitHub Secrets. On every run,
+Fastlane `sigh` authenticates with the App Store Connect API key, creates or
+refreshes an App Store profile for every bundle identifier, and installs it on
+the runner. Each profile includes the valid distribution certificates so it
+matches the imported `.p12`. This keeps expiring profiles out of both GitHub
+Secrets and the repository while reusing the existing certificate/private key.
 
-The Fastlane lane validates the key against the App Store Connect API before
-building, so a misconfigured secret fails in under a minute with a precise
-message instead of a cryptic signing error later. Signing uses `fastlane
-match`: one Apple Distribution certificate and the App Store profiles for
-both bundle ids are created once, encrypted with `MATCH_PASSWORD`, and stored
-on this repository's `certificates` branch. Every CI run reuses that same
-certificate — ephemeral runners previously minted a fresh "Created via API"
-development certificate per run until the account hit Apple's certificate
-cap.
+The temporary keychain gets a random per-run password. The `.p12` is deleted
+immediately after import, and the API key and keychain are removed in an
+`always()` cleanup step, including after failed builds.
+
+### Required Apple-side setup
+
+Before deploying, verify all of the following:
+
+1. The App Store Connect app record exists for `com.worsa.padel`.
+2. These explicit App IDs exist in Certificates, Identifiers & Profiles:
+   `com.worsa.padel`, `com.worsa.padel.watchapp`,
+   `com.worsa.padel.widgets`, and `com.worsa.padel.watchapp.widgets`.
+3. HealthKit is enabled for the iPhone and Watch App IDs. The iPhone App ID
+   also has iCloud/CloudKit enabled and access to `iCloud.com.worsa.padel`.
+4. The Apple Distribution certificate represented by the `.p12` is valid in
+   the Developer portal, and the `.p12` contains its private key.
+5. The Team API key is active and has Admin access. Apple only allows its `.p8`
+   to be downloaded once.
+
+No provisioning profile needs to be created by hand. If capabilities change,
+the next workflow run refreshes the profiles automatically.
 
 ## Local development (optional)
 
-The app can also be run locally in Xcode 26+ on a Mac — this is never
-required for deploying:
+The app can be run locally in Xcode 26+ on a Mac:
 
 ```bash
 brew install xcodegen
@@ -169,27 +166,26 @@ xcodegen generate
 open Padel.xcodeproj
 ```
 
-Pick the **PadelApp** scheme to run on an iPhone (or Simulator with a paired
-Watch Simulator), or the **PadelWatch** scheme to run the Watch app on its own.
+Select your development team in Xcode for device builds. CI never stores a
+team in the public project; it supplies `DEVELOPMENT_TEAM` from the
+`APPLE_TEAM_ID` secret. Simulator builds do not require signing.
 
-The scoring-engine unit tests run anywhere Swift does, no Xcode project
-needed:
+The scoring-engine unit tests run anywhere Swift does:
 
 ```bash
 cd Packages/PadelKit
 swift test
 ```
 
-## Changing bundle identifiers / team
+## Reusing the repository for another app
 
-Everything Apple-specific lives in three places:
-
-- `PRODUCT_BUNDLE_IDENTIFIER` for each target in `project.yml`
-- `app_identifier` in `fastlane/Appfile`
-- the bundle ID probed by the key-validation step in `fastlane/Fastfile`
-
-Update those, create a matching app record in App Store Connect, and the
-same workflow works unchanged.
+The app identity is centralized in `Config/App.xcconfig`. Change its display
+name, four bundle identifiers, and iCloud container, then review the
+app-specific capabilities and generated entitlements in `project.yml`. Create
+the corresponding Apple Identifiers/App Store Connect record and configure the
+six GitHub Secrets above. The Fastlane lane reads the same xcconfig, so bundle
+identifiers do not need to be duplicated in Ruby or edited throughout the
+generated `project.pbxproj`.
 
 ## Notes on the Americano scheduler
 
