@@ -4,9 +4,9 @@ platform :ios do
   desc "Build the app and upload it to TestFlight"
   lane :beta do
     require "shellwords"
+    require "yaml"
 
     required_env = %w[
-      APPLE_TEAM_ID
       APP_STORE_CONNECT_KEY_ID
       APP_STORE_CONNECT_ISSUER_ID
       APP_STORE_CONNECT_API_KEY_PATH
@@ -14,7 +14,9 @@ platform :ios do
     missing = required_env.select { |key| ENV[key].to_s.strip.empty? }
     UI.user_error!("Missing required environment variable(s): #{missing.join(', ')}") unless missing.empty?
 
-    team_id = ENV.fetch("APPLE_TEAM_ID").strip
+    project_config = YAML.safe_load_file("project.yml")
+    team_id = project_config.dig("settings", "base", "DEVELOPMENT_TEAM").to_s.strip
+    UI.user_error!("Missing DEVELOPMENT_TEAM in project.yml settings.base") if team_id.empty?
     api_key = app_store_connect_api_key(
       key_id: ENV.fetch("APP_STORE_CONNECT_KEY_ID").strip,
       issuer_id: ENV.fetch("APP_STORE_CONNECT_ISSUER_ID").strip,
