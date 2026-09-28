@@ -1,4 +1,8 @@
-// App identity. Change these values when using this repository as a template.
+// Local-development fallback values.
+// GitHub Actions deployment does NOT use these as its source of truth: CI
+// overrides all values below from Settings -> Secrets and variables -> Actions
+// -> Variables. Keep these defaults only so a locally generated Xcode project
+// remains usable without GitHub Actions.
 APP_DISPLAY_NAME = Padel
 APP_BUNDLE_IDENTIFIER = com.worsa.padel
 WATCH_APP_BUNDLE_IDENTIFIER = com.worsa.padel.watchapp
@@ -6,5 +10,5 @@ WIDGET_BUNDLE_IDENTIFIER = com.worsa.padel.widgets
 WATCH_WIDGET_BUNDLE_IDENTIFIER = com.worsa.padel.watchapp.widgets
 ICLOUD_CONTAINER_IDENTIFIER = iCloud.com.worsa.padel
 
-// DEVELOPMENT_TEAM is deliberately not stored here. CI supplies it from the
-// APPLE_TEAM_ID GitHub secret; local Xcode development can select a team.
+// DEVELOPMENT_TEAM is intentionally absent. CI supplies APPLE_TEAM_ID as a
+// GitHub Variable and Fastlane passes it to Xcode as DEVELOPMENT_TEAM.
