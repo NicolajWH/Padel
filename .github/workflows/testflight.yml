@@ -15,12 +15,10 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: "26"
-
       - name: Run PadelKit unit tests
         working-directory: Packages/PadelKit
         run: swift test
@@ -32,6 +30,14 @@ jobs:
     timeout-minutes: 60
     permissions:
       contents: read
+    env:
+      APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+      APP_DISPLAY_NAME: ${{ vars.APP_DISPLAY_NAME }}
+      APP_BUNDLE_IDENTIFIER: ${{ vars.APP_BUNDLE_IDENTIFIER }}
+      WATCH_APP_BUNDLE_IDENTIFIER: ${{ vars.WATCH_APP_BUNDLE_IDENTIFIER }}
+      WIDGET_BUNDLE_IDENTIFIER: ${{ vars.WIDGET_BUNDLE_IDENTIFIER }}
+      WATCH_WIDGET_BUNDLE_IDENTIFIER: ${{ vars.WATCH_WIDGET_BUNDLE_IDENTIFIER }}
+      ICLOUD_CONTAINER_IDENTIFIER: ${{ vars.ICLOUD_CONTAINER_IDENTIFIER }}
     steps:
       - uses: actions/checkout@v4
 
@@ -49,13 +55,7 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Generate app icons
-        run: python3 scripts/generate_app_icons.py
-
-      - name: Generate Xcode project
-        run: xcodegen generate
-
-      - name: Validate deployment secrets
+      - name: Validate deployment configuration
         env:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
@@ -63,13 +63,22 @@ jobs:
         shell: bash
         run: |
           missing=()
-          for name in APP_STORE_CONNECT_KEY_ID APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_API_KEY_BASE64; do
+          for name in \
+            APP_STORE_CONNECT_KEY_ID APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_API_KEY_BASE64 \
+            APPLE_TEAM_ID APP_DISPLAY_NAME APP_BUNDLE_IDENTIFIER WATCH_APP_BUNDLE_IDENTIFIER \
+            WIDGET_BUNDLE_IDENTIFIER WATCH_WIDGET_BUNDLE_IDENTIFIER ICLOUD_CONTAINER_IDENTIFIER; do
             [[ -n "${!name:-}" ]] || missing+=("$name")
           done
           if (( ${#missing[@]} )); then
-            printf 'Missing required GitHub Actions secret(s): %s\n' "${missing[*]}" >&2
+            printf 'Missing required GitHub Actions Secret/Variable(s): %s\n' "${missing[*]}" >&2
             exit 1
           fi
+
+      - name: Generate app icons
+        run: python3 scripts/generate_app_icons.py
+
+      - name: Generate Xcode project
+        run: xcodegen generate
 
       - name: Install App Store Connect API key
         env:
