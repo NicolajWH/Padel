@@ -4,20 +4,23 @@ platform :ios do
   desc "Build the app and upload it to TestFlight"
   lane :beta do
     require "shellwords"
-    require "yaml"
 
     required_env = %w[
       APP_STORE_CONNECT_KEY_ID
       APP_STORE_CONNECT_ISSUER_ID
       APP_STORE_CONNECT_API_KEY_PATH
+      APPLE_TEAM_ID
+      APP_DISPLAY_NAME
+      APP_BUNDLE_IDENTIFIER
+      WATCH_APP_BUNDLE_IDENTIFIER
+      WIDGET_BUNDLE_IDENTIFIER
+      WATCH_WIDGET_BUNDLE_IDENTIFIER
+      ICLOUD_CONTAINER_IDENTIFIER
     ]
     missing = required_env.select { |key| ENV[key].to_s.strip.empty? }
     UI.user_error!("Missing required environment variable(s): #{missing.join(', ')}") unless missing.empty?
 
-    project_config = YAML.safe_load_file("project.yml")
-    team_id = project_config.dig("settings", "base", "DEVELOPMENT_TEAM").to_s.strip
-    UI.user_error!("Missing DEVELOPMENT_TEAM in project.yml settings.base") if team_id.empty?
-
+    team_id = ENV.fetch("APPLE_TEAM_ID").strip
     api_key_path = ENV.fetch("APP_STORE_CONNECT_API_KEY_PATH")
     api_key = app_store_connect_api_key(
       key_id: ENV.fetch("APP_STORE_CONNECT_KEY_ID").strip,
@@ -31,15 +34,21 @@ platform :ios do
       build_number: ENV["GITHUB_RUN_NUMBER"] || Time.now.strftime("%Y%m%d%H%M")
     )
 
-    # Xcode authenticates to Apple with the App Store Connect API key and uses
-    # automatic/cloud-managed signing. No exported .p12 or manually managed
-    # provisioning profile is stored in GitHub.
+    # GitHub Variables are the single source of truth for app identity in CI.
+    # Xcode authenticates with the App Store Connect API key and uses automatic
+    # cloud-managed signing; no exported .p12 or manual provisioning is stored.
     signing_args = [
       "-allowProvisioningUpdates",
       "-authenticationKeyPath #{api_key_path.shellescape}",
       "-authenticationKeyID #{ENV.fetch('APP_STORE_CONNECT_KEY_ID').strip.shellescape}",
       "-authenticationKeyIssuerID #{ENV.fetch('APP_STORE_CONNECT_ISSUER_ID').strip.shellescape}",
-      "DEVELOPMENT_TEAM=#{team_id.shellescape}"
+      "DEVELOPMENT_TEAM=#{team_id.shellescape}",
+      "APP_DISPLAY_NAME=#{ENV.fetch('APP_DISPLAY_NAME').strip.shellescape}",
+      "APP_BUNDLE_IDENTIFIER=#{ENV.fetch('APP_BUNDLE_IDENTIFIER').strip.shellescape}",
+      "WATCH_APP_BUNDLE_IDENTIFIER=#{ENV.fetch('WATCH_APP_BUNDLE_IDENTIFIER').strip.shellescape}",
+      "WIDGET_BUNDLE_IDENTIFIER=#{ENV.fetch('WIDGET_BUNDLE_IDENTIFIER').strip.shellescape}",
+      "WATCH_WIDGET_BUNDLE_IDENTIFIER=#{ENV.fetch('WATCH_WIDGET_BUNDLE_IDENTIFIER').strip.shellescape}",
+      "ICLOUD_CONTAINER_IDENTIFIER=#{ENV.fetch('ICLOUD_CONTAINER_IDENTIFIER').strip.shellescape}"
     ].join(" ")
 
     build_app(
