@@ -17,64 +17,30 @@ platform :ios do
     project_config = YAML.safe_load_file("project.yml")
     team_id = project_config.dig("settings", "base", "DEVELOPMENT_TEAM").to_s.strip
     UI.user_error!("Missing DEVELOPMENT_TEAM in project.yml settings.base") if team_id.empty?
+
+    api_key_path = ENV.fetch("APP_STORE_CONNECT_API_KEY_PATH")
     api_key = app_store_connect_api_key(
       key_id: ENV.fetch("APP_STORE_CONNECT_KEY_ID").strip,
       issuer_id: ENV.fetch("APP_STORE_CONNECT_ISSUER_ID").strip,
-      key_filepath: ENV.fetch("APP_STORE_CONNECT_API_KEY_PATH"),
+      key_filepath: api_key_path,
       in_house: false
     )
-
-    # Keep identifiers in App.xcconfig as the single source of truth for
-    # Xcode, signing, and template reuse.
-    config = File.read("Config/App.xcconfig").lines.each_with_object({}) do |line, values|
-      key, value = line.split("=", 2).map(&:strip)
-      values[key] = value if key&.end_with?("_BUNDLE_IDENTIFIER") && value && !value.empty?
-    end
-    identifiers = %w[
-      APP_BUNDLE_IDENTIFIER
-      WATCH_APP_BUNDLE_IDENTIFIER
-      WIDGET_BUNDLE_IDENTIFIER
-      WATCH_WIDGET_BUNDLE_IDENTIFIER
-    ].map { |key| config.fetch(key) }
 
     increment_build_number(
       xcodeproj: "Padel.xcodeproj",
       build_number: ENV["GITHUB_RUN_NUMBER"] || Time.now.strftime("%Y%m%d%H%M")
     )
 
-    # sigh uses Apple's API to create/refresh and install a profile for each
-    # signed bundle. Including every valid distribution certificate ensures
-    # the profile contains the certificate imported by the workflow.
-    profiles = identifiers.to_h do |identifier|
-      profile_name = "CI App Store #{identifier}"
-      sigh(
-        api_key: api_key,
-        app_identifier: identifier,
-        team_id: team_id,
-        provisioning_name: profile_name,
-        force: true,
-        include_all_certificates: true,
-        skip_install: false
-      )
-      [identifier, profile_name]
-    end
-
-    target_profiles = {
-      "PadelApp" => profiles.fetch(config.fetch("APP_BUNDLE_IDENTIFIER")),
-      "PadelWatch" => profiles.fetch(config.fetch("WATCH_APP_BUNDLE_IDENTIFIER")),
-      "PadelWidgets" => profiles.fetch(config.fetch("WIDGET_BUNDLE_IDENTIFIER")),
-      "PadelWatchWidgets" => profiles.fetch(config.fetch("WATCH_WIDGET_BUNDLE_IDENTIFIER"))
-    }
-    target_profiles.each do |target, profile_name|
-      update_code_signing_settings(
-        path: "Padel.xcodeproj",
-        use_automatic_signing: false,
-        team_id: team_id,
-        code_sign_identity: "Apple Distribution",
-        targets: [target],
-        profile_name: profile_name
-      )
-    end
+    # Xcode authenticates to Apple with the App Store Connect API key and uses
+    # automatic/cloud-managed signing. No exported .p12 or manually managed
+    # provisioning profile is stored in GitHub.
+    signing_args = [
+      "-allowProvisioningUpdates",
+      "-authenticationKeyPath #{api_key_path.shellescape}",
+      "-authenticationKeyID #{ENV.fetch('APP_STORE_CONNECT_KEY_ID').strip.shellescape}",
+      "-authenticationKeyIssuerID #{ENV.fetch('APP_STORE_CONNECT_ISSUER_ID').strip.shellescape}",
+      "DEVELOPMENT_TEAM=#{team_id.shellescape}"
+    ].join(" ")
 
     build_app(
       scheme: "PadelApp",
@@ -82,12 +48,12 @@ platform :ios do
       configuration: "Release",
       export_method: "app-store",
       clean: true,
-      xcargs: "DEVELOPMENT_TEAM=#{team_id.shellescape}",
+      xcargs: signing_args,
+      export_xcargs: signing_args,
       export_options: {
         method: "app-store",
-        signingStyle: "manual",
-        teamID: team_id,
-        provisioningProfiles: profiles
+        signingStyle: "automatic",
+        teamID: team_id
       }
     )
 
