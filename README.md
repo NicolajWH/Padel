@@ -181,3 +181,13 @@ The workflow also runs automatically on pushes to `main`.
 When this repository is copied for a new app, the deployment configuration is intentionally concentrated on one GitHub page. Add the 3 Secrets, change the 7 Variables, create matching Apple identifiers/App Store Connect records, and review capabilities/entitlements if the new app needs different Apple services.
 
 For local Mac development, `Config/App.xcconfig` provides fallback app-identity values. GitHub Actions does not treat those fallback values as the deployment source of truth.
+
+## Verify a new TestFlight deployment
+
+After creating or resetting GitHub Secrets or Variables, open:
+
+https://github.com/NicolajWH/Padel/actions/workflows/testflight.yml
+
+Choose **Run workflow** on `main`, or push a new commit to `main`. Changes to repository Secrets/Variables alone do not automatically start a workflow.
+
+First check **Validate deployment configuration**. If it reports a missing name, add that name under **Settings → Secrets and variables → Actions** (Secrets or Variables as indicated). Once validation passes, inspect **Build and upload to TestFlight**. A green workflow indicates the upload step completed; the build still needs to finish processing in App Store Connect before it is available to testers. Never paste a private `.p8` key or Base64 secret into an issue or Actions log.
