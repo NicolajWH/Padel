@@ -58,7 +58,8 @@ platform :ios do
       export_method: "app-store",
       clean: true,
       xcargs: signing_args,
-      export_xcargs: signing_args,
+      # Fastlane passes export authentication options itself; avoid duplicate Xcode flags.
+      export_xcargs: "-allowProvisioningUpdates",
       export_options: {
         method: "app-store",
         signingStyle: "automatic",
