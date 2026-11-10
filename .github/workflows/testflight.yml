@@ -59,12 +59,12 @@ jobs:
         env:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+          APP_STORE_CONNECT_API_KEY_P8_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8_CONTENT }}
         shell: bash
         run: |
           missing=()
           for name in \
-            APP_STORE_CONNECT_KEY_ID APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_API_KEY_BASE64 \
+            APP_STORE_CONNECT_KEY_ID APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_API_KEY_P8_CONTENT \
             APPLE_TEAM_ID APP_DISPLAY_NAME APP_BUNDLE_IDENTIFIER WATCH_APP_BUNDLE_IDENTIFIER \
             WIDGET_BUNDLE_IDENTIFIER WATCH_WIDGET_BUNDLE_IDENTIFIER ICLOUD_CONTAINER_IDENTIFIER; do
             [[ -n "${!name:-}" ]] || missing+=("$name")
@@ -82,13 +82,21 @@ jobs:
 
       - name: Install App Store Connect API key
         env:
-          APP_STORE_CONNECT_API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_API_KEY_BASE64 }}
+          APP_STORE_CONNECT_API_KEY_P8_CONTENT: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8_CONTENT }}
         shell: bash
         run: |
           API_KEY_PATH="$RUNNER_TEMP/AuthKey_${{ secrets.APP_STORE_CONNECT_KEY_ID }}.p8"
           echo "APP_STORE_CONNECT_API_KEY_PATH=$API_KEY_PATH" >> "$GITHUB_ENV"
-          printf '%s' "$APP_STORE_CONNECT_API_KEY_BASE64" | base64 --decode > "$API_KEY_PATH"
-          chmod 600 "$API_KEY_PATH"
+          umask 077
+          printf '%s' "$APP_STORE_CONNECT_API_KEY_P8_CONTENT" > "$API_KEY_PATH"
+          if ! grep -qx -- '-----BEGIN PRIVATE KEY-----' "$API_KEY_PATH" || ! grep -qx -- '-----END PRIVATE KEY-----' "$API_KEY_PATH"; then
+            echo "APP_STORE_CONNECT_API_KEY_P8_CONTENT must contain the full .p8 key, including BEGIN/END PRIVATE KEY lines." >&2
+            exit 1
+          fi
+          if ! openssl pkey -in "$API_KEY_PATH" -noout >/dev/null 2>&1; then
+            echo "APP_STORE_CONNECT_API_KEY_P8_CONTENT is not a valid .p8 private key." >&2
+            exit 1
+          fi
 
       - name: Build and upload to TestFlight
         env:
