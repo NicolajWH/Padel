@@ -63,27 +63,25 @@ Example:
 
 Check: UUID format, 36 characters including four hyphens.
 
-### `APP_STORE_CONNECT_API_KEY_BASE64`
+### `APP_STORE_CONNECT_API_KEY_P8_CONTENT`
 
-Download the `.p8` private key when Apple offers it. Apple only allows the private key to be downloaded once, so store the original safely and never commit it.
+This Secret contains the **original contents** of the Apple `.p8` file. **No Base64 conversion is needed**.
 
-The original file looks approximately like:
+Open the `AuthKey_<KEY_ID>.p8` file in a text viewer (for example a file preview/text editor on iPhone), select **all** the contents, and copy everything, including the first and last lines:
 
-```
+```text
 -----BEGIN PRIVATE KEY-----
-MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdw...
+MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBH...
 -----END PRIVATE KEY-----
 ```
 
-Both BEGIN and END lines must be included. Base64-encode the **complete file locally on Windows**. Do not use an online Base64 converter for this private credential.
+The example above is incomplete and must **not** be used as the actual Secret. A real key has many more characters between the markers.
 
-PowerShell example from the folder containing the file:
+Open [Padel → GitHub repository Secrets](https://github.com/NicolajWH/Padel/settings/secrets/actions), select **New repository secret**, enter the name `APP_STORE_CONNECT_API_KEY_P8_CONTENT`, and paste the complete multi-line text into **Secret**. GitHub accepts multi-line Secrets, so retain all line breaks and both BEGIN/END lines. Press **Add secret**.
 
-```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("AuthKey_2X9R4HXF34.p8")) | Set-Clipboard
-```
+This can be done entirely on **iPhone**, provided you have access to the previously downloaded `.p8` file and a text viewer. Apple permits a private key download only once; if the file is lost, generate a new Team API key and update its corresponding Key ID.
 
-Replace the example filename with your own. Paste the resulting single long line into the `APP_STORE_CONNECT_API_KEY_BASE64` secret.
+**Security:** Treat the `.p8` private key as a password. Do not commit it, send it in chat, or upload it to a converter website. Base64 is not encryption and is not required for GitHub Secrets.
 
 ## 3 — Add the seven Variables
 
@@ -133,7 +131,7 @@ Under **Settings → Secrets and variables → Actions**, verify:
 ```
 APP_STORE_CONNECT_KEY_ID
 APP_STORE_CONNECT_ISSUER_ID
-APP_STORE_CONNECT_API_KEY_BASE64
+APP_STORE_CONNECT_API_KEY_P8_CONTENT
 ```
 
 **Repository variables (7)**
@@ -148,9 +146,10 @@ WATCH_WIDGET_BUNDLE_IDENTIFIER
 ICLOUD_CONTAINER_IDENTIFIER
 ```
 
-Old `.p12`-based secrets are not used:
+The following older Secrets are not used by the new workflow:
 
 ```
+APP_STORE_CONNECT_API_KEY_BASE64
 IOS_DISTRIBUTION_CERTIFICATE_BASE64
 IOS_DISTRIBUTION_CERTIFICATE_PASSWORD
 MATCH_PASSWORD
@@ -168,7 +167,7 @@ The workflow:
 1. Runs PadelKit unit tests.
 2. Validates all 3 Secrets and 7 Variables before deployment.
 3. Generates app icons and the Xcode project.
-4. Recreates the `.p8` key temporarily on the macOS runner.
+4. Writes the raw `.p8` content to a temporary file on the macOS runner and checks its format.
 5. Passes Team ID, display name, all Bundle IDs and the iCloud container from GitHub Variables to Xcode.
 6. Uses automatic/cloud-managed signing with `-allowProvisioningUpdates`.
 7. Builds the Release archive and uploads it to TestFlight.
@@ -190,4 +189,4 @@ https://github.com/NicolajWH/Padel/actions/workflows/testflight.yml
 
 Choose **Run workflow** on `main`, or push a new commit to `main`. Changes to repository Secrets/Variables alone do not automatically start a workflow.
 
-First check **Validate deployment configuration**. If it reports a missing name, add that name under **Settings → Secrets and variables → Actions** (Secrets or Variables as indicated). Once validation passes, inspect **Build and upload to TestFlight**. A green workflow indicates the upload step completed; the build still needs to finish processing in App Store Connect before it is available to testers. Never paste a private `.p8` key or Base64 secret into an issue or Actions log.
+First check **Validate deployment configuration**. If it reports a missing name, add that name under **Settings → Secrets and variables → Actions** (Secrets or Variables as indicated). Once validation passes, inspect **Build and upload to TestFlight**. A green workflow indicates the upload step completed; the build still needs to finish processing in App Store Connect before it is available to testers. Never paste a private `.p8` key into an issue or Actions log.
