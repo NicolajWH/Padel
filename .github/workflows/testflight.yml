@@ -98,11 +98,27 @@ jobs:
             exit 1
           fi
 
+      - name: Test certificate cleanup safety rules
+        run: bundle exec ruby scripts/test_temporary_signing.rb
+
+      - name: Snapshot signing certificates
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: bundle exec ruby scripts/temporary_signing.rb snapshot
+
       - name: Build and upload to TestFlight
         env:
           APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         run: bundle exec fastlane beta
+
+      - name: Revoke verified temporary development certificates
+        if: always() && env.APP_STORE_CONNECT_API_KEY_PATH != ''
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: bundle exec ruby scripts/temporary_signing.rb cleanup
 
       - name: Remove temporary API key
         if: always()
